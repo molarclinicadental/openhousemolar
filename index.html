@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Open House Molar - Tercera Edición</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%B7%3C/text%3E%3C/svg%3E">
 <meta name="description" content="Open House Molar 3ra Edición. Sábado 6 de junio. Diversión + profilaxis dental por $13.">
 
 <meta property="og:title" content="Open House Molar - 3ra Edición">
@@ -2977,7 +2978,7 @@ body { background: #FAFAF7; }
 <!-- 🎵 MÚSICA DE FONDO INFANTIL — Archivo local subido al repo
      Para activar: descarga un MP3 royalty-free (te paso 3 opciones) y súbelo
      al mismo repo donde está este HTML con el nombre exacto: musica-evento.mp3 -->
-<audio id="ohMusica" loop preload="auto">
+<audio id="ohMusica" loop preload="none">
   <source src="musica-evento.mp3" type="audio/mpeg">
 </audio>
 
@@ -3630,6 +3631,15 @@ window.rsvNextStep2 = rsvNextStep2;
 // ────────────────────────────────────────────────────────────
 //  Confirmar reserva (paso 3 → BD)
 // ────────────────────────────────────────────────────────────
+
+// Helper: envuelve una promesa con timeout para que nunca se cuelgue
+function _rsvConTimeout(promesa, ms, etiqueta) {
+  return Promise.race([
+    promesa,
+    new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout (' + ms + 'ms) en: ' + etiqueta)), ms))
+  ]);
+}
+
 async function rsvConfirmar() {
   const btn = document.getElementById('rsvBtnConfirmar');
   btn.disabled = true;
@@ -3643,14 +3653,22 @@ async function rsvConfirmar() {
     return;
   }
 
+  console.log('[reserva] INICIO. Datos:', _rsvDatos, 'Hora:', _rsvHoraElegida);
+
   try {
     // 1) Verificar que el slot AÚN está disponible (anti-race)
-    const { data: yaReservadas } = await cli
-      .from('evento_inscripciones')
-      .select('id')
-      .eq('evento_slug', EVENTO_CONFIG.slug)
-      .eq('hora_reservada', _rsvHoraElegida)
-      .neq('estado', 'cancelada');
+    console.log('[reserva] PASO 1: verificando disponibilidad del slot...');
+    const { data: yaReservadas, error: eYa } = await _rsvConTimeout(
+      cli
+        .from('evento_inscripciones')
+        .select('id')
+        .eq('evento_slug', EVENTO_CONFIG.slug)
+        .eq('hora_reservada', _rsvHoraElegida)
+        .neq('estado', 'cancelada'),
+      10000, 'verificar disponibilidad slot'
+    );
+    if (eYa) { console.error('[reserva] Error PASO 1:', eYa); throw eYa; }
+    console.log('[reserva] PASO 1 OK. Reservas existentes en slot:', yaReservadas?.length || 0);
 
     const cuposEsteSlot = EVENTO_CONFIG.cuposParaSlot(_rsvHoraElegida);
     if (yaReservadas && yaReservadas.length >= cuposEsteSlot) {
@@ -3664,20 +3682,32 @@ async function rsvConfirmar() {
     }
 
     // 2) Si no encontramos el paciente antes por cédula, intentar otra vez
+    console.log('[reserva] PASO 2: pacienteId guardado?', _rsvDatos._pacienteId);
     if (!_rsvDatos._pacienteId) {
-      const { data: pacExistente } = await cli
-        .from('pacientes')
-        .select('id')
-        .eq('cedula', _rsvDatos.cedula)
-        .is('archived_at', null)
-        .maybeSingle();
-      if (pacExistente) _rsvDatos._pacienteId = pacExistente.id;
+      console.log('[reserva] PASO 2: re-buscando paciente por cédula...');
+      const { data: pacExistente, error: ePb } = await _rsvConTimeout(
+        cli
+          .from('pacientes')
+          .select('id')
+          .eq('cedula', _rsvDatos.cedula)
+          .is('archived_at', null)
+          .maybeSingle(),
+        10000, 're-buscar paciente'
+      );
+      if (ePb) { console.error('[reserva] Error PASO 2:', ePb); throw ePb; }
+      if (pacExistente) {
+        _rsvDatos._pacienteId = pacExistente.id;
+        console.log('[reserva] PASO 2: paciente encontrado al segundo intento, id:', pacExistente.id);
+      } else {
+        console.log('[reserva] PASO 2: paciente nuevo, se creará');
+      }
     }
 
     // 3) Si no existe el paciente, CREARLO con TODOS los campos que usa la app Molar
     let pacienteId = _rsvDatos._pacienteId;
     let pacienteEsNuevo = false;
     if (!pacienteId) {
+      console.log('[reserva] PASO 3: creando paciente nuevo en BD...');
       const partes = _rsvDatos.nombre.trim().split(/\s+/);
       // Si hay solo 1 palabra, usar la misma como nombre y apellido
       // Si hay 2+ palabras, mitad como nombres, mitad como apellidos
@@ -3707,33 +3737,39 @@ async function rsvConfirmar() {
       else aniosAprox = 30;
       const fechaNac = (hoy.getFullYear() - aniosAprox) + '-01-01';
 
-      const { data: nuevoPac, error: ePac } = await cli
-        .from('pacientes')
-        .insert({
-          cedula: _rsvDatos.cedula,
-          tipo_doc: 'cedula',
-          nombres: nombres,
-          apellidos: apellidos,
-          telefono: telBD,
-          whatsapp: telBD,                         // mismo número WhatsApp
-          email: _rsvDatos.email,
-          fecha_nacimiento: fechaNac,
-          genero: 'no_especifica',
-          estado: 'nuevo',
-          sede_id: EVENTO_CONFIG.sedeId,
-          sedes_atendido: [EVENTO_CONFIG.sedeId],
-          origen: 'Open House Web',
-          origen_detalle: 'Reserva online evento 3ra edición',
-          tags: ['open-house-2026'],
-          notas_internas: 'Paciente registrado desde la web del Open House. Edad declarada: ' + _rsvDatos.edad,
-          consentimiento_datos: true,
-          alertas_clinicas: []
-        })
-        .select('id')
-        .single();
-      if (ePac) throw ePac;
+      const { data: nuevoPac, error: ePac } = await _rsvConTimeout(
+        cli
+          .from('pacientes')
+          .insert({
+            cedula: _rsvDatos.cedula,
+            tipo_doc: 'cedula',
+            nombres: nombres,
+            apellidos: apellidos,
+            telefono: telBD,
+            whatsapp: telBD,                         // mismo número WhatsApp
+            email: _rsvDatos.email,
+            fecha_nacimiento: fechaNac,
+            genero: 'no_especifica',
+            estado: 'nuevo',
+            sede_id: EVENTO_CONFIG.sedeId,
+            sedes_atendido: [EVENTO_CONFIG.sedeId],
+            origen: 'Open House Web',
+            origen_detalle: 'Reserva online evento 3ra edición',
+            tags: ['open-house-2026'],
+            notas_internas: 'Paciente registrado desde la web del Open House. Edad declarada: ' + _rsvDatos.edad,
+            consentimiento_datos: true,
+            alertas_clinicas: []
+          })
+          .select('id')
+          .single(),
+        10000, 'crear paciente'
+      );
+      if (ePac) { console.error('[reserva] Error PASO 3:', ePac); throw ePac; }
       pacienteId = nuevoPac.id;
       pacienteEsNuevo = true;
+      console.log('[reserva] PASO 3 OK. Nuevo paciente id:', pacienteId);
+    } else {
+      console.log('[reserva] PASO 3: SKIP, paciente ya existe id:', pacienteId);
     }
 
     // 4) Crear la cita en la tabla 'citas' usando las COLUMNAS REALES de la app Molar
@@ -3751,45 +3787,55 @@ async function rsvConfirmar() {
 
     const motivoCita = 'Open House - ' + EVENTO_CONFIG.servicio + ' · ' + boxSugerido;
 
-    const { data: cita, error: eCita } = await cli
-      .from('citas')
-      .insert({
-        paciente_id: pacienteId,
-        sede_id: EVENTO_CONFIG.sedeId,
-        fecha_hora: fechaHoraISO,        // ← timestamp único, NO fecha+hora separados
-        duracion_min: 30,                 // ← duracion_min, NO duracion
-        motivo: motivoCita,
-        estado: 'confirmada',
-        notas_internas: 'Reserva web Open House 3ra Edición. Edad declarada: ' + _rsvDatos.edad + ' años. Precio: $' + EVENTO_CONFIG.precio + '. ' + boxSugerido + (pacienteEsNuevo ? '. ⚠️ PACIENTE NUEVO desde la web (verificar datos).' : '')
-      })
-      .select('id')
-      .single();
-    if (eCita) throw eCita;
+    console.log('[reserva] PASO 4: insertando cita en tabla citas...');
+    const { data: cita, error: eCita } = await _rsvConTimeout(
+      cli
+        .from('citas')
+        .insert({
+          paciente_id: pacienteId,
+          sede_id: EVENTO_CONFIG.sedeId,
+          fecha_hora: fechaHoraISO,        // ← timestamp único, NO fecha+hora separados
+          duracion_min: 30,                 // ← duracion_min, NO duracion
+          motivo: motivoCita,
+          estado: 'confirmada',
+          notas_internas: 'Reserva web Open House 3ra Edición. Edad declarada: ' + _rsvDatos.edad + ' años. Precio: $' + EVENTO_CONFIG.precio + '. ' + boxSugerido + (pacienteEsNuevo ? '. ⚠️ PACIENTE NUEVO desde la web (verificar datos).' : '')
+        })
+        .select('id')
+        .single(),
+      10000, 'crear cita'
+    );
+    if (eCita) { console.error('[reserva] Error PASO 4:', eCita); throw eCita; }
+    console.log('[reserva] PASO 4 OK. Cita id:', cita?.id);
 
     // 5) Registrar inscripción en el evento (CON ANTI-RACE robusto)
+    console.log('[reserva] PASO 5: insertando inscripción en evento_inscripciones...');
     const codigo = 'OH-' + Date.now().toString(36).toUpperCase().slice(-5);
-    const { data: nuevaInscripcion, error: eIns } = await cli
-      .from('evento_inscripciones')
-      .insert({
-        evento_slug: EVENTO_CONFIG.slug,
-        paciente_id: pacienteId,
-        cita_id: cita ? cita.id : null,
-        nombre: _rsvDatos.nombre,
-        cedula: _rsvDatos.cedula,
-        telefono: _rsvDatos.tel,
-        email: _rsvDatos.email,
-        edad_rango: _rsvDatos.edad,
-        hora_reservada: _rsvHoraElegida,
-        servicio: EVENTO_CONFIG.servicio,
-        precio: EVENTO_CONFIG.precio,
-        estado: 'confirmada',
-        codigo: codigo,
-        origen: 'web',
-        observaciones: boxSugerido  // sugerencia para coordinación el día del evento
-      })
-      .select('id, created_at')
-      .single();
-    if (eIns) throw eIns;
+    const { data: nuevaInscripcion, error: eIns } = await _rsvConTimeout(
+      cli
+        .from('evento_inscripciones')
+        .insert({
+          evento_slug: EVENTO_CONFIG.slug,
+          paciente_id: pacienteId,
+          cita_id: cita ? cita.id : null,
+          nombre: _rsvDatos.nombre,
+          cedula: _rsvDatos.cedula,
+          telefono: _rsvDatos.tel,
+          email: _rsvDatos.email,
+          edad_rango: _rsvDatos.edad,
+          hora_reservada: _rsvHoraElegida,
+          servicio: EVENTO_CONFIG.servicio,
+          precio: EVENTO_CONFIG.precio,
+          estado: 'confirmada',
+          codigo: codigo,
+          origen: 'web',
+          observaciones: boxSugerido  // sugerencia para coordinación el día del evento
+        })
+        .select('id, created_at')
+        .single(),
+      10000, 'crear inscripción'
+    );
+    if (eIns) { console.error('[reserva] Error PASO 5:', eIns); throw eIns; }
+    console.log('[reserva] PASO 5 OK. Inscripción id:', nuevaInscripcion?.id, 'código:', codigo);
 
     // 5.b) ANTI-RACE: re-verificar que NO se sobrepasó el cupo de 3 por slot.
     //      Si dos personas insertaron casi al tiempo, el último que entró tiene
