@@ -3497,7 +3497,8 @@ window.onCedulaInput = onCedulaInput;
 
 async function buscarPacientePorCedula(cedula) {
   const cli = initSupa();
-  if (!cli) return;
+  if (!cli) { console.warn('[OH] Supabase no inicializado'); return; }
+  console.log('[OH] Buscando paciente con cédula:', cedula);
   try {
     const { data, error } = await cli
       .from('pacientes')
@@ -3505,7 +3506,15 @@ async function buscarPacientePorCedula(cedula) {
       .eq('cedula', cedula)
       .is('archived_at', null)         // excluir pacientes archivados
       .maybeSingle();
-    if (error || !data) return;
+    if (error) {
+      console.error('[OH] Error consultando pacientes:', error);
+      return;
+    }
+    if (!data) {
+      console.log('[OH] Cédula no encontrada en BD (paciente nuevo)');
+      return;
+    }
+    console.log('[OH] Paciente encontrado:', data);
     // Autorellenar
     const nombreCompleto = ((data.nombres || '') + ' ' + (data.apellidos || '')).trim();
     if (nombreCompleto) document.getElementById('rsvNombre').value = nombreCompleto;
@@ -3526,7 +3535,10 @@ async function buscarPacientePorCedula(cedula) {
       else sel.value = '18+';
     }
     _rsvDatos._pacienteId = data.id;
-  } catch (e) { /* silencioso */ }
+    console.log('[OH] Datos autocompletados correctamente');
+  } catch (e) {
+    console.error('[OH] Excepción en buscarPacientePorCedula:', e);
+  }
 }
 
 // ────────────────────────────────────────────────────────────
