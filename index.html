@@ -7,7 +7,7 @@
 <meta name="description" content="Open House Molar 3ra Edición. Sábado 6 de junio. Diversión + profilaxis dental por $13.">
 
 <meta property="og:title" content="Open House Molar - 3ra Edición">
-<meta property="og:description" content="Sábado 6 de junio. Juegos, inflables y profilaxis dental por $13. Solo 48 cupos.">
+<meta property="og:description" content="Sábado 6 de junio. Juegos, inflables y profilaxis dental por $13. Solo 42 cupos.">
 <meta property="og:type" content="website">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2726,7 +2726,7 @@ body { background: #FAFAF7; }
   <!-- Mini-indicador de cupos -->
   <div class="h3-cupos-pill">
     <span class="h3-pulse"></span>
-    <span class="h3-pill-text"><strong id="cuposRestantes">48</strong> de 48 cupos disponibles</span>
+    <span class="h3-pill-text"><strong id="cuposRestantes">42</strong> de 42 cupos disponibles</span>
   </div>
 
   <!-- Scroll hint discreto -->
@@ -2758,15 +2758,27 @@ body { background: #FAFAF7; }
 
   <div class="oh-video-wrap" id="ohVideoWrap">
     <div class="oh-video-placeholder oh-pl-1" onclick="ohPlayVideo()">
-      <div class="oh-play-circle">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="#1a1a2e">
-          <path d="M8 5.14v14l11-7-11-7z"/>
+      <div class="oh-play-circle oh-play-ig">
+        <!-- Logo Instagram con gradiente original -->
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+          <defs>
+            <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#feda75"/>
+              <stop offset="25%" stop-color="#fa7e1e"/>
+              <stop offset="50%" stop-color="#d62976"/>
+              <stop offset="75%" stop-color="#962fbf"/>
+              <stop offset="100%" stop-color="#4f5bd5"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#igGrad)" stroke-width="2.2"/>
+          <circle cx="12" cy="12" r="4" stroke="url(#igGrad)" stroke-width="2.2"/>
+          <circle cx="17.5" cy="6.5" r="1.2" fill="url(#igGrad)"/>
         </svg>
       </div>
       <div class="oh-video-overlay-text">
         <span class="oh-vid-badge">Open House 2025</span>
         <h3>Mira cómo fue</h3>
-        <p>Click para reproducir el video</p>
+        <p>Toca para ver el video en Instagram</p>
       </div>
     </div>
   </div>
@@ -2793,7 +2805,7 @@ body { background: #FAFAF7; }
       </div>
       <div class="oh-info-lbl">Fecha y hora</div>
       <div class="oh-info-val">Sábado 6 de junio</div>
-      <div class="oh-info-sub">10:00 AM a 5:00 PM</div>
+      <div class="oh-info-sub">8:00 AM a 2:30 PM</div>
     </div>
     <div class="oh-info-card">
       <div class="oh-info-icon oh-icon-2">
@@ -2829,7 +2841,7 @@ body { background: #FAFAF7; }
         </svg>
       </div>
       <div class="oh-info-lbl">Cupos</div>
-      <div class="oh-info-val">Solo 48 disponibles</div>
+      <div class="oh-info-val">Solo 42 disponibles</div>
       <div class="oh-info-sub">Reserva tu lugar pronto</div>
     </div>
   </div>
@@ -2890,7 +2902,7 @@ body { background: #FAFAF7; }
     Quito, Ecuador
   </p>
   <div class="oh-llegar-botones">
-    <a href="https://www.google.com/maps/search/?api=1&query=Torre+Metromed+Galo+Plaza+Lasso+Quito"
+    <a href="https://maps.app.goo.gl/kXL7hxQdyqaut85r6"
        class="oh-btn oh-btn-primary"
        target="_blank" rel="noopener">
       <svg class="oh-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2962,10 +2974,11 @@ body { background: #FAFAF7; }
   </svg>
 </a>
 
-<!-- 🎵 MÚSICA DE FONDO INFANTIL — Arranca al primer toque del usuario -->
-<audio id="ohMusica" loop preload="auto" crossorigin="anonymous">
-  <source src="https://cdn.pixabay.com/audio/2023/03/14/audio_0a0e1f8b53.mp3" type="audio/mpeg">
-  <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+<!-- 🎵 MÚSICA DE FONDO INFANTIL — Archivo local subido al repo
+     Para activar: descarga un MP3 royalty-free (te paso 3 opciones) y súbelo
+     al mismo repo donde está este HTML con el nombre exacto: musica-evento.mp3 -->
+<audio id="ohMusica" loop preload="auto">
+  <source src="musica-evento.mp3" type="audio/mpeg">
 </audio>
 
 <!-- Botón flotante para mutear/desmutear -->
@@ -3282,18 +3295,35 @@ const EVENTO_CONFIG = {
   nombre: 'Open House Molar 3ra Edición',
   fecha: '2026-06-06',          // sábado 6 de junio
   fechaTexto: 'Sábado 6 de Junio',
-  cuposTotal: 48,                // 16 slots × 3 pacientes
+  cuposTotal: 42,                // 13 slots: 10×3 + 3×4 = 42 cupos
   precio: 13,
   servicio: 'Profilaxis dental',
   sedeId: 1,                    // Metromed
   sedeNombre: 'Torre Metromed · Consultorio 009',
-  // 16 slots cada 30 min — de 9:30 a 17:30
-  slots: [
-    '09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00',
-    '14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'
+  // 13 slots cada 30 min — de 8:00 AM a 2:00 PM (último entra 14:00, sale 14:30)
+  // Cada slot tiene capacidad propia: 3 o 4 cupos (horas pico = 4)
+  slotsConfig: [
+    { hora: '08:00', cupos: 3 },
+    { hora: '08:30', cupos: 3 },
+    { hora: '09:00', cupos: 3 },
+    { hora: '09:30', cupos: 3 },
+    { hora: '10:00', cupos: 4 },   // hora pico
+    { hora: '10:30', cupos: 3 },
+    { hora: '11:00', cupos: 4 },   // hora pico
+    { hora: '11:30', cupos: 3 },
+    { hora: '12:00', cupos: 4 },   // hora pico
+    { hora: '12:30', cupos: 3 },
+    { hora: '13:00', cupos: 3 },
+    { hora: '13:30', cupos: 3 },
+    { hora: '14:00', cupos: 3 }
   ],
-  // Máximo 3 pacientes por cada slot de 30 min
-  cuposPorSlot: 3,
+  // Lista plana (compatibilidad con código existente)
+  get slots() { return this.slotsConfig.map(s => s.hora); },
+  // Capacidad de un slot específico
+  cuposParaSlot: function(hora) {
+    const c = this.slotsConfig.find(s => s.hora === hora);
+    return c ? c.cupos : 3;
+  },
   telClinica: '593986130776'
 };
 
@@ -3358,7 +3388,8 @@ async function cargarCuposReales() {
 
     // Guardar cupos por slot
     window._cuposPorSlot = {};
-    EVENTO_CONFIG.slots.forEach(s => window._cuposPorSlot[s] = EVENTO_CONFIG.cuposPorSlot);
+    // Cada slot tiene su propia capacidad (3 o 4)
+    EVENTO_CONFIG.slotsConfig.forEach(s => window._cuposPorSlot[s.hora] = s.cupos);
     (data || []).forEach(r => {
       if (window._cuposPorSlot[r.hora_reservada] != null) {
         window._cuposPorSlot[r.hora_reservada]--;
@@ -3381,7 +3412,7 @@ async function cargarCuposReales() {
         btn.innerHTML = 'Cupos agotados';
       }
     } else if (restantes <= 10) {
-      if (pillText) pillText.innerHTML = '<strong>¡Solo ' + restantes + '</strong> de 48 cupos!';
+      if (pillText) pillText.innerHTML = '<strong>¡Solo ' + restantes + '</strong> de 42 cupos!';
       const pulse = document.querySelector('.h3-pulse');
       if (pulse) pulse.style.background = '#F59E0B';
     }
@@ -3550,7 +3581,7 @@ function renderSlots() {
   document.getElementById('rsvBtnContinuar2').disabled = true;
 
   grid.innerHTML = EVENTO_CONFIG.slots.map(s => {
-    const restantes = cupos[s] != null ? cupos[s] : EVENTO_CONFIG.cuposPorSlot;
+    const restantes = cupos[s] != null ? cupos[s] : EVENTO_CONFIG.cuposParaSlot(s);
     const full = restantes <= 0;
     return `
       <button type="button" class="rsv-slot ${full ? 'full' : ''}"
@@ -3609,7 +3640,8 @@ async function rsvConfirmar() {
       .eq('hora_reservada', _rsvHoraElegida)
       .neq('estado', 'cancelada');
 
-    if (yaReservadas && yaReservadas.length >= EVENTO_CONFIG.cuposPorSlot) {
+    const cuposEsteSlot = EVENTO_CONFIG.cuposParaSlot(_rsvHoraElegida);
+    if (yaReservadas && yaReservadas.length >= cuposEsteSlot) {
       alert('Lo sentimos, ese horario se acaba de llenar. Elige otro por favor.');
       btn.disabled = false;
       btn.innerHTML = '✓ Confirmar reserva';
@@ -3745,9 +3777,10 @@ async function rsvConfirmar() {
       .neq('estado', 'cancelada')
       .order('created_at', { ascending: true });
 
-    if (enEseSlot && enEseSlot.length > EVENTO_CONFIG.cuposPorSlot) {
-      // ¿Está nuestro registro dentro de los primeros 3?
-      const primeros = enEseSlot.slice(0, EVENTO_CONFIG.cuposPorSlot).map(r => r.id);
+    const cuposPostInsert = EVENTO_CONFIG.cuposParaSlot(_rsvHoraElegida);
+    if (enEseSlot && enEseSlot.length > cuposPostInsert) {
+      // ¿Está nuestro registro dentro de los primeros N (3 o 4 según el slot)?
+      const primeros = enEseSlot.slice(0, cuposPostInsert).map(r => r.id);
       if (!primeros.includes(nuevaInscripcion.id)) {
         // Nuestro registro QUEDÓ FUERA → rollback: borrar inscripción y cita
         console.warn('[anti-race] El slot se llenó al mismo tiempo, haciendo rollback');
@@ -3793,25 +3826,14 @@ async function rsvConfirmar() {
 window.rsvConfirmar = rsvConfirmar;
 
 // ════════════════════════════════════════════════════════════
-//  VIDEO OPEN HOUSE 2025 — Reproducir al click
+//  VIDEO OPEN HOUSE 2025 — Abre Instagram al click
 // ════════════════════════════════════════════════════════════
-// 👇 PEGÁ AQUÍ el ID del video de YouTube de la edición pasada
-//    Si tu URL es: https://www.youtube.com/watch?v=abc123XYZ
-//    entonces YOUTUBE_VIDEO_ID = 'abc123XYZ'
-const YOUTUBE_VIDEO_ID = 'TU_VIDEO_ID_AQUI';  // ← reemplazar
+// El video del año pasado vive en Instagram. Como Instagram no permite
+// reproducir videos embebidos, hacemos que el click abra el post directamente.
+const INSTAGRAM_VIDEO_URL = 'https://www.instagram.com/p/DQwjSklDSNx/';
 
 function ohPlayVideo() {
-  const wrap = document.getElementById('ohVideoWrap');
-  if (!wrap) return;
-  if (YOUTUBE_VIDEO_ID === 'TU_VIDEO_ID_AQUI') {
-    alert('Pronto subiremos el video del Open House 2025. ¡Mientras tanto, síguenos en Instagram @molar.ecu!');
-    return;
-  }
-  wrap.innerHTML = `
-    <iframe 
-      src="https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1" 
-      allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
-      allowfullscreen></iframe>`;
+  window.open(INSTAGRAM_VIDEO_URL, '_blank', 'noopener');
 }
 window.ohPlayVideo = ohPlayVideo;
 
