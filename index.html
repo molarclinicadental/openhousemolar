@@ -3726,7 +3726,19 @@ async function rsvConfirmar() {
 
     // 4) Crear la cita en la tabla 'citas' usando las COLUMNAS REALES de la app Molar
     //    fecha_hora (timestamp único), duracion_min, notas_internas (no fecha+hora separadas)
+    //    NO asignamos doctor_id — asignación manual el día del evento
     const fechaHoraISO = EVENTO_CONFIG.fecha + 'T' + _rsvHoraElegida + ':00';
+
+    // Sugerencia de box según edad (no es obligatorio, ayuda al coordinador del evento)
+    let boxSugerido;
+    if (_rsvDatos.edad === '0-2' || _rsvDatos.edad === '3-5') {
+      boxSugerido = 'PREF Box 3 (0-5 años)';
+    } else {
+      boxSugerido = 'Box 1 o 2';
+    }
+
+    const motivoCita = 'Open House - ' + EVENTO_CONFIG.servicio + ' · ' + boxSugerido;
+
     const { data: cita, error: eCita } = await cli
       .from('citas')
       .insert({
@@ -3734,9 +3746,9 @@ async function rsvConfirmar() {
         sede_id: EVENTO_CONFIG.sedeId,
         fecha_hora: fechaHoraISO,        // ← timestamp único, NO fecha+hora separados
         duracion_min: 30,                 // ← duracion_min, NO duracion
-        motivo: 'Open House - ' + EVENTO_CONFIG.servicio,
+        motivo: motivoCita,
         estado: 'confirmada',
-        notas_internas: 'Reserva web Open House 3ra Edición. Edad: ' + _rsvDatos.edad + '. Precio: $' + EVENTO_CONFIG.precio + (pacienteEsNuevo ? '. PACIENTE NUEVO desde la web.' : '')
+        notas_internas: 'Reserva web Open House 3ra Edición. Edad declarada: ' + _rsvDatos.edad + ' años. Precio: $' + EVENTO_CONFIG.precio + '. ' + boxSugerido + (pacienteEsNuevo ? '. ⚠️ PACIENTE NUEVO desde la web (verificar datos).' : '')
       })
       .select('id')
       .single();
@@ -3760,7 +3772,8 @@ async function rsvConfirmar() {
         precio: EVENTO_CONFIG.precio,
         estado: 'confirmada',
         codigo: codigo,
-        origen: 'web'
+        origen: 'web',
+        observaciones: boxSugerido  // sugerencia para coordinación el día del evento
       })
       .select('id, created_at')
       .single();
