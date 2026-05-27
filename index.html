@@ -3331,7 +3331,7 @@ const EVENTO_CONFIG = {
 //  SUPABASE — Configura tu URL y anon key
 // ════════════════════════════════════════════════════════════
 const SUPABASE_URL  = 'https://jpkoshobuwjfjlpsubls.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impwa29zaG9idXdqZmpscHN1YmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0Njk5OTAsImV4cCI6MjA3NjA0NTk5MH0.bjxvHbXFlIBPx7y9p7iL8gnRVGS2QmBV4LjP-VlGRrA';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impwa29zaG9idXdqZmpscHN1YmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MjAzNTcsImV4cCI6MjA5MzQ5NjM1N30.d3SN-tU6D8qmWSwp63OQl79PEbs3QVFn9XjgmUSFBKQ';
 
 let sb = null;
 
@@ -3843,7 +3843,19 @@ async function rsvConfirmar() {
     cargarCuposReales();
   } catch (e) {
     console.error('[reserva]', e);
-    alert('Hubo un error al reservar: ' + (e.message || e) + '\n\nPor favor escríbenos por WhatsApp.');
+    // Construir link de WhatsApp de emergencia con datos del usuario
+    const msgError = encodeURIComponent(
+      'Hola! Intenté reservar mi cupo para el Open House Molar pero la página dio error.\n\n' +
+      '*Nombre:* ' + (_rsvDatos.nombre || '(no ingresado)') + '\n' +
+      '*Cédula:* ' + (_rsvDatos.cedula || '(no ingresada)') + '\n' +
+      '*Teléfono:* ' + (_rsvDatos.tel || '(no ingresado)') + '\n' +
+      '*Hora que quería:* ' + (_rsvHoraElegida || '(no seleccionada)') + '\n\n' +
+      '¿Pueden ayudarme a reservar manualmente? Gracias!'
+    );
+    const waLink = 'https://wa.me/' + EVENTO_CONFIG.telClinica + '?text=' + msgError;
+    if (confirm('Hubo un error al reservar: ' + (e.message || e) + '\n\n¿Abrimos WhatsApp para reservar manualmente?')) {
+      window.open(waLink, '_blank');
+    }
     btn.disabled = false;
     btn.innerHTML = '✓ Confirmar reserva';
   }
