@@ -7,7 +7,7 @@
 <meta name="description" content="Open House Molar 3ra Edición. Sábado 6 de junio. Diversión + profilaxis dental por $13.">
 
 <meta property="og:title" content="Open House Molar - 3ra Edición">
-<meta property="og:description" content="Sábado 6 de junio. Juegos, inflables y profilaxis dental por $13. Solo 60 cupos.">
+<meta property="og:description" content="Sábado 6 de junio. Juegos, inflables y profilaxis dental por $13. Solo 48 cupos.">
 <meta property="og:type" content="website">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2576,6 +2576,77 @@ body { background: #FAFAF7; }
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
+/* 🎵 BOTÓN FLOTANTE DE MÚSICA — Arriba a la derecha, discreto */
+.oh-music-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  z-index: 9998;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 20px rgba(91, 28, 154, 0.12);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Color del icono — se invierte para que se vea bien sobre el fondo blanco */
+  color: #1A1A1A;
+}
+.oh-music-toggle svg {
+  stroke: #1A1A1A;
+}
+.oh-music-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 28px rgba(91, 28, 154, 0.2);
+  background: #fff;
+}
+.oh-music-toggle:active {
+  transform: scale(0.95);
+}
+/* Cuando suena, animación de "onda" sutil */
+.oh-music-toggle.playing {
+  background: linear-gradient(135deg, #2EC4F1, #9B59E5);
+  animation: musicPulse 2s ease-in-out infinite;
+}
+.oh-music-toggle.playing svg {
+  stroke: #fff;
+}
+@keyframes musicPulse {
+  0%, 100% { box-shadow: 0 8px 20px rgba(155, 89, 229, 0.3), 0 0 0 0 rgba(155, 89, 229, 0.4); }
+  50% { box-shadow: 0 8px 20px rgba(155, 89, 229, 0.3), 0 0 0 8px rgba(155, 89, 229, 0); }
+}
+/* Tooltip sutil "Tocá para activar música" */
+.oh-music-toggle::after {
+  content: '🎵 Tocá la pantalla para escuchar música';
+  position: absolute;
+  top: 52px;
+  right: 0;
+  background: rgba(26, 26, 26, 0.92);
+  color: #fff;
+  font-family: Nunito, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 10px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.oh-music-toggle.hint-visible::after {
+  opacity: 1;
+  animation: musicHintBob 3s ease-in-out 2;
+}
+@keyframes musicHintBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
 </style>
 </head>
 <body>
@@ -2655,7 +2726,7 @@ body { background: #FAFAF7; }
   <!-- Mini-indicador de cupos -->
   <div class="h3-cupos-pill">
     <span class="h3-pulse"></span>
-    <span class="h3-pill-text"><strong id="cuposRestantes">60</strong> de 60 cupos disponibles</span>
+    <span class="h3-pill-text"><strong id="cuposRestantes">48</strong> de 48 cupos disponibles</span>
   </div>
 
   <!-- Scroll hint discreto -->
@@ -2758,7 +2829,7 @@ body { background: #FAFAF7; }
         </svg>
       </div>
       <div class="oh-info-lbl">Cupos</div>
-      <div class="oh-info-val">Solo 60 disponibles</div>
+      <div class="oh-info-val">Solo 48 disponibles</div>
       <div class="oh-info-sub">Reserva tu lugar pronto</div>
     </div>
   </div>
@@ -2890,6 +2961,27 @@ body { background: #FAFAF7; }
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
   </svg>
 </a>
+
+<!-- 🎵 MÚSICA DE FONDO INFANTIL — Arranca al primer toque del usuario -->
+<audio id="ohMusica" loop preload="auto" crossorigin="anonymous">
+  <source src="https://cdn.pixabay.com/audio/2023/03/14/audio_0a0e1f8b53.mp3" type="audio/mpeg">
+  <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Botón flotante para mutear/desmutear -->
+<button type="button" id="ohMusicToggle" class="oh-music-toggle" aria-label="Activar o silenciar música">
+  <!-- Icono altavoz con onda (activo por defecto) -->
+  <svg id="ohMusicIconOn" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+  </svg>
+  <!-- Icono altavoz mute (oculto por defecto) -->
+  <svg id="ohMusicIconOff" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="display:none;">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <line x1="23" y1="9" x2="17" y2="15"/>
+    <line x1="17" y1="9" x2="23" y2="15"/>
+  </svg>
+</button>
 
 <!-- ════════════════════════════════════════════════════════════
      MODAL DE RESERVA — 3 pasos: datos / horario / confirmación
@@ -3190,7 +3282,7 @@ const EVENTO_CONFIG = {
   nombre: 'Open House Molar 3ra Edición',
   fecha: '2026-06-06',          // sábado 6 de junio
   fechaTexto: 'Sábado 6 de Junio',
-  cuposTotal: 60,
+  cuposTotal: 48,                // 16 slots × 3 pacientes
   precio: 13,
   servicio: 'Profilaxis dental',
   sedeId: 1,                    // Metromed
@@ -3200,8 +3292,8 @@ const EVENTO_CONFIG = {
     '09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00',
     '14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'
   ],
-  // Cupos por slot (60 total / 16 slots ≈ 3-4 por slot; ajusta si quieres más)
-  cuposPorSlot: 4,
+  // Máximo 3 pacientes por cada slot de 30 min
+  cuposPorSlot: 3,
   telClinica: '593986130776'
 };
 
@@ -3289,7 +3381,7 @@ async function cargarCuposReales() {
         btn.innerHTML = 'Cupos agotados';
       }
     } else if (restantes <= 10) {
-      if (pillText) pillText.innerHTML = '<strong>¡Solo ' + restantes + '</strong> de 60 cupos!';
+      if (pillText) pillText.innerHTML = '<strong>¡Solo ' + restantes + '</strong> de 48 cupos!';
       const pulse = document.querySelector('.h3-pulse');
       if (pulse) pulse.style.background = '#F59E0B';
     }
@@ -3380,6 +3472,7 @@ async function buscarPacientePorCedula(cedula) {
       .from('pacientes')
       .select('id, nombres, apellidos, telefono, email, fecha_nacimiento')
       .eq('cedula', cedula)
+      .is('archived_at', null)         // excluir pacientes archivados
       .maybeSingle();
     if (error || !data) return;
     // Autorellenar
@@ -3532,56 +3625,94 @@ async function rsvConfirmar() {
         .from('pacientes')
         .select('id')
         .eq('cedula', _rsvDatos.cedula)
+        .is('archived_at', null)
         .maybeSingle();
       if (pacExistente) _rsvDatos._pacienteId = pacExistente.id;
     }
 
-    // 3) Si no existe el paciente, CREARLO
+    // 3) Si no existe el paciente, CREARLO con TODOS los campos que usa la app Molar
     let pacienteId = _rsvDatos._pacienteId;
+    let pacienteEsNuevo = false;
     if (!pacienteId) {
-      const partes = _rsvDatos.nombre.split(/\s+/);
-      const nombres = partes.slice(0, Math.ceil(partes.length / 2)).join(' ');
-      const apellidos = partes.slice(Math.ceil(partes.length / 2)).join(' ') || partes[0];
-      // Teléfono con código país
+      const partes = _rsvDatos.nombre.trim().split(/\s+/);
+      // Si hay solo 1 palabra, usar la misma como nombre y apellido
+      // Si hay 2+ palabras, mitad como nombres, mitad como apellidos
+      let nombres, apellidos;
+      if (partes.length === 1) {
+        nombres = partes[0]; apellidos = partes[0];
+      } else if (partes.length === 2) {
+        nombres = partes[0]; apellidos = partes[1];
+      } else {
+        // 3+ palabras → primeras 2 como nombres, resto como apellidos
+        const mitad = Math.ceil(partes.length / 2);
+        nombres = partes.slice(0, mitad).join(' ');
+        apellidos = partes.slice(mitad).join(' ');
+      }
+
+      // Teléfono con código país (formato 593XXXXXXXXX)
       let telBD = _rsvDatos.tel;
       if (telBD.startsWith('0')) telBD = '593' + telBD.substring(1);
+
+      // Determinar fecha aproximada de nacimiento según rango de edad
+      const hoy = new Date();
+      let aniosAprox = 25;
+      if (_rsvDatos.edad === '0-2') aniosAprox = 1;
+      else if (_rsvDatos.edad === '3-5') aniosAprox = 4;
+      else if (_rsvDatos.edad === '6-12') aniosAprox = 9;
+      else if (_rsvDatos.edad === '13-17') aniosAprox = 15;
+      else aniosAprox = 30;
+      const fechaNac = (hoy.getFullYear() - aniosAprox) + '-01-01';
 
       const { data: nuevoPac, error: ePac } = await cli
         .from('pacientes')
         .insert({
           cedula: _rsvDatos.cedula,
+          tipo_doc: 'cedula',
           nombres: nombres,
           apellidos: apellidos,
           telefono: telBD,
+          whatsapp: telBD,                         // mismo número WhatsApp
           email: _rsvDatos.email,
+          fecha_nacimiento: fechaNac,
+          genero: 'no_especifica',
           estado: 'nuevo',
-          sede_id: EVENTO_CONFIG.sedeId
+          sede_id: EVENTO_CONFIG.sedeId,
+          sedes_atendido: [EVENTO_CONFIG.sedeId],
+          origen: 'Open House Web',
+          origen_detalle: 'Reserva online evento 3ra edición',
+          tags: ['open-house-2026'],
+          notas_internas: 'Paciente registrado desde la web del Open House. Edad declarada: ' + _rsvDatos.edad,
+          consentimiento_datos: true,
+          alertas_clinicas: []
         })
         .select('id')
         .single();
       if (ePac) throw ePac;
       pacienteId = nuevoPac.id;
+      pacienteEsNuevo = true;
     }
 
-    // 4) Crear la cita en la tabla 'citas'
-    const { data: cita } = await cli
+    // 4) Crear la cita en la tabla 'citas' usando las COLUMNAS REALES de la app Molar
+    //    fecha_hora (timestamp único), duracion_min, notas_internas (no fecha+hora separadas)
+    const fechaHoraISO = EVENTO_CONFIG.fecha + 'T' + _rsvHoraElegida + ':00';
+    const { data: cita, error: eCita } = await cli
       .from('citas')
       .insert({
         paciente_id: pacienteId,
         sede_id: EVENTO_CONFIG.sedeId,
-        fecha: EVENTO_CONFIG.fecha,
-        hora: _rsvHoraElegida + ':00',
-        duracion: 30,
+        fecha_hora: fechaHoraISO,        // ← timestamp único, NO fecha+hora separados
+        duracion_min: 30,                 // ← duracion_min, NO duracion
         motivo: 'Open House - ' + EVENTO_CONFIG.servicio,
         estado: 'confirmada',
-        observaciones: 'Reserva web Open House. Edad: ' + _rsvDatos.edad + '. $' + EVENTO_CONFIG.precio
+        notas_internas: 'Reserva web Open House 3ra Edición. Edad: ' + _rsvDatos.edad + '. Precio: $' + EVENTO_CONFIG.precio + (pacienteEsNuevo ? '. PACIENTE NUEVO desde la web.' : '')
       })
       .select('id')
       .single();
+    if (eCita) throw eCita;
 
-    // 5) Registrar inscripción en el evento
+    // 5) Registrar inscripción en el evento (CON ANTI-RACE robusto)
     const codigo = 'OH-' + Date.now().toString(36).toUpperCase().slice(-5);
-    const { error: eIns } = await cli
+    const { data: nuevaInscripcion, error: eIns } = await cli
       .from('evento_inscripciones')
       .insert({
         evento_slug: EVENTO_CONFIG.slug,
@@ -3598,8 +3729,41 @@ async function rsvConfirmar() {
         estado: 'confirmada',
         codigo: codigo,
         origen: 'web'
-      });
+      })
+      .select('id, created_at')
+      .single();
     if (eIns) throw eIns;
+
+    // 5.b) ANTI-RACE: re-verificar que NO se sobrepasó el cupo de 3 por slot.
+    //      Si dos personas insertaron casi al tiempo, el último que entró tiene
+    //      created_at más reciente — ese es el que rebota.
+    const { data: enEseSlot } = await cli
+      .from('evento_inscripciones')
+      .select('id, created_at')
+      .eq('evento_slug', EVENTO_CONFIG.slug)
+      .eq('hora_reservada', _rsvHoraElegida)
+      .neq('estado', 'cancelada')
+      .order('created_at', { ascending: true });
+
+    if (enEseSlot && enEseSlot.length > EVENTO_CONFIG.cuposPorSlot) {
+      // ¿Está nuestro registro dentro de los primeros 3?
+      const primeros = enEseSlot.slice(0, EVENTO_CONFIG.cuposPorSlot).map(r => r.id);
+      if (!primeros.includes(nuevaInscripcion.id)) {
+        // Nuestro registro QUEDÓ FUERA → rollback: borrar inscripción y cita
+        console.warn('[anti-race] El slot se llenó al mismo tiempo, haciendo rollback');
+        await cli.from('evento_inscripciones').delete().eq('id', nuevaInscripcion.id);
+        if (cita && cita.id) {
+          await cli.from('citas').delete().eq('id', cita.id);
+        }
+        alert('Lo sentimos, ese horario se acaba de llenar mientras procesábamos tu reserva. Por favor elige otro horario.');
+        btn.disabled = false;
+        btn.innerHTML = '✓ Confirmar reserva';
+        rsvGoStep(2);
+        await cargarCuposReales();
+        renderSlots();
+        return;
+      }
+    }
 
     // 6) Éxito → mostrar pantalla de confirmación
     document.getElementById('rsvCodigo').textContent = codigo;
@@ -3650,6 +3814,113 @@ function ohPlayVideo() {
       allowfullscreen></iframe>`;
 }
 window.ohPlayVideo = ohPlayVideo;
+
+// ════════════════════════════════════════════════════════════
+//  🎵 MÚSICA DE FONDO — Arranca al primer toque del usuario
+// ════════════════════════════════════════════════════════════
+(function() {
+  const audio = document.getElementById('ohMusica');
+  const btn = document.getElementById('ohMusicToggle');
+  const iconOn = document.getElementById('ohMusicIconOn');
+  const iconOff = document.getElementById('ohMusicIconOff');
+  if (!audio || !btn) return;
+
+  audio.volume = 0.35;  // volumen suave, no agresivo
+
+  // Estado: el usuario quiere música? (recuerda preferencia en localStorage)
+  let userWantsMusic = localStorage.getItem('ohMusicMuted') !== '1';
+
+  function actualizarUI() {
+    if (audio.paused || audio.muted) {
+      btn.classList.remove('playing');
+      iconOn.style.display = 'none';
+      iconOff.style.display = 'block';
+    } else {
+      btn.classList.add('playing');
+      iconOn.style.display = 'block';
+      iconOff.style.display = 'none';
+      btn.classList.remove('hint-visible');  // ocultar tooltip
+    }
+  }
+
+  // Intentar reproducir al primer toque o click en cualquier parte
+  let yaInicio = false;
+  function intentarReproducir() {
+    if (yaInicio || !userWantsMusic) return;
+    yaInicio = true;
+    audio.play().then(() => {
+      actualizarUI();
+    }).catch((err) => {
+      console.log('[música] autoplay bloqueado, esperando click en botón:', err.message);
+      yaInicio = false;  // dejar reintentar
+    });
+  }
+
+  // Mostrar tooltip "Tocá la pantalla" después de 1.5s si no ha empezado a sonar
+  setTimeout(() => {
+    if (audio.paused && userWantsMusic) {
+      btn.classList.add('hint-visible');
+    }
+  }, 1500);
+
+  // Eventos que cuentan como "primera interacción del usuario"
+  ['click', 'touchstart', 'keydown', 'scroll'].forEach(evt => {
+    document.addEventListener(evt, intentarReproducir, { once: false, passive: true });
+  });
+
+  // Toggle del botón
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (audio.paused) {
+      userWantsMusic = true;
+      localStorage.setItem('ohMusicMuted', '0');
+      audio.play().then(actualizarUI).catch(err => console.warn('[música]', err.message));
+    } else {
+      userWantsMusic = false;
+      localStorage.setItem('ohMusicMuted', '1');
+      audio.pause();
+      actualizarUI();
+    }
+  });
+
+  // Si el audio falla a cargar (sin internet, CDN caída, etc.), ocultar botón
+  audio.addEventListener('error', () => {
+    console.warn('[música] No se pudo cargar el audio');
+    btn.style.display = 'none';
+  });
+
+  // Pausar música cuando se reproduce el video (no se chocan)
+  const videoWrap = document.getElementById('ohVideoWrap');
+  if (videoWrap) {
+    const obs = new MutationObserver(() => {
+      // Si apareció un iframe (video se reproduce), pausar música
+      if (videoWrap.querySelector('iframe')) {
+        if (!audio.paused) {
+          audio.pause();
+          actualizarUI();
+        }
+      }
+    });
+    obs.observe(videoWrap, { childList: true, subtree: true });
+  }
+
+  // Pausar música cuando se abre el modal de reserva (no distraer)
+  const modal = document.getElementById('reservaModal');
+  if (modal) {
+    const obsModal = new MutationObserver(() => {
+      if (modal.classList.contains('open') && !audio.paused) {
+        audio.pause();
+        actualizarUI();
+      }
+    });
+    obsModal.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // Estado inicial
+  if (!userWantsMusic) {
+    actualizarUI();
+  }
+})();
 </script>
 
 </body>
