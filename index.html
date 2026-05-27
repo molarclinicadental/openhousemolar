@@ -3325,7 +3325,10 @@ const EVENTO_CONFIG = {
     const c = this.slotsConfig.find(s => s.hora === hora);
     return c ? c.cupos : 3;
   },
-  telClinica: '593986130776'
+  telClinica: '593986130776',
+  doctorCoordinadorId: 10        // Daymi Laura Calderón — coordinadora del Open House
+                                 // El día del evento, ella o el coordinador puede reasignar
+                                 // las citas a los otros doctores (Jenny=9, Xavier=11)
 };
 
 // ════════════════════════════════════════════════════════════
@@ -3794,6 +3797,7 @@ async function rsvConfirmar() {
         .insert({
           paciente_id: pacienteId,
           sede_id: EVENTO_CONFIG.sedeId,
+          doctor_id: EVENTO_CONFIG.doctorCoordinadorId,  // ← Daymi (coordinadora). Reasignable día del evento.
           fecha_hora: fechaHoraISO,        // ← timestamp único, NO fecha+hora separados
           duracion_min: 30,                 // ← duracion_min, NO duracion
           motivo: motivoCita,
