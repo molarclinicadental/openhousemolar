@@ -2967,6 +2967,9 @@ body { background: #FAFAF7; }
     </a>
   </div>
   <p class="footer-mini">3ra Edición · Open House Molar 2026</p>
+  <p class="footer-mini" style="font-size:0.7rem;opacity:0.6;margin-top:4px;">
+    Música: <a href="https://incompetech.com" target="_blank" rel="noopener" style="color:inherit;opacity:0.8;">"Carefree" de Kevin MacLeod</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener" style="color:inherit;opacity:0.8;">CC BY 4.0</a>
+  </p>
 </footer>
 
 <a href="https://wa.me/593986130776?text=Hola!%20Quiero%20reservar%20mi%20cupo%20para%20el%20Open%20House%20Molar" class="wa-float" target="_blank" aria-label="WhatsApp">
@@ -2975,10 +2978,18 @@ body { background: #FAFAF7; }
   </svg>
 </a>
 
-<!-- 🎵 MÚSICA DE FONDO INFANTIL — Archivo local subido al repo
-     Para activar: descarga un MP3 royalty-free (te paso 3 opciones) y súbelo
-     al mismo repo donde está este HTML con el nombre exacto: musica-evento.mp3 -->
-<audio id="ohMusica" loop preload="none">
+<!-- ════════════════════════════════════════════════════════════════════
+     🎵 MÚSICA DE FONDO DEL EVENTO
+     Track: "Carefree" de Kevin MacLeod (incompetech.com)
+     Licencia: Creative Commons BY 4.0 — uso comercial permitido con atribución
+     Atribución acreditada en el footer del sitio (legalmente requerido)
+     Duración: 3:25 · BPM: 96 · Instrumental alegre
+     Hosted en Internet Archive (estable, sin caducidad)
+     ════════════════════════════════════════════════════════════════════ -->
+<audio id="ohMusica" loop preload="none" crossorigin="anonymous">
+  <!-- Fuente principal: Internet Archive (sirve MP3 estables con CORS) -->
+  <source src="https://archive.org/download/CarefreeKevinMacLeod/Carefree.mp3" type="audio/mpeg">
+  <!-- Fallback local: si vas a subir el MP3 al repo, lo levantará automáticamente -->
   <source src="musica-evento.mp3" type="audio/mpeg">
 </audio>
 
