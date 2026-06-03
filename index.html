@@ -2829,8 +2829,8 @@ body { background: #FAFAF7; }
         </svg>
       </div>
       <div class="oh-info-lbl">Para quién</div>
-      <div class="oh-info-val">Toda la familia</div>
-      <div class="oh-info-sub">Bebés, niños, adolescentes y adultos</div>
+      <div class="oh-info-val">Niños y niñas</div>
+      <div class="oh-info-sub">De 0 a 12 años</div>
     </div>
     <div class="oh-info-card">
       <div class="oh-info-icon oh-icon-4">
@@ -2930,8 +2930,8 @@ body { background: #FAFAF7; }
     <div class="oh-cierre-emoji">🦷✨</div>
     <h2 class="oh-cierre-title">¡Te esperamos!</h2>
     <p class="oh-cierre-text">
-      Una mañana llena de sonrisas, diversión y cuidado dental para toda la familia.
-      Reserva tu cupo desde el botón de arriba.
+      Una mañana llena de sonrisas, diversión y cuidado dental para los más pequeños de la casa.
+      Reserva el cupo de tu peque desde el botón de arriba.
     </p>
     <p class="oh-cierre-firma">
       Con cariño,<br>
@@ -3222,11 +3222,12 @@ body { background: #FAFAF7; }
           <select id="rsvEdad">
             <option value="">Selecciona...</option>
             <option value="0-2">Recién nacido / hasta 2 años</option>
-            <option value="3-5">Niño (3 a 5 años)</option>
-            <option value="6-12">Niño (6 a 12 años)</option>
-            <option value="13-17">Adolescente (13 a 17 años)</option>
-            <option value="18+">Adulto (18 años o más)</option>
+            <option value="3-5">Niño/a (3 a 5 años)</option>
+            <option value="6-12">Niño/a (6 a 12 años)</option>
           </select>
+          <small style="display:block;margin-top:6px;color:#5A7DA8;font-size:0.85rem;">
+            Este evento es exclusivo para niños y niñas de 0 a 12 años.
+          </small>
           <div class="rsv-error-msg" id="rsvEdadErr"></div>
         </div>
         <div class="rsv-actions">
@@ -3539,15 +3540,20 @@ async function buscarPacientePorCedula(cedula) {
       if (tel.length === 10) document.getElementById('rsvTel').value = tel;
     }
     if (data.email) document.getElementById('rsvEmail').value = data.email;
-    // Edad
+    // Edad — solo para niños de 0 a 12 años (evento exclusivo infantil)
     if (data.fecha_nacimiento) {
       const edad = Math.floor((Date.now() - new Date(data.fecha_nacimiento).getTime()) / (365.25 * 86400000));
       const sel = document.getElementById('rsvEdad');
       if (edad < 3) sel.value = '0-2';
       else if (edad < 6) sel.value = '3-5';
       else if (edad < 13) sel.value = '6-12';
-      else if (edad < 18) sel.value = '13-17';
-      else sel.value = '18+';
+      else {
+        // Paciente mayor de 12: avisar que el evento es solo para niños
+        sel.value = '';
+        _rsvSetError('rsvEdad',
+          'Este paciente tiene ' + edad + ' años. El Open House es exclusivo para niños de 0 a 12 años.');
+        console.warn('[OH] Paciente fuera del rango de edad permitido:', edad);
+      }
     }
     _rsvDatos._pacienteId = data.id;
     console.log('[OH] Datos autocompletados correctamente');
@@ -3741,14 +3747,12 @@ async function rsvConfirmar() {
       let telBD = _rsvDatos.tel;
       if (telBD.startsWith('0')) telBD = '593' + telBD.substring(1);
 
-      // Determinar fecha aproximada de nacimiento según rango de edad
+      // Determinar fecha aproximada de nacimiento según rango de edad (0-12 años, evento infantil)
       const hoy = new Date();
-      let aniosAprox = 25;
+      let aniosAprox = 9; // default conservador
       if (_rsvDatos.edad === '0-2') aniosAprox = 1;
       else if (_rsvDatos.edad === '3-5') aniosAprox = 4;
       else if (_rsvDatos.edad === '6-12') aniosAprox = 9;
-      else if (_rsvDatos.edad === '13-17') aniosAprox = 15;
-      else aniosAprox = 30;
       const fechaNac = (hoy.getFullYear() - aniosAprox) + '-01-01';
 
       const { data: nuevoPac, error: ePac } = await _rsvConTimeout(
