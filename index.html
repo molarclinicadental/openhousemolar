@@ -3415,18 +3415,25 @@ async function cargarCuposReales() {
 
     // Para cada cita, extraer su hora HH:MM y descontar del slot correspondiente
     let totalOcupados = 0;
+    // Contamos primero CUÁNTAS citas hay por slot, sin descontar todavía
+    const conteoPorSlot = {};
     (data || []).forEach(c => {
-      // c.fecha_hora viene como "2026-06-06T10:30:00+00:00" o similar
       const fh = new Date(c.fecha_hora);
-      // Usar getUTCHours/getUTCMinutes para evitar saltos por zona horaria
       const hh = String(fh.getUTCHours()).padStart(2, '0');
       const mm = String(fh.getUTCMinutes()).padStart(2, '0');
       const hora = hh + ':' + mm;
+      // Solo cuenta si la hora corresponde a un slot del evento
       if (window._cuposPorSlot[hora] != null) {
-        window._cuposPorSlot[hora]--;
-        totalOcupados++;
+        conteoPorSlot[hora] = (conteoPorSlot[hora] || 0) + 1;
       }
-      // Si la cita es fuera de los slots del evento (ej: 15:00), no la contamos
+    });
+    // Ahora aplicamos el conteo, sin pasar del cupo máximo por slot
+    EVENTO_CONFIG.slotsConfig.forEach(s => {
+      const ocupadasEnSlot = conteoPorSlot[s.hora] || 0;
+      // Solo descontamos hasta el límite del slot (no más)
+      const efectivo = Math.min(ocupadasEnSlot, s.cupos);
+      window._cuposPorSlot[s.hora] = s.cupos - ocupadasEnSlot; // puede quedar negativo (ej: 6 citas en slot de 3 → -3)
+      totalOcupados += efectivo;
     });
 
     // Calcular total ocupado solo de slots válidos del evento
@@ -3643,7 +3650,7 @@ function _rsvClearAllErrors() {
   ['rsvCedula','rsvNombre','rsvTel','rsvEmail','rsvEdad'].forEach(_rsvClearError);
 }
 
-function rsvNextStep1() {
+async function rsvNextStep1() {
   _rsvClearAllErrors();
   const cedula = document.getElementById('rsvCedula').value.trim();
   const nombre = document.getElementById('rsvNombre').value.trim();
@@ -3662,6 +3669,9 @@ function rsvNextStep1() {
 
   _rsvDatos = { ..._rsvDatos, cedula, nombre, tel, email, edad };
   rsvGoStep(2);
+  // ⚠️ Recargar cupos en vivo desde BD antes de mostrar los horarios
+  // Si pasaron varios minutos desde que se abrió la web, los cupos pueden estar desactualizados
+  await cargarCuposReales();
   renderSlots();
 }
 window.rsvNextStep1 = rsvNextStep1;
