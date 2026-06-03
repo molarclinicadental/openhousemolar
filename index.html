@@ -3392,25 +3392,49 @@ async function cargarCuposReales() {
     return;
   }
   try {
+    // ────────────────────────────────────────────────────────────
+    // Contamos cupos directamente desde la tabla `citas` del día del
+    // evento. Así incluimos TODO: reservas OH, citas manuales del equipo
+    // y huérfanas. La web refleja la realidad de la agenda de Molar.
+    // ────────────────────────────────────────────────────────────
+    const fechaEvento = EVENTO_CONFIG.fecha; // ej: '2026-06-06'
+    const inicioDia = fechaEvento + 'T00:00:00';
+    const finDia    = fechaEvento + 'T23:59:59';
+
     const { data, error } = await cli
-      .from('evento_inscripciones')
-      .select('hora_reservada')
-      .eq('evento_slug', EVENTO_CONFIG.slug)
+      .from('citas')
+      .select('fecha_hora, estado')
+      .gte('fecha_hora', inicioDia)
+      .lte('fecha_hora', finDia)
       .neq('estado', 'cancelada');
     if (error) throw error;
 
-    const reservadas = (data || []).length;
-    const restantes = Math.max(0, EVENTO_CONFIG.cuposTotal - reservadas);
-
-    // Guardar cupos por slot
+    // Inicializar mapa: cada slot empieza con su capacidad máxima (3 o 4)
     window._cuposPorSlot = {};
-    // Cada slot tiene su propia capacidad (3 o 4)
     EVENTO_CONFIG.slotsConfig.forEach(s => window._cuposPorSlot[s.hora] = s.cupos);
-    (data || []).forEach(r => {
-      if (window._cuposPorSlot[r.hora_reservada] != null) {
-        window._cuposPorSlot[r.hora_reservada]--;
+
+    // Para cada cita, extraer su hora HH:MM y descontar del slot correspondiente
+    let totalOcupados = 0;
+    (data || []).forEach(c => {
+      // c.fecha_hora viene como "2026-06-06T10:30:00+00:00" o similar
+      const fh = new Date(c.fecha_hora);
+      // Usar getUTCHours/getUTCMinutes para evitar saltos por zona horaria
+      const hh = String(fh.getUTCHours()).padStart(2, '0');
+      const mm = String(fh.getUTCMinutes()).padStart(2, '0');
+      const hora = hh + ':' + mm;
+      if (window._cuposPorSlot[hora] != null) {
+        window._cuposPorSlot[hora]--;
+        totalOcupados++;
       }
+      // Si la cita es fuera de los slots del evento (ej: 15:00), no la contamos
     });
+
+    // Calcular total ocupado solo de slots válidos del evento
+    const restantes = Math.max(0, EVENTO_CONFIG.cuposTotal - totalOcupados);
+
+    console.log('[cupos] Recargado. Total citas del día:', data?.length || 0,
+                '· Ocupados en slots OH:', totalOcupados, '· Restantes:', restantes);
+    console.log('[cupos] Detalle por slot:', window._cuposPorSlot);
 
     // Actualizar UI del pill de cupos del hero-v3
     const elNum = document.getElementById('cuposRestantes');
@@ -3453,16 +3477,28 @@ function suscribirRealtimeCupos() {
   if (!cli) { console.warn('[realtime] Sin cliente Supabase, no se suscribe'); return; }
   try {
     cli.channel('evento-cupos-rt')
+      // Cambios en inscripciones del Open House
       .on('postgres_changes',
           { event: '*', schema: 'public', table: 'evento_inscripciones' },
           (payload) => {
-            console.log('[realtime] 🔔 Cambio detectado:', payload.eventType, payload);
+            console.log('[realtime] 🔔 Cambio en inscripciones:', payload.eventType);
             cargarCuposReales();
+          })
+      // Cambios en citas (incluye citas manuales agendadas desde la app Molar)
+      .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'citas' },
+          (payload) => {
+            // Solo nos interesan cambios en citas del día del evento
+            const fh = payload.new?.fecha_hora || payload.old?.fecha_hora;
+            if (fh && fh.startsWith(EVENTO_CONFIG.fecha)) {
+              console.log('[realtime] 🔔 Cambio en citas del evento:', payload.eventType);
+              cargarCuposReales();
+            }
           })
       .subscribe((status) => {
         console.log('[realtime] Estado suscripción:', status);
         if (status === 'SUBSCRIBED') {
-          console.log('[realtime] ✅ Suscripción activa — los cupos se actualizan en vivo');
+          console.log('[realtime] ✅ Suscripción activa — los cupos se actualizan en vivo (inscripciones + citas)');
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.error('[realtime] ❌ Error en suscripción, los cupos NO se actualizarán automáticamente');
           // Fallback: refrescar cada 30 seg si Realtime no funciona
@@ -3703,18 +3739,21 @@ async function rsvConfirmar() {
 
   try {
     // 1) Verificar que el slot AÚN está disponible (anti-race)
+    //    Contamos desde la tabla `citas` para incluir citas manuales también
     console.log('[reserva] PASO 1: verificando disponibilidad del slot...');
+    const fechaHoraSlot = EVENTO_CONFIG.fecha + 'T' + _rsvHoraElegida + ':00';
+    const fechaHoraSlotFin = EVENTO_CONFIG.fecha + 'T' + _rsvHoraElegida + ':59';
     const { data: yaReservadas, error: eYa } = await _rsvConTimeout(
       cli
-        .from('evento_inscripciones')
+        .from('citas')
         .select('id')
-        .eq('evento_slug', EVENTO_CONFIG.slug)
-        .eq('hora_reservada', _rsvHoraElegida)
+        .gte('fecha_hora', fechaHoraSlot)
+        .lte('fecha_hora', fechaHoraSlotFin)
         .neq('estado', 'cancelada'),
       10000, 'verificar disponibilidad slot'
     );
     if (eYa) { console.error('[reserva] Error PASO 1:', eYa); throw eYa; }
-    console.log('[reserva] PASO 1 OK. Reservas existentes en slot:', yaReservadas?.length || 0);
+    console.log('[reserva] PASO 1 OK. Citas existentes en slot:', yaReservadas?.length || 0);
 
     const cuposEsteSlot = EVENTO_CONFIG.cuposParaSlot(_rsvHoraElegida);
     if (yaReservadas && yaReservadas.length >= cuposEsteSlot) {
@@ -3882,28 +3921,28 @@ async function rsvConfirmar() {
     if (eIns) { console.error('[reserva] Error PASO 5:', eIns); throw eIns; }
     console.log('[reserva] PASO 5 OK. Inscripción id:', nuevaInscripcion?.id, 'código:', codigo);
 
-    // 5.b) ANTI-RACE: re-verificar que NO se sobrepasó el cupo de 3 por slot.
-    //      Si dos personas insertaron casi al tiempo, el último que entró tiene
-    //      created_at más reciente — ese es el que rebota.
+    // 5.b) ANTI-RACE: re-verificar que NO se sobrepasó el cupo del slot
+    //      contando desde la tabla `citas` (incluye OH + manuales + huérfanas).
+    //      Si quedamos fuera por orden de creación, hacemos rollback.
+    const fhSlotIni = EVENTO_CONFIG.fecha + 'T' + _rsvHoraElegida + ':00';
+    const fhSlotFin = EVENTO_CONFIG.fecha + 'T' + _rsvHoraElegida + ':59';
     const { data: enEseSlot } = await cli
-      .from('evento_inscripciones')
+      .from('citas')
       .select('id, created_at')
-      .eq('evento_slug', EVENTO_CONFIG.slug)
-      .eq('hora_reservada', _rsvHoraElegida)
+      .gte('fecha_hora', fhSlotIni)
+      .lte('fecha_hora', fhSlotFin)
       .neq('estado', 'cancelada')
       .order('created_at', { ascending: true });
 
     const cuposPostInsert = EVENTO_CONFIG.cuposParaSlot(_rsvHoraElegida);
     if (enEseSlot && enEseSlot.length > cuposPostInsert) {
-      // ¿Está nuestro registro dentro de los primeros N (3 o 4 según el slot)?
+      // ¿Está NUESTRA cita dentro de las primeras N (3 o 4 según el slot)?
       const primeros = enEseSlot.slice(0, cuposPostInsert).map(r => r.id);
-      if (!primeros.includes(nuevaInscripcion.id)) {
-        // Nuestro registro QUEDÓ FUERA → rollback: borrar inscripción y cita
+      if (cita && cita.id && !primeros.includes(cita.id)) {
+        // Nuestra cita QUEDÓ FUERA → rollback: borrar inscripción y cita
         console.warn('[anti-race] El slot se llenó al mismo tiempo, haciendo rollback');
         await cli.from('evento_inscripciones').delete().eq('id', nuevaInscripcion.id);
-        if (cita && cita.id) {
-          await cli.from('citas').delete().eq('id', cita.id);
-        }
+        await cli.from('citas').delete().eq('id', cita.id);
         alert('Lo sentimos, ese horario se acaba de llenar mientras procesábamos tu reserva. Por favor elige otro horario.');
         btn.disabled = false;
         btn.innerHTML = '✓ Confirmar reserva';
