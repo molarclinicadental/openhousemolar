@@ -3432,6 +3432,15 @@ async function cargarCuposReales() {
       const pulse = document.querySelector('.h3-pulse');
       if (pulse) pulse.style.background = '#F59E0B';
     }
+
+    // ✅ Re-renderizar los slots SI el modal de reserva está abierto.
+    // Sin esto, alguien que tenga el modal abierto seguiría viendo
+    // horarios "disponibles" que ya se llenaron por otro usuario.
+    const modal = document.getElementById('rsvModal');
+    const modalAbierto = modal && (modal.style.display === 'flex' || modal.classList.contains('open'));
+    if (modalAbierto && typeof renderSlots === 'function') {
+      try { renderSlots(); } catch (e) { console.warn('[cupos] renderSlots:', e); }
+    }
   } catch (e) {
     console.warn('[cupos]', e.message);
     // Si falla, conservar valor inicial 60
@@ -3441,14 +3450,31 @@ async function cargarCuposReales() {
 // Realtime: si otro usuario reserva mientras estás en la página, actualizar
 function suscribirRealtimeCupos() {
   const cli = initSupa();
-  if (!cli) return;
+  if (!cli) { console.warn('[realtime] Sin cliente Supabase, no se suscribe'); return; }
   try {
     cli.channel('evento-cupos-rt')
       .on('postgres_changes',
           { event: '*', schema: 'public', table: 'evento_inscripciones' },
-          () => cargarCuposReales())
-      .subscribe();
-  } catch (e) { /* no crítico */ }
+          (payload) => {
+            console.log('[realtime] 🔔 Cambio detectado:', payload.eventType, payload);
+            cargarCuposReales();
+          })
+      .subscribe((status) => {
+        console.log('[realtime] Estado suscripción:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('[realtime] ✅ Suscripción activa — los cupos se actualizan en vivo');
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[realtime] ❌ Error en suscripción, los cupos NO se actualizarán automáticamente');
+          // Fallback: refrescar cada 30 seg si Realtime no funciona
+          if (!window._cuposFallbackInterval) {
+            console.warn('[realtime] Activando refresco automático cada 30s como fallback');
+            window._cuposFallbackInterval = setInterval(cargarCuposReales, 30000);
+          }
+        }
+      });
+  } catch (e) {
+    console.error('[realtime] Excepción al suscribirse:', e);
+  }
 }
 
 // Cargar cuando el DOM y Supabase estén listos
