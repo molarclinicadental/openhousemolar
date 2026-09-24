@@ -162,6 +162,11 @@
   .campo .err { display: none; color: #FF8A8A; font-size: .82rem; margin-top: 4px; }
   .campo .err.ver { display: block; }
   .ayuda { color: var(--texto-2); font-size: .85rem; margin-bottom: 12px; }
+  .saludo { margin: 4px 0 14px; padding: 18px; border-radius: 18px; text-align: center;
+            background: linear-gradient(135deg, rgba(255, 122, 26, .2), rgba(142, 92, 247, .22)); border: 1.5px solid rgba(255, 162, 76, .55); }
+  .saludo-titulo { font-family: Fredoka, sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--calabaza-2); }
+  .saludo-texto { color: var(--texto); margin-top: 2px; }
+  [hidden] { display: none !important; }
   .turnos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   @media (min-width: 420px) { .turnos { grid-template-columns: repeat(4, 1fr); } }
   .turno { padding: 12px 6px; border-radius: 14px; border: 1.5px solid var(--linea); background: var(--noche); color: var(--texto);
@@ -305,19 +310,29 @@
 
     <div class="paso" id="paso1">
       <div class="campo"><label for="rCedula">Cédula del niño o niña</label>
-        <input id="rCedula" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 dígitos"><div class="err" id="rCedulaErr"></div></div>
-      <div class="campo"><label for="rNombre">Nombre y apellido del niño o niña</label>
-        <input id="rNombre" maxlength="120" autocomplete="off" placeholder="Ej: Sofía Andrade"><div class="err" id="rNombreErr"></div></div>
-      <div class="campo"><label for="rEdad">Edad</label>
-        <select id="rEdad"><option value="">Selecciona</option><option value="0-2">0 a 2 años</option><option value="3-5">3 a 5 años</option><option value="6-12">6 a 12 años</option></select>
-        <div class="err" id="rEdadErr"></div></div>
-      <div class="campo"><label for="rTel">Celular del representante (WhatsApp)</label>
-        <input id="rTel" inputmode="tel" maxlength="10" autocomplete="tel" placeholder="09XXXXXXXX"><div class="err" id="rTelErr"></div></div>
-      <div class="campo"><label for="rEmail">Correo del representante</label>
-        <input id="rEmail" type="email" maxlength="120" autocomplete="email" placeholder="correo@ejemplo.com"><div class="err" id="rEmailErr"></div></div>
-      <div class="acciones"><button class="b-pri" type="button" onclick="paso1Siguiente()">Continuar →</button></div>
-    </div>
+        <input id="rCedula" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 dígitos" oninput="alEscribirCedula()"><div class="err" id="rCedulaErr"></div></div>
+      <div class="ayuda" id="cedulaEstado">Escribe la cédula para empezar.</div>
 
+      <!-- Paciente ya registrado: saludo y directo a elegir el horario -->
+      <div class="saludo" id="saludo" hidden>
+        <div class="saludo-titulo" id="saludoTitulo">¡Hola! 🎃</div>
+        <div class="saludo-texto" id="saludoTexto">Qué gusto verte de nuevo. Ya tenemos tus datos.</div>
+      </div>
+
+      <div id="campos" hidden>
+        <div class="campo" data-grupo="nuevo"><label for="rNombre">Nombre y apellido del niño o niña</label>
+          <input id="rNombre" maxlength="120" autocomplete="off" placeholder="Ej: Sofía Andrade"><div class="err" id="rNombreErr"></div></div>
+        <div class="campo" data-grupo="nuevo edad"><label for="rEdad">Edad</label>
+          <select id="rEdad"><option value="">Selecciona</option><option value="0-2">0 a 2 años</option><option value="3-5">3 a 5 años</option><option value="6-12">6 a 12 años</option></select>
+          <div class="err" id="rEdadErr"></div></div>
+        <div class="campo" data-grupo="nuevo tel"><label for="rTel">Celular del representante (WhatsApp)</label>
+          <input id="rTel" inputmode="tel" maxlength="10" autocomplete="tel" placeholder="09XXXXXXXX"><div class="err" id="rTelErr"></div></div>
+        <div class="campo" data-grupo="nuevo"><label for="rEmail">Correo del representante</label>
+          <input id="rEmail" type="email" maxlength="120" autocomplete="email" placeholder="correo@ejemplo.com"><div class="err" id="rEmailErr"></div></div>
+      </div>
+      <div class="aviso" id="avisoCedula"></div>
+      <div class="acciones" id="accionesPaso1" hidden><button class="b-pri" type="button" id="btnPaso1" onclick="paso1Siguiente()">Continuar →</button></div>
+    </div>
     <div class="paso" id="paso2">
       <p class="ayuda">🕒 Elige el horario. Cada cita dura 20 minutos.</p>
       <div class="turnos" id="turnos"></div>
@@ -430,6 +445,9 @@ function abrirReserva() {
   document.getElementById('reserva').classList.add('abierto');
   document.body.style.overflow = 'hidden';
   irPaso(1);
+  const ced = document.getElementById('rCedula').value;
+  if (ced.length !== 10) mostrarPaso1('esperando');
+  else mostrarPaso1(registrado ? 'registrado' : 'nuevo');
   setTimeout(() => document.getElementById('rCedula').focus(), 60);
 }
 function cerrarReserva() {
@@ -456,16 +474,91 @@ function limpiarErrores() {
   });
 }
 
+// ── Cédula: ¿ya es paciente? ──
+// Si ya es paciente se saluda con su primer nombre y pasa directo a elegir
+// el horario (la base usa los datos de su ficha). Si es nuevo, formulario.
+let registrado = null;       // respuesta de publico_oh_paciente
+let _cedulaTimer = null, _cedulaConsulta = 0;
+function alEscribirCedula() {
+  const inp = document.getElementById('rCedula');
+  inp.value = inp.value.replace(/\D/g, '').slice(0, 10);
+  clearTimeout(_cedulaTimer);
+  registrado = null;
+  mostrarPaso1('esperando');
+  if (inp.value.length === 10) _cedulaTimer = setTimeout(() => consultarCedula(inp.value), 300);
+}
+
+async function consultarCedula(cedula) {
+  const n = ++_cedulaConsulta;
+  document.getElementById('cedulaEstado').textContent = 'Buscando…';
+  let r = { existe: false };
+  try {
+    const cli = cliente();
+    const { data, error } = cli ? await cli.rpc('publico_oh_paciente', { p_slug: EVENTO_SLUG, p_cedula: cedula }) : { data: null };
+    if (!error && data) r = data;
+  } catch (_) { /* sin conexión: se llena el formulario completo */ }
+  if (n !== _cedulaConsulta) return;   // llegó otra consulta más nueva
+  registrado = r.existe ? r : null;
+  mostrarPaso1(r.existe ? 'registrado' : 'nuevo');
+}
+
+/** Muestra lo que corresponde en el paso 1: esperando cédula, paciente registrado o nuevo. */
+function mostrarPaso1(estado) {
+  const $ = id => document.getElementById(id);
+  const aviso = $('avisoCedula');
+  aviso.classList.remove('ver');
+  $('saludo').hidden = estado !== 'registrado';
+  $('campos').hidden = estado === 'esperando';
+  $('accionesPaso1').hidden = estado === 'esperando';
+  $('cedulaEstado').hidden = estado !== 'esperando';
+  if (estado === 'esperando') { $('cedulaEstado').textContent = 'Escribe la cédula para empezar.'; return; }
+  document.querySelectorAll('#campos .campo').forEach(c => {
+    const g = c.dataset.grupo.split(' ');
+    c.hidden = estado === 'registrado'
+      ? !((g.includes('tel') && registrado.falta_telefono) || (g.includes('edad') && registrado.falta_edad))
+      : false;
+  });
+  $('btnPaso1').disabled = false;
+  $('btnPaso1').textContent = estado === 'registrado' ? '🎃 Agendar mi turno →' : 'Continuar →';
+  if (estado !== 'registrado') return;
+  $('saludoTitulo').textContent = `¡Hola, ${registrado.nombre || ''}! 🎃`;
+  if (registrado.ya_reservado) {
+    $('saludoTexto').textContent = 'Ya tienes un cupo reservado para el Open House. Si necesitas cambiar tu horario, escríbenos por WhatsApp.';
+    $('btnPaso1').disabled = true;
+    aviso.innerHTML = '<a href="https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent('Hola! Tengo una reserva para el Open House Halloween y necesito cambiar el horario.') +
+      '" target="_blank" rel="noopener" style="color:#fff;font-weight:800">💬 Escribir por WhatsApp</a>';
+    aviso.classList.add('ver');
+  } else if (registrado.fuera_de_edad) {
+    $('saludoTexto').textContent = `El Open House es para niños de 0 a ${registrado.edad_max} años.`;
+    $('btnPaso1').disabled = true;
+  } else {
+    $('saludoTexto').textContent = registrado.falta_telefono || registrado.falta_edad
+      ? 'Qué gusto verte de nuevo. Solo completa este dato y elige tu horario.'
+      : 'Qué gusto verte de nuevo. Ya tenemos tus datos: solo elige tu horario.';
+  }
+}
+
 async function paso1Siguiente() {
   limpiarErrores();
   const v = id => document.getElementById(id).value.trim();
   const d = { cedula: v('rCedula'), nombre: v('rNombre').replace(/[<>"]/g, ''), edad: v('rEdad'), tel: v('rTel'), email: v('rEmail') };
   let ok = true;
   if (!/^\d{10}$/.test(d.cedula)) { marcarError('rCedula', 'Debe tener 10 dígitos'); ok = false; }
-  if (d.nombre.length < 3) { marcarError('rNombre', 'Escribe nombre y apellido'); ok = false; }
-  if (!d.edad) { marcarError('rEdad', 'Selecciona la edad'); ok = false; }
-  if (!/^09\d{8}$/.test(d.tel)) { marcarError('rTel', 'Celular ecuatoriano: 09XXXXXXXX'); ok = false; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { marcarError('rEmail', 'Correo no válido'); ok = false; }
+  if (registrado) {
+    // Paciente registrado: solo lo que falte en su ficha
+    d.registrado = true;
+    d.nombre = registrado.nombre || '';
+    if (registrado.falta_edad && !d.edad) { marcarError('rEdad', 'Selecciona la edad'); ok = false; }
+    if (registrado.falta_telefono && !/^09\d{8}$/.test(d.tel)) { marcarError('rTel', 'Celular ecuatoriano: 09XXXXXXXX'); ok = false; }
+    if (!registrado.falta_edad) d.edad = '';
+    if (!registrado.falta_telefono) d.tel = '';
+    d.email = '';
+  } else {
+    if (d.nombre.length < 3) { marcarError('rNombre', 'Escribe nombre y apellido'); ok = false; }
+    if (!d.edad) { marcarError('rEdad', 'Selecciona la edad'); ok = false; }
+    if (!/^09\d{8}$/.test(d.tel)) { marcarError('rTel', 'Celular ecuatoriano: 09XXXXXXXX'); ok = false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { marcarError('rEmail', 'Correo no válido'); ok = false; }
+  }
   if (!ok) return;
   datos = d;
   irPaso(2);
@@ -502,7 +595,7 @@ function paso2Siguiente() {
   if (!horaElegida) return;
   document.getElementById('resNombre').textContent = datos.nombre;
   document.getElementById('resCedula').textContent = datos.cedula;
-  document.getElementById('resTel').textContent = datos.tel;
+  document.getElementById('resTel').textContent = datos.tel || 'El registrado en su ficha';
   document.getElementById('resHora').textContent = horaElegida;
   document.getElementById('avisoReserva').classList.remove('ver');
   irPaso(3);
@@ -518,8 +611,10 @@ async function confirmarReserva() {
     const cli = cliente();
     if (!cli) throw new Error('Sin conexión');
     const { data, error } = await cli.rpc('publico_oh_reservar', { p: {
-      slug: EVENTO_SLUG, cedula: datos.cedula, nombre: datos.nombre, telefono: datos.tel,
-      email: datos.email, edad_rango: datos.edad, hora: horaElegida,
+      slug: EVENTO_SLUG, cedula: datos.cedula,
+      // Paciente registrado: nombre, celular y correo salen de su ficha en la base
+      nombre: datos.registrado ? null : datos.nombre, telefono: datos.tel || null,
+      email: datos.email || null, edad_rango: datos.edad || null, hora: horaElegida,
     } });
     if (error) throw error;
     if (!data || !data.ok) {
@@ -539,7 +634,7 @@ async function confirmarReserva() {
     document.getElementById('exCodigo').textContent = data.codigo;
     document.getElementById('exHora').textContent = data.hora;
     const msg = 'Hola! Acabo de reservar un cupo para el Open House Halloween de Molar 🎃\n\n' +
-      '*Código:* ' + data.codigo + '\n*Nombre:* ' + datos.nombre + '\n*Hora:* ' + data.hora + ' del sábado 31 de octubre\n' +
+      '*Código:* ' + data.codigo + '\n*Nombre:* ' + (data.nombre || datos.nombre) + '\n*Cédula:* ' + datos.cedula + '\n*Hora:* ' + data.hora + ' del sábado 31 de octubre\n' +
       '*Lugar:* Torre Metromed · Consultorio 009\n\n¡Gracias!';
     document.getElementById('exWa').href = 'https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent(msg);
     irPaso(4);
