@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Open House Halloween · Molar Clínica Dental</title>
-<meta name="description" content="Open House Molar edición Halloween. Sábado 31 de octubre, 9:00 a 14:00. Diversión + profilaxis dental por $15 para niños de 0 a 12 años. Cupos limitados.">
+<meta name="description" content="Open House Molar edición Halloween. Sábado 31 de octubre, 9:00 a 14:00. Profilaxis dental por $15, inflables, show de mago, bocaditos y premios para niños de 0 a 12 años. ¡Ven disfrazado!">
 <meta property="og:title" content="Open House Halloween · Molar">
-<meta property="og:description" content="Sábado 31 de octubre · Dulce o truco… ¡y dientes sanos! Profilaxis dental por $15 para niños de 0 a 12 años.">
+<meta property="og:description" content="Sábado 31 de octubre · ¡Dulce o premio! Profilaxis dental por $15, inflables, show de mago y premios. Disfraz obligatorio.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#1A1030">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%83%3C/text%3E%3C/svg%3E">
@@ -50,7 +50,7 @@
           background: radial-gradient(circle at 35% 35%, #FFFBEA, #FFE7A3 60%, #F7C967);
           box-shadow: 0 0 80px 20px rgba(255, 231, 163, .25); }
   .murcielago { position: absolute; font-size: 28px; animation: volar 14s linear infinite; opacity: .85; }
-  @media (max-width: 640px) { .luna { width: 64px; height: 64px; top: 14px; right: 74px; box-shadow: 0 0 40px 10px rgba(255, 231, 163, .22); } }
+  @media (max-width: 640px) { .luna { width: 58px; height: 58px; top: 16px; right: auto; left: 16px; opacity: .55; box-shadow: 0 0 40px 10px rgba(255, 231, 163, .18); } }
   @keyframes parpadeo { 0%, 100% { opacity: .2; } 50% { opacity: .9; } }
   @keyframes volar {
     0% { transform: translate(-10vw, 0) rotate(-8deg); }
@@ -107,6 +107,14 @@
   .tarjeta .val { font-family: Fredoka, sans-serif; font-size: 1.25rem; font-weight: 700; margin-top: 2px; }
   .tarjeta .det { color: var(--texto-2); font-size: .95rem; }
   .incluye .tarjeta { text-align: center; }
+  .incluye .rejilla { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .dulce { display: flex; gap: 18px; align-items: center; margin-top: 22px; padding: 22px; border-radius: var(--radio);
+           background: linear-gradient(135deg, rgba(155, 229, 100, .16), rgba(142, 92, 247, .22)); border: 1.5px solid rgba(155, 229, 100, .45); }
+  .dulce-ico { font-size: 38px; flex-shrink: 0; white-space: nowrap; }
+  .dulce-ico .flecha { color: var(--baba); font-weight: 800; margin: 0 6px; font-size: 30px; }
+  .dulce h3 { font-family: Fredoka, sans-serif; font-size: 1.35rem; color: var(--baba); }
+  .dulce p { color: var(--texto); margin-top: 4px; }
+  @media (max-width: 560px) { .dulce { flex-direction: column; text-align: center; } }
   .disfraz { margin-top: 18px; padding: 18px 20px; border-radius: var(--radio); text-align: center; font-weight: 700;
              background: linear-gradient(90deg, rgba(142, 92, 247, .25), rgba(255, 122, 26, .2)); border: 1px dashed rgba(255, 162, 76, .55); }
   .video { display: flex; align-items: center; gap: 18px; margin-top: 22px; padding: 18px; border-radius: var(--radio); text-decoration: none;
@@ -204,11 +212,11 @@
   <div><span class="etiqueta">Open House · Edición Halloween</span></div>
   <h1 class="titulo-halloween">Halloween</h1>
   <p class="fecha">Sábado <span>31 de octubre</span></p>
-  <p class="lema">Dulce o truco… ¡y dientes sanos! Una mañana de diversión y cuidado dental para los peques.</p>
+  <p class="lema">¡Dulce o premio! Una mañana de disfraces, diversión y cuidado dental para los peques.</p>
   <div class="calabaza-hero flota" aria-hidden="true">🎃</div>
   <div class="chips">
-    <span class="chip">🦷 Profilaxis</span><span class="chip">✨ Fluorización</span><span class="chip">🎨 Pinta caritas</span>
-    <span class="chip">🎁 Premios</span><span class="chip">🍬 Sorpresas</span><span class="chip">👻 ¡Ven disfrazado!</span>
+    <span class="chip">🦷 Profilaxis</span><span class="chip">🎪 Inflables</span><span class="chip">🎩 Show de mago</span>
+    <span class="chip">🎨 Pinta caritas</span><span class="chip">🧁 Bocaditos</span><span class="chip">🎁 Premios</span><span class="chip">🍬 Dulce o premio</span>
   </div>
   <button class="cta" id="btnReservar" type="button" onclick="abrirReserva()">🎃 Reservar mi cupo</button>
   <div><span class="cupos-pill" id="cuposPill"><span class="punto"></span><span id="cuposTexto">Cargando cupos…</span></span></div>
@@ -236,11 +244,24 @@
     <p class="sec-sub">Lo que vivirán los peques ese día</p>
     <div class="rejilla">
       <div class="tarjeta"><div class="ico">🦷</div><div class="val">Profilaxis</div><div class="det">Limpieza dental completa</div></div>
-      <div class="tarjeta"><div class="ico">✨</div><div class="val">Fluorización</div><div class="det">Protección contra las caries</div></div>
+      <div class="tarjeta"><div class="ico">🎪</div><div class="val">Inflables</div><div class="det">Diversión sin parar</div></div>
+      <div class="tarjeta"><div class="ico">🎩</div><div class="val">Show de mago</div><div class="det">Magia y sorpresas para los peques</div></div>
       <div class="tarjeta"><div class="ico">🎨</div><div class="val">Pinta caritas</div><div class="det">Calabazas, gatitos y fantasmas</div></div>
-      <div class="tarjeta"><div class="ico">🎁</div><div class="val">Premios</div><div class="det">Sorpresas y regalitos</div></div>
+      <div class="tarjeta"><div class="ico">🧁</div><div class="val">Bocaditos</div><div class="det">Para reponer energía</div></div>
+      <div class="tarjeta"><div class="ico">🎁</div><div class="val">Premios</div><div class="det">Regalitos para los asistentes</div></div>
     </div>
-    <div class="disfraz">👻 ¡Ven con tu disfraz favorito! 🧙‍♀️ Brujitas, superhéroes y monstruos son bienvenidos.</div>
+    <p class="sec-sub" style="margin-top:14px;">✨ Pronto anunciaremos más actividades</p>
+
+    <div class="dulce">
+      <div class="dulce-ico" aria-hidden="true">🍬<span class="flecha">→</span>🎁</div>
+      <div>
+        <h3>Campaña «Dulce o premio»</h3>
+        <p>Este Halloween, ¡los dientes ganan! Trae los dulces que recolectes y entrégalos en el consultorio:
+        a cambio te damos <b>descuentos en tratamientos o premios</b>. Menos azúcar, más sonrisas sanas.</p>
+      </div>
+    </div>
+
+    <div class="disfraz"><b>👻 El disfraz es obligatorio.</b> Todos los asistentes deben venir disfrazados: brujitas, superhéroes, monstruos… ¡tú eliges!</div>
     <a class="video" href="https://www.instagram.com/p/DQwjSklDSNx/" target="_blank" rel="noopener">
       <span class="play">▶</span>
       <span><b>Así fue el Open House del año pasado</b><br><span class="det" style="color:var(--texto-2)">Mira el video en Instagram</span></span>
@@ -259,7 +280,7 @@
   <section class="contenedor cierre">
     <div style="font-size:48px" class="flota" aria-hidden="true">🦷🎃</div>
     <h2 class="sec-titulo">¡Te esperamos!</h2>
-    <p>Una mañana llena de sonrisas, disfraces y cuidado dental. Reserva el cupo de tu peque con el botón de arriba.</p>
+    <p>Una mañana llena de sonrisas, disfraces y cuidado dental. Recuerda: ¡el disfraz es obligatorio! Reserva el cupo de tu peque con el botón de arriba.</p>
   </section>
 </main>
 
