@@ -481,6 +481,12 @@
   .toca-audio, .toca-audio body { cursor: pointer; }
   .exito .btn { color: var(--texto); font: inherit; font-weight: 800; cursor: pointer; }
   .exito .acciones { flex-wrap: wrap; }
+  /* Pregunta de alergias (sí / no) */
+  .opciones-sn { display: flex; gap: 10px; }
+  .opciones-sn label { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 14px; border: 1.5px solid var(--linea); background: var(--noche); font-weight: 800; cursor: pointer; }
+  .opciones-sn label:has(input:checked) { border-color: var(--calabaza); background: rgba(255, 122, 26, .16); }
+  .opciones-sn input { width: 18px; height: 18px; accent-color: var(--calabaza); }
+  .opciones-sn.error label { border-color: #FF6B6B; }
 </style>
 </head>
 <body>
@@ -750,6 +756,17 @@
           <input id="rTel" inputmode="tel" maxlength="10" autocomplete="tel" placeholder="09XXXXXXXX"><div class="err" id="rTelErr"></div></div>
         <div class="campo" data-grupo="nuevo"><label for="rEmail">Correo del representante</label>
           <input id="rEmail" type="email" maxlength="120" autocomplete="email" placeholder="correo@ejemplo.com"><div class="err" id="rEmailErr"></div></div>
+        <!-- Alergias: se pregunta a todos (también a pacientes registrados); queda en su ficha para el doctor -->
+        <div class="campo" data-grupo="siempre">
+          <label>¿El niño o niña tiene alguna alergia?</label>
+          <div class="opciones-sn" id="rAlergia">
+            <label><input type="radio" name="rAlergia" value="no" onchange="alCambiarAlergia()"> No</label>
+            <label><input type="radio" name="rAlergia" value="si" onchange="alCambiarAlergia()"> Sí</label>
+          </div>
+          <div class="err" id="rAlergiaErr"></div>
+          <input id="rAlergiaCual" maxlength="200" autocomplete="off" placeholder="¿Cuál? Ej.: penicilina, látex, maní…" hidden style="margin-top:8px">
+          <div class="err" id="rAlergiaCualErr"></div>
+        </div>
         <div class="campo" data-grupo="nuevo"><label class="confirma" for="rConfirmaNino">
           <input type="checkbox" id="rConfirmaNino">
           <span>Confirmo que la <b>cédula</b> y el <b>nombre</b> son del niño o niña que se atenderá (no del representante).</span></label>
@@ -773,6 +790,7 @@
         <div><span>Celular</span><b id="resTel"></b></div>
         <div><span>Fecha</span><b>Sábado 31 de octubre</b></div>
         <div><span>Hora</span><b id="resHora"></b></div>
+        <div><span>Alergias</span><b id="resAlergia">Ninguna</b></div>
         <div><span>Servicio</span><b id="resServicio">Profilaxis + fluorización</b></div>
       </div>
       <p class="precio"><span id="resPrecioTexto">Valor a pagar el día del evento:</span> <b id="resPrecio">$15</b></p>
@@ -926,7 +944,7 @@ function marcarError(id, msg) {
   const e = document.getElementById(id + 'Err'); e.textContent = msg; e.classList.add('ver');
 }
 function limpiarErrores() {
-  ['rCedula', 'rNombre', 'rEdad', 'rTel', 'rEmail', 'rConfirmaNino'].forEach(id => {
+  ['rCedula', 'rNombre', 'rEdad', 'rTel', 'rEmail', 'rConfirmaNino', 'rAlergia', 'rAlergiaCual'].forEach(id => {
     document.getElementById(id).classList.remove('error');
     document.getElementById(id + 'Err').classList.remove('ver');
   });
@@ -993,7 +1011,7 @@ function mostrarPaso1(estado) {
   document.querySelectorAll('#campos .campo').forEach(c => {
     const g = c.dataset.grupo.split(' ');
     c.hidden = estado === 'registrado'
-      ? !((g.includes('tel') && registrado.falta_telefono) || (g.includes('edad') && registrado.falta_edad))
+      ? !(g.includes('siempre') || (g.includes('tel') && registrado.falta_telefono) || (g.includes('edad') && registrado.falta_edad))
       : false;
   });
   $('btnPaso1').disabled = false;
@@ -1012,8 +1030,15 @@ function mostrarPaso1(estado) {
   } else {
     $('saludoTexto').textContent = registrado.falta_telefono || registrado.falta_edad
       ? 'Qué gusto verte de nuevo. Solo completa este dato y elige tu horario.'
-      : 'Qué gusto verte de nuevo. Ya tenemos tus datos: solo elige tu horario.';
+      : 'Qué gusto verte de nuevo. Ya tenemos tus datos: cuéntanos si tiene alergias y elige tu horario.';
   }
+}
+
+function alCambiarAlergia() {
+  const si = document.querySelector('input[name="rAlergia"]:checked')?.value === 'si';
+  const cual = document.getElementById('rAlergiaCual');
+  cual.hidden = !si;
+  if (si) setTimeout(() => cual.focus(), 30);
 }
 
 async function paso1Siguiente() {
@@ -1039,6 +1064,12 @@ async function paso1Siguiente() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { marcarError('rEmail', 'Correo no válido'); ok = false; }
     if (!document.getElementById('rConfirmaNino').checked) { marcarError('rConfirmaNino', 'Marca la casilla para confirmar que los datos son del niño o niña'); ok = false; }
   }
+  // Alergias (para todos): sí/no obligatorio; si es sí, cuál
+  const alergiaSel = document.querySelector('input[name="rAlergia"]:checked');
+  d.tieneAlergia = alergiaSel ? alergiaSel.value === 'si' : null;
+  d.alergiaCual = d.tieneAlergia ? v('rAlergiaCual').replace(/[<>"]/g, '') : '';
+  if (d.tieneAlergia === null) { marcarError('rAlergia', 'Responde si el niño o niña tiene alguna alergia'); ok = false; }
+  else if (d.tieneAlergia && d.alergiaCual.length < 3) { marcarError('rAlergiaCual', 'Escribe cuál es la alergia'); ok = false; }
   if (!ok) return;
   datos = d;
   irPaso(2);
@@ -1077,6 +1108,7 @@ function paso2Siguiente() {
   document.getElementById('resCedula').textContent = datos.cedula;
   document.getElementById('resTel').textContent = datos.tel || 'El registrado en su ficha';
   document.getElementById('resHora').textContent = horaElegida;
+  document.getElementById('resAlergia').textContent = datos.tieneAlergia ? '⚠ ' + datos.alergiaCual : 'Ninguna';
   document.getElementById('avisoReserva').classList.remove('ver');
   pintarPago();
   irPaso(3);
@@ -1200,6 +1232,7 @@ async function confirmarReserva() {
       // Paciente registrado: nombre, celular y correo salen de su ficha en la base
       nombre: datos.registrado ? null : datos.nombre, telefono: datos.tel || null,
       email: datos.email || null, edad_rango: datos.edad || null, hora: horaElegida,
+      tiene_alergias: !!datos.tieneAlergia, alergias: datos.tieneAlergia ? datos.alergiaCual : null,
       pago_referencia: pago ? pago.referencia : null, pago_comprobante: pago ? pago.ruta : null,
     } });
     if (error) throw error;
@@ -1243,6 +1276,8 @@ async function confirmarReserva() {
     guardarPago(datos.cedula, null);
     document.getElementById('rComprobante').value = '';
     document.getElementById('rFoto').value = '';
+    document.querySelectorAll('input[name="rAlergia"]').forEach(r => { r.checked = false; });
+    document.getElementById('rAlergiaCual').value = ''; document.getElementById('rAlergiaCual').hidden = true;
     document.getElementById('exWa').href = 'https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent(msg);
     // Carta de bienvenida y pase: los datos van después del # (no se envían a ningún servidor)
     window.__pase = { nombre: (data.nombre || datos.nombre || '').split(' ')[0], hora: data.hora, codigo: numero };
