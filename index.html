@@ -49,23 +49,82 @@
   .luna { position: absolute; top: 60px; right: 7%; width: 120px; height: 120px; border-radius: 50%;
           background: radial-gradient(circle at 35% 35%, #FFFBEA, #FFE7A3 60%, #F7C967);
           box-shadow: 0 0 80px 20px rgba(255, 231, 163, .25); }
-  .murcielago { position: absolute; font-size: 28px; animation: volar 14s linear infinite; opacity: .85; }
-  @media (max-width: 640px) { .luna { width: 58px; height: 58px; top: 16px; right: auto; left: 16px; opacity: .55; box-shadow: 0 0 40px 10px rgba(255, 231, 163, .18); } }
+  .luna { animation: brillo-luna 6s ease-in-out infinite; }
+  @keyframes brillo-luna { 0%, 100% { box-shadow: 0 0 80px 20px rgba(255, 231, 163, .22); } 50% { box-shadow: 0 0 110px 34px rgba(255, 231, 163, .34); } }
+  @media (max-width: 640px) { .luna { width: 58px; height: 58px; top: 16px; right: auto; left: 16px; opacity: .55; box-shadow: 0 0 40px 10px rgba(255, 231, 163, .18); animation: none; } }
   @keyframes parpadeo { 0%, 100% { opacity: .2; } 50% { opacity: .9; } }
-  @keyframes volar {
-    0% { transform: translate(-10vw, 0) rotate(-8deg); }
-    50% { transform: translate(55vw, -30px) rotate(8deg); }
-    100% { transform: translate(115vw, 10px) rotate(-8deg); }
-  }
   @keyframes flotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  /* Adornos de fondo: siluetas de Halloween en gris translúcido (solo decoración) */
+  body { position: relative; }
+  .adornos { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .adorno { position: absolute; color: #D9D2EA; opacity: var(--op, .08); animation: deriva var(--dur, 16s) ease-in-out var(--delay, 0s) infinite alternate; }
+  .adorno svg { width: 100%; height: 100%; display: block; }
+  @keyframes deriva {
+    0%   { transform: translate(0, 0) rotate(var(--rot, 0deg)); }
+    50%  { transform: translate(var(--dx, 14px), -18px) rotate(calc(var(--rot, 0deg) + 6deg)); }
+    100% { transform: translate(calc(var(--dx, 14px) * -1), 10px) rotate(calc(var(--rot, 0deg) - 5deg)); }
+  }
+
+  /* Murciélagos: vuelan por toda la pantalla (los mueve el script) */
+  .murcielagos { position: fixed; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+  .bat { position: absolute; left: 0; top: 0; will-change: transform; color: #0B0616;
+         filter: drop-shadow(0 0 1.5px rgba(214, 200, 245, .75)) drop-shadow(0 0 10px rgba(142, 92, 247, .55)); }
+  .bat svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .bat .ala-i, .bat .ala-d { transform-origin: 50px 28px; animation: aleteo var(--aleteo, .22s) ease-in-out infinite alternate; }
+  @keyframes aleteo { from { transform: scaleY(1); } to { transform: scaleY(-.55); } }
+
+  /* Niebla y araña del inicio */
+  .hero { position: relative; }
+  .niebla { position: absolute; left: -10%; right: -10%; bottom: -30px; height: 140px; pointer-events: none; z-index: -1; overflow: hidden; }
+  .niebla span { position: absolute; bottom: 0; width: 60%; height: 100%; border-radius: 50%;
+                 background: radial-gradient(ellipse at center, rgba(201, 189, 230, .16), transparent 70%); animation: niebla 26s linear infinite; }
+  .niebla span:nth-child(2) { animation-duration: 34s; animation-delay: -12s; opacity: .8; }
+  .niebla span:nth-child(3) { animation-duration: 42s; animation-delay: -25s; height: 70%; }
+  @keyframes niebla { from { transform: translateX(-60%); } to { transform: translateX(180%); } }
+  .arana { position: absolute; top: -28px; left: 20%; width: 30px; pointer-events: auto; cursor: pointer; animation: arana 7s ease-in-out infinite; transform-origin: top center; z-index: 3; }
+  .arana .hilo { width: 1.5px; height: 90px; margin: 0 auto; background: linear-gradient(rgba(255, 255, 255, .05), rgba(255, 255, 255, .45)); transition: height .6s; }
+  .arana svg { display: block; width: 30px; height: 30px; margin-top: -2px; }
+  .arana.baja .hilo { height: 190px; }
+  @keyframes arana { 0%, 100% { transform: rotate(-4deg) translateY(0); } 50% { transform: rotate(4deg) translateY(26px); } }
+  @media (max-width: 640px) { .arana { left: auto; right: 72px; } }
+
+  /* Aparecer al hacer scroll */
+  .revelar { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .8, .2, 1); transition-delay: var(--d, 0s); }
+  .revelar.visto { opacity: 1; transform: none; }
+
+  /* Cementerio al final */
+  .cementerio { position: relative; z-index: 1; margin-top: 30px; height: 230px; overflow: hidden; }
+  .cementerio svg { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); height: 100%; width: auto; min-width: 100%; overflow: visible; }
+  @media (max-width: 640px) { .cementerio { height: 165px; } }
+  .cementerio .lapida-texto { font-family: Creepster, Fredoka, cursive; fill: #2A2140; letter-spacing: .03em; }
+  .cementerio .lapida-sub { font-family: Nunito, sans-serif; font-weight: 800; fill: #3C3257; font-size: 11px; letter-spacing: .12em; }
+  .cementerio .fantasma-tumba { animation: sube-fantasma 7s ease-in-out infinite; }
+  @keyframes sube-fantasma { 0%, 100% { transform: translateY(40px); opacity: 0; } 35%, 65% { transform: translateY(0); opacity: .75; } }
+  .cementerio .ojo-calabaza { animation: parpadeo-vela 2.4s ease-in-out infinite; }
+  @keyframes parpadeo-vela { 0%, 100% { opacity: 1; } 40% { opacity: .55; } 60% { opacity: .9; } }
+  .cementerio .niebla-baja { animation: niebla-baja 20s ease-in-out infinite alternate; }
+  @keyframes niebla-baja { from { transform: translateX(-40px); } to { transform: translateX(40px); } }
+
+  /* Confeti de dulces al reservar */
+  .confeti { position: fixed; top: -40px; z-index: 60; pointer-events: none; font-size: 26px; animation: cae var(--t, 3s) linear forwards; }
+  @keyframes cae { to { transform: translate(var(--x, 0), 110vh) rotate(var(--r, 360deg)); } }
+
   @media (prefers-reduced-motion: reduce) {
-    .estrella, .murcielago, .flota { animation: none !important; }
+    .estrella, .flota, .adorno, .bat .ala-i, .bat .ala-d, .niebla span, .arana, .luna,
+    .cementerio .fantasma-tumba, .cementerio .ojo-calabaza, .cementerio .niebla-baja, .titulo-halloween, .cta { animation: none !important; }
+    .revelar { opacity: 1; transform: none; transition: none; }
   }
   main, header, footer { position: relative; z-index: 1; }
 
   /* ── Hero ─────────────────────────────────── */
   .hero { padding: 28px 0 56px; text-align: center; }
-  .logo { height: 46px; filter: brightness(0) invert(1); opacity: .95; }
+  /* El logo conserva sus colores: va sobre una placa clara */
+  .logo-caja { display: inline-flex; padding: 10px 18px; border-radius: 18px; background: #FFFFFF;
+               box-shadow: 0 0 0 3px rgba(255, 122, 26, .35), 0 10px 30px rgba(0, 0, 0, .35), 0 0 40px rgba(255, 162, 76, .25);
+               animation: logo-flota 6s ease-in-out infinite; }
+  @keyframes logo-flota { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
+  .logo { height: 46px; display: block; }
   .etiqueta { display: inline-block; margin-top: 26px; padding: 6px 16px; border-radius: 999px;
               background: rgba(255, 122, 26, .15); border: 1px solid rgba(255, 122, 26, .45);
               color: var(--calabaza-2); font-weight: 800; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; }
@@ -83,7 +142,28 @@
          transition: transform .15s, box-shadow .15s; }
   .cta:hover { transform: translateY(-2px); }
   .cta:active { transform: translateY(3px); box-shadow: 0 3px 0 #B84A00; }
-  .cta:disabled { filter: grayscale(.7); cursor: not-allowed; transform: none; }
+  .cta:disabled { filter: grayscale(.7); cursor: not-allowed; transform: none; animation: none; }
+  .cta { animation: latido 2.6s ease-in-out infinite; }
+  @keyframes latido { 0%, 100% { box-shadow: 0 6px 0 #B84A00, 0 14px 30px rgba(255, 122, 26, .35), 0 0 0 0 rgba(255, 122, 26, .45); }
+                      50% { box-shadow: 0 6px 0 #B84A00, 0 14px 30px rgba(255, 122, 26, .5), 0 0 0 14px rgba(255, 122, 26, 0); } }
+  .titulo-halloween { animation: titilar 7s ease-in-out infinite; }
+  @keyframes titilar {
+    0%, 100%, 44%, 50%, 56% { text-shadow: 0 4px 0 #B84A00, 0 12px 40px rgba(255, 122, 26, .35); opacity: 1; }
+    46%, 54% { text-shadow: 0 4px 0 #B84A00, 0 0 70px rgba(255, 122, 26, .8); opacity: .85; }
+    48% { opacity: .55; }
+  }
+  .cuenta b.salto { animation: salto .35s ease; }
+  @keyframes salto { 0% { transform: scale(1); } 40% { transform: scale(1.18); color: var(--calabaza-2); } 100% { transform: scale(1); } }
+  .tarjeta { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+  .tarjeta:hover { transform: translateY(-5px); border-color: rgba(255, 122, 26, .6); box-shadow: 0 14px 30px rgba(0, 0, 0, .3), 0 0 24px rgba(255, 122, 26, .18); }
+  .tarjeta.revelar { transition: opacity .7s ease, transform .7s cubic-bezier(.2, .8, .2, 1), border-color .25s ease, box-shadow .25s ease;
+                     transition-delay: var(--d, 0s), var(--d, 0s), 0s, 0s; }
+  .tarjeta .ico { display: inline-block; }
+  .tarjeta:hover .ico { animation: menear .5s ease; }
+  @keyframes menear { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-14deg) scale(1.15); } 75% { transform: rotate(12deg) scale(1.15); } }
+  .calabaza-hero { cursor: pointer; user-select: none; }
+  .musica.sonando { animation: pulso-musica 1.1s ease-in-out infinite; }
+  @keyframes pulso-musica { 0%, 100% { box-shadow: 0 0 0 0 rgba(142, 92, 247, .6); } 50% { box-shadow: 0 0 0 10px rgba(142, 92, 247, 0); } }
   .cupos-pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 8px 16px; border-radius: 999px;
                 background: rgba(155, 229, 100, .12); border: 1px solid rgba(155, 229, 100, .4); font-weight: 700; font-size: .95rem; }
   .cupos-pill .punto { width: 9px; height: 9px; border-radius: 50%; background: var(--baba); box-shadow: 0 0 10px var(--baba); }
@@ -215,21 +295,40 @@
 </head>
 <body>
 
+<!-- Siluetas de Halloween (el script las reparte por la página) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="s-fantasma" viewBox="0 0 100 100"><path fill="currentColor" fill-rule="evenodd" d="M50 6C29 6 16 22 16 44v48l9-8 8 8 9-8 8 8 8-8 8 8 9-8 9 8V44C84 22 71 6 50 6zM36 38a6 7 0 1 0 12 0a6 7 0 1 0-12 0zM56 38a6 7 0 1 0 12 0a6 7 0 1 0-12 0zM44 58a6 8 0 1 0 12 0a6 8 0 1 0-12 0z"/></symbol>
+    <symbol id="s-calabaza" viewBox="0 0 100 100"><path fill="currentColor" d="M46 10q4-3 8 0l-1 16h-6z"/><path fill="currentColor" fill-rule="evenodd" d="M50 26c-6 0-10 2-13 4-9-5-23-2-28 12-5 15 2 36 19 40 7 2 14 0 22-2 8 2 15 4 22 2 17-4 24-25 19-40-5-14-19-17-28-12-3-2-7-4-13-4zM28 50l9-12 9 12zM54 50l9-12 9 12zM26 62q24 18 48 0l-7 3-4-5-6 6-5-6-5 6-6-6-4 5z"/></symbol>
+    <symbol id="s-sombrero" viewBox="0 0 100 100"><path fill="currentColor" d="M30 72L50 10q6-4 10 2l-6 8q10 24 16 52zM6 74q44-16 88 0-44 16-88 0z"/></symbol>
+    <symbol id="s-gato" viewBox="0 0 100 100"><path fill="currentColor" fill-rule="evenodd" d="M30 94c-5-12-3-27 6-36-5-6-6-15-4-24l8 9c4-2 9-2 13 0l8-9c2 9 1 18-4 24 9 9 11 24 6 36zM37 44a3 4 0 1 0 6 0a3 4 0 1 0-6 0zM51 44a3 4 0 1 0 6 0a3 4 0 1 0-6 0z"/><path fill="currentColor" d="M64 92c16-1 24-12 20-26-1-3 3-5 5-1 7 16-3 30-25 31z"/></symbol>
+    <symbol id="s-telarana" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M0 0L100 100M0 0L100 40M0 0L40 100M0 0L100 0M0 0L0 100"/><path d="M22 0Q18 10 0 22M44 0Q38 20 0 44M66 0Q58 30 0 66M88 0Q76 42 0 88"/><path d="M22 0Q24 12 22 22Q12 22 0 22M44 0Q48 24 44 44Q24 48 0 44M66 0Q72 36 66 66Q36 72 0 66"/></g></symbol>
+    <symbol id="s-dulce" viewBox="0 0 100 100"><path fill="currentColor" d="M34 38h32a12 12 0 0 1 0 24H34a12 12 0 0 1 0-24zM30 50L8 36v28zM70 50l22-14v28z"/></symbol>
+    <symbol id="s-caldero" viewBox="0 0 100 100"><path fill="currentColor" d="M12 40h76v8H12zM18 50h64c0 22-14 36-32 36S18 72 18 50zM28 84l-6 10h9zM72 84l6 10h-9z"/><circle fill="currentColor" cx="38" cy="30" r="5"/><circle fill="currentColor" cx="56" cy="22" r="7"/><circle fill="currentColor" cx="66" cy="33" r="4"/></symbol>
+    <symbol id="s-diente" viewBox="0 0 100 100"><path fill="currentColor" fill-rule="evenodd" d="M30 12c-12 0-19 12-17 28 2 14 7 22 9 38 1 10 10 10 12 0l5-18c1-5 8-5 9 0l5 18c2 10 11 10 12 0 2-16 7-24 9-38 2-16-5-28-17-28-7 0-11 4-14 4s-7-4-13-4zM34 36a5 6 0 1 0 10 0a5 6 0 1 0-10 0zM56 36a5 6 0 1 0 10 0a5 6 0 1 0-10 0z"/></symbol>
+    <symbol id="s-escoba" viewBox="0 0 100 100"><path fill="currentColor" d="M88 8l4 4-46 46-4-4z"/><path fill="currentColor" d="M40 52l8 8c-4 14-18 28-40 32 4-22 18-36 32-40z"/></symbol>
+    <symbol id="s-murcielago" viewBox="0 0 100 60"><path fill="currentColor" d="M50 18c3 0 5 3 5 6 8-10 22-16 40-14-8 4-10 12-8 20-8-4-16-2-20 6-4-6-10-8-17-4 0 8-0 12 0 12s0-4 0-12c-7-4-13-2-17 4-4-8-12-10-20-6 2-8 0-16-8-20 18-2 32 4 40 14 0-3 2-6 5-6z"/></symbol>
+  </defs>
+</svg>
+
+<div class="adornos" id="adornos" aria-hidden="true"></div>
+
 <div class="cielo" aria-hidden="true">
   <div class="luna"></div>
   <div id="estrellas"></div>
-  <span class="murcielago" style="top:18%;animation-delay:-2s">🦇</span>
-  <span class="murcielago" style="top:32%;animation-delay:-8s;font-size:20px">🦇</span>
-  <span class="murcielago" style="top:62%;animation-delay:-11s;font-size:24px">🦇</span>
 </div>
 
-<button class="musica" id="btnMusica" type="button" aria-label="Activar o pausar música" title="Música">🎵</button>
-<audio id="musica" loop preload="none" crossorigin="anonymous">
-  <source src="https://archive.org/download/CarefreeKevinMacLeod/Carefree.mp3" type="audio/mpeg">
-</audio>
+<div class="murcielagos" id="murcielagos" aria-hidden="true"></div>
+
+<button class="musica" id="btnMusica" type="button" aria-label="Activar o pausar música de Halloween" title="Música de Halloween">🎵</button>
 
 <header class="hero contenedor">
-  <img src="logo-molar.png" alt="Molar Clínica Dental" class="logo" width="123" height="46">
+  <div class="niebla" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="arana" id="arana" aria-hidden="true" title="¡Buu!">
+    <div class="hilo"></div>
+    <svg viewBox="0 0 40 40"><g stroke="#1B0F30" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M14 18L4 10M14 21L2 21M14 24L4 32M26 18L36 10M26 21L38 21M26 24L36 32M16 26l-6 10M24 26l6 10"/></g><ellipse cx="20" cy="22" rx="8" ry="9" fill="#1B0F30"/><circle cx="20" cy="12" r="5.5" fill="#1B0F30"/><circle cx="18" cy="11.5" r="1.4" fill="#FF7A1A"/><circle cx="22" cy="11.5" r="1.4" fill="#FF7A1A"/></svg>
+  </div>
+  <span class="logo-caja"><img src="logo-molar.png" alt="Molar Clínica Dental" class="logo" width="123" height="46"></span>
   <div><span class="etiqueta">Open House · Edición Halloween</span></div>
   <h1 class="titulo-halloween">Halloween</h1>
   <p class="fecha">Sábado <span>31 de octubre</span></p>
@@ -305,10 +404,65 @@
   </section>
 </main>
 
+<!-- Cementerio: aquí descansan los enemigos de la sonrisa -->
+<div class="cementerio" aria-hidden="true">
+  <svg viewBox="0 0 1200 230" preserveAspectRatio="xMidYMax meet">
+    <defs>
+      <linearGradient id="g-lapida" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8C84A3"/><stop offset="1" stop-color="#5E5577"/></linearGradient>
+      <linearGradient id="g-suelo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#231538"/><stop offset="1" stop-color="#140B24"/></linearGradient>
+      <radialGradient id="g-luz"><stop offset="0" stop-color="#FFB347" stop-opacity=".55"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient>
+    </defs>
+    <!-- árbol seco -->
+    <path fill="#150C26" d="M88 190c6-40 4-70-6-96-8 6-20 8-32 4 12-2 22-8 28-16-8-12-10-26-6-40 4 12 10 22 18 28 4-14 12-26 24-32-6 12-8 26-6 38 10-4 22-2 32 6-14 0-24 4-30 12 6 30 8 62 4 96z"/>
+    <!-- fantasma que sale de la tumba -->
+    <g class="fantasma-tumba" style="transform-box:fill-box">
+      <path fill="#E9E3F7" fill-opacity=".55" d="M612 128c-16 0-26 12-26 28v34l7-6 6 6 7-6 6 6 6-6 6 6 7-6 7 6v-34c0-16-10-28-26-28z"/>
+      <circle cx="604" cy="152" r="3.5" fill="#1B1030"/><circle cx="620" cy="152" r="3.5" fill="#1B1030"/><ellipse cx="612" cy="166" rx="4" ry="5" fill="#1B1030"/>
+    </g>
+    <!-- lápidas -->
+    <g>
+      <path fill="url(#g-lapida)" d="M250 200v-86c0-26 20-44 50-44s50 18 50 44v86z"/>
+      <text class="lapida-sub" x="300" y="105" text-anchor="middle">Q.E.P.D.</text>
+      <text class="lapida-texto" x="300" y="140" text-anchor="middle" font-size="30">Caries</text>
+      <text class="lapida-sub" x="300" y="162" text-anchor="middle">VENCIDA</text>
+    </g>
+    <g transform="rotate(-4 470 200)">
+      <path fill="url(#g-lapida)" d="M420 200v-70h-10v-18h10v-8c0-4 4-8 8-8h28v-24h26v24h28c4 0 8 4 8 8v8h10v18h-10v70z" opacity=".95"/>
+      <text class="lapida-texto" x="467" y="160" text-anchor="middle" font-size="26">Sarro</text>
+      <text class="lapida-sub" x="467" y="182" text-anchor="middle">R.I.P.</text>
+    </g>
+    <g>
+      <path fill="url(#g-lapida)" d="M560 200v-60c0-8 6-14 14-14h76c8 0 14 6 14 14v60z" opacity=".9"/>
+      <text class="lapida-texto" x="612" y="176" text-anchor="middle" font-size="20">Mal aliento</text>
+    </g>
+    <g transform="rotate(3 780 200)">
+      <path fill="url(#g-lapida)" d="M720 200v-92c0-30 26-50 60-50s60 20 60 50v92z"/>
+      <text class="lapida-sub" x="780" y="104" text-anchor="middle">Q.E.P.D.</text>
+      <text class="lapida-texto" x="780" y="140" text-anchor="middle" font-size="28">Placa</text>
+      <text class="lapida-texto" x="780" y="170" text-anchor="middle" font-size="22">Bacteriana</text>
+    </g>
+    <g>
+      <path fill="url(#g-lapida)" d="M925 200v-78c0-22 16-38 40-38s40 16 40 38v78z" opacity=".9"/>
+      <text class="lapida-texto" x="965" y="146" text-anchor="middle" font-size="16">Gingivitis</text>
+      <text class="lapida-sub" x="965" y="166" text-anchor="middle">NUNCA MÁS</text>
+    </g>
+    <!-- calabazas encendidas -->
+    <circle cx="380" cy="182" r="34" fill="url(#g-luz)"/>
+    <ellipse cx="380" cy="184" rx="20" ry="16" fill="#E8680F"/><rect x="377" y="164" width="5" height="8" rx="2" fill="#3B6B1F"/>
+    <path class="ojo-calabaza" fill="#FFE08A" d="M371 180l4-6 4 6zM381 180l4-6 4 6zM370 188q10 7 20 0l-4 2-3-3-3 3-3-3-3 3z"/>
+    <circle cx="1070" cy="186" r="30" fill="url(#g-luz)"/>
+    <ellipse cx="1070" cy="188" rx="17" ry="13" fill="#E8680F"/><rect x="1067" y="171" width="5" height="7" rx="2" fill="#3B6B1F"/>
+    <path class="ojo-calabaza" fill="#FFE08A" d="M1062 185l3-5 3 5zM1072 185l3-5 3 5zM1062 192q8 5 16 0l-3 1-2-2-3 2-3-2-2 2z"/>
+    <!-- suelo, pasto y niebla -->
+    <path fill="url(#g-suelo)" d="M-1600 198H0q150-16 300-2t300 0 300-4 300 4H2800v40H-1600z"/>
+    <path fill="#1C1030" d="M40 196l4-12 3 11 4-9 2 10zM520 196l3-10 3 9 4-12 2 13zM700 196l4-11 2 10 4-8 2 9zM860 194l3-12 3 11 4-9 2 10zM1150 196l3-10 3 9 3-11 3 12z"/>
+    <ellipse class="niebla-baja" cx="600" cy="214" rx="1400" ry="22" fill="#C9BDE6" fill-opacity=".10"/>
+  </svg>
+</div>
+
 <footer class="contenedor">
   <div><b>Molar Clínica Dental</b> · +593 98 613 0776 · @molar.ecu</div>
   <div>Torre Metromed · Consultorio 009</div>
-  <div class="nota">Música: "Carefree" de Kevin MacLeod (incompetech.com) · Licencia CC BY 4.0</div>
 </footer>
 
 <a class="wa-flotante" href="https://wa.me/593986130776?text=Hola!%20Quiero%20informaci%C3%B3n%20del%20Open%20House%20Halloween%20de%20Molar" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
@@ -441,7 +595,12 @@ function cliente() {
 // ── Cuenta regresiva ──
 function tic() {
   const d = FECHA_EVENTO - new Date();
-  const set = (id, v) => { document.getElementById(id).textContent = String(Math.max(0, v)).padStart(2, '0'); };
+  const set = (id, v) => {
+    const el = document.getElementById(id), txt = String(Math.max(0, v)).padStart(2, '0');
+    if (el.textContent === txt) return;
+    el.textContent = txt;
+    el.classList.remove('salto'); void el.offsetWidth; el.classList.add('salto');   // pequeño salto al cambiar
+  };
   if (d <= 0) { ['cDias', 'cHoras', 'cMin', 'cSeg'].forEach(id => set(id, 0)); return; }
   set('cDias', Math.floor(d / 86400000));
   set('cHoras', Math.floor((d % 86400000) / 3600000));
@@ -823,6 +982,7 @@ async function confirmarReserva() {
     document.getElementById('rFoto').value = '';
     document.getElementById('exWa').href = 'https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent(msg);
     irPaso(4);
+    lluviaDeDulces();
     cargarEvento();
   } catch (e) {
     console.error('[Open House] reservar:', e);
@@ -838,13 +998,327 @@ async function confirmarReserva() {
   }
 }
 
-// ── Música (se activa con el botón) ──
-const audio = document.getElementById('musica');
+const SIN_MOVIMIENTO = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const azar = (a, b) => a + Math.random() * (b - a);
+
+// ════════════════════════════════════════════════════════════
+//  Música de Halloween: se genera aquí mismo (Web Audio), sin archivos
+//  externos. Marcha misteriosa en re menor con órgano, bajo, campanita,
+//  "fantasma" que canta y eco de cripta. Suena solo al tocar el botón.
+// ════════════════════════════════════════════════════════════
+const Musica = (() => {
+  let ctx = null, master, bus, timer = null, sig = 0, paso = 0, sonando = false;
+  const CORCHEA = 60 / 104 / 2;
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  const melA = [74,0,77,81, 82,81,79,77, 76,77,79,76, 74,0,0,0,  74,0,77,81, 82,81,79,77, 76,74,73,76, 74,0,0,0];
+  const melB = [81,0,81,82, 81,79,77,79, 77,76,74,76, 77,0,73,0,  74,77,81,86, 85,0,81,0, 82,81,77,73, 74,0,0,0];
+  const MEL = melA.concat(melB);                          // 8 compases de 8 corcheas
+  const RAIZ = [38, 46, 45, 38, 38, 43, 45, 38];          // Rem, Sib, La, Rem · Rem, Solm, La, Rem
+  const ACORDE = { 38: [0, 3, 7], 46: [0, 4, 7], 45: [0, 4, 7], 43: [0, 3, 7] };
+  const BAJO = [0, null, 12, null, 0, 7, 12, 7];
+
+  function iniciar() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    bus = ctx.createGain(); bus.connect(master);
+    // Eco de cripta (reverberación)
+    const largo = ctx.sampleRate * 2.4, imp = ctx.createBuffer(2, largo, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); for (let i = 0; i < largo; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / largo, 3); }
+    const eco = ctx.createConvolver(); eco.buffer = imp;
+    const ecoVol = ctx.createGain(); ecoVol.gain.value = 0.38;
+    bus.connect(eco); eco.connect(ecoVol); ecoVol.connect(master);
+  }
+
+  function env(g, t, ataque, pico, dur, suelta) {
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(pico, t + ataque);
+    g.gain.setValueAtTime(pico, t + Math.max(ataque, dur - suelta));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  }
+  function organo(m, t, dur) {
+    const g = ctx.createGain(); g.connect(bus);
+    env(g, t, 0.02, 0.09, dur, 0.12);
+    [[1, 1], [2, .45], [3, .18], [4, .12]].forEach(([k, v]) => {
+      const o = ctx.createOscillator(), gv = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = hz(m) * k; gv.gain.value = v;
+      o.connect(gv); gv.connect(g); o.start(t); o.stop(t + dur + .05);
+    });
+  }
+  function bajo(m, t) {
+    const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = 'triangle'; o.frequency.value = hz(m); f.type = 'lowpass'; f.frequency.value = 700;
+    o.connect(f); f.connect(g); g.connect(bus);
+    env(g, t, 0.01, 0.22, CORCHEA * 0.9, 0.08);
+    o.start(t); o.stop(t + CORCHEA);
+  }
+  function colchon(raiz, t) {
+    ACORDE[raiz].forEach(i => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = hz(raiz + 24 + i); o.detune.value = azar(-8, 8);
+      o.connect(g); g.connect(bus);
+      env(g, t, 0.25, 0.025, CORCHEA * 8, 0.4);
+      o.start(t); o.stop(t + CORCHEA * 8 + .1);
+    });
+  }
+  function bombo(t) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(42, t + .25);
+    o.connect(g); g.connect(master);
+    env(g, t, 0.005, 0.35, 0.3, 0.2);
+    o.start(t); o.stop(t + .32);
+  }
+  function tic(t, fuerte) {
+    const n = ctx.createBufferSource(), b = ctx.createBuffer(1, ctx.sampleRate * .05, ctx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const f = ctx.createBiquadFilter(), g = ctx.createGain();
+    n.buffer = b; f.type = 'highpass'; f.frequency.value = 7000;
+    n.connect(f); f.connect(g); g.connect(master);
+    env(g, t, 0.002, fuerte ? .05 : .025, .05, .04);
+    n.start(t);
+  }
+  function campanita(m, t) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = hz(m + 24);
+    o.connect(g); g.connect(bus);
+    env(g, t, 0.005, 0.05, 1.2, 1.1);
+    o.start(t); o.stop(t + 1.25);
+  }
+  function fantasma(t) {                                   // "uuuuh" con vibrato
+    const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(hz(69), t);
+    o.frequency.exponentialRampToValueAtTime(hz(74), t + .8); o.frequency.exponentialRampToValueAtTime(hz(65), t + 2.6);
+    lfo.frequency.value = 5.5; lg.gain.value = 9; lfo.connect(lg); lg.connect(o.frequency);
+    o.connect(g); g.connect(bus);
+    env(g, t, 0.5, 0.06, 2.8, 1.2);
+    o.start(t); lfo.start(t); o.stop(t + 2.9); lfo.stop(t + 2.9);
+  }
+
+  function programar(p, t) {
+    const compas = Math.floor(p / 8), enCompas = p % 8, raiz = RAIZ[compas];
+    const m = MEL[p];
+    if (m) {
+      let largo = 1; while (p + largo < MEL.length && MEL[p + largo] === 0 && largo < 4) largo++;
+      organo(m, t, CORCHEA * largo * 0.92);
+      if (enCompas === 0 && compas % 2 === 0) campanita(m, t);
+    }
+    if (BAJO[enCompas] !== null) bajo(raiz + BAJO[enCompas], t);
+    if (enCompas === 0) { colchon(raiz, t); bombo(t); }
+    if (enCompas === 4) bombo(t);
+    tic(t, enCompas % 2 === 1);
+    if (p === 48) fantasma(t);
+  }
+  function reloj() {
+    while (sig < ctx.currentTime + 0.15) { programar(paso, sig); sig += CORCHEA; paso = (paso + 1) % MEL.length; }
+  }
+
+  return {
+    get sonando() { return sonando; },
+    async encender() {
+      if (!ctx) iniciar();
+      await ctx.resume();
+      sonando = true;
+      sig = ctx.currentTime + 0.08;
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1.2);
+      clearInterval(timer); timer = setInterval(reloj, 25);
+    },
+    apagar() {
+      if (!ctx) return;
+      sonando = false;
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
+      setTimeout(() => { if (!sonando) { clearInterval(timer); ctx.suspend(); } }, 450);
+    },
+    pausarOculta(oculta) {
+      if (!ctx || !sonando) return;
+      if (oculta) { clearInterval(timer); ctx.suspend(); }
+      else { ctx.resume().then(() => { sig = ctx.currentTime + 0.08; clearInterval(timer); timer = setInterval(reloj, 25); }); }
+    },
+  };
+})();
+
 const btnMusica = document.getElementById('btnMusica');
-btnMusica.addEventListener('click', () => {
-  if (audio.paused) { audio.volume = 0.35; audio.play().then(() => btnMusica.classList.add('sonando')).catch(() => {}); }
-  else { audio.pause(); btnMusica.classList.remove('sonando'); }
+btnMusica.addEventListener('click', async () => {
+  try {
+    if (Musica.sonando) { Musica.apagar(); btnMusica.classList.remove('sonando'); btnMusica.textContent = '🎵'; }
+    else { await Musica.encender(); btnMusica.classList.add('sonando'); btnMusica.textContent = '🔊'; }
+  } catch (e) { console.warn('[Open House] música:', e); }
 });
+document.addEventListener('visibilitychange', () => Musica.pausarOculta(document.hidden));
+
+// ════════════════════════════════════════════════════════════
+//  Murciélagos: vuelan por toda la pantalla buscando destinos al azar,
+//  giran, aletean y a veces se acercan a donde está el dedo o el mouse.
+// ════════════════════════════════════════════════════════════
+const Murcielagos = (() => {
+  const cont = document.getElementById('murcielagos');
+  const lista = [];
+  let W = innerWidth, H = innerHeight, antes = 0, puntero = null;
+  const SVG = '<svg viewBox="0 0 100 60"><path class="ala-i" fill="currentColor" d="M46 26C36 10 18 6 2 14c8 4 10 12 8 20 8-4 16-2 20 6 4-6 10-8 16-6z"/>' +
+    '<path class="ala-d" fill="currentColor" d="M54 26c10-16 28-20 44-12-8 4-10 12-8 20-8-4-16-2-20 6-4-6-10-8-16-6z"/>' +
+    '<ellipse cx="50" cy="31" rx="7" ry="10" fill="currentColor"/><path fill="currentColor" d="M44 23l1-11 4 8zM56 23l-1-11-4 8z"/>' +
+    '<circle cx="47.5" cy="25" r="1.4" fill="#FF7A1A"/><circle cx="52.5" cy="25" r="1.4" fill="#FF7A1A"/></svg>';
+
+  function destino(b) {
+    if (b.vida !== undefined) return;                     // los de la calabaza ya saben a dónde van
+    const salir = Math.random() < 0.12;                   // a veces salen de la pantalla y vuelven
+    b.tx = salir ? (Math.random() < .5 ? -120 : W + 120) : azar(0.03, 0.97) * W;
+    b.ty = azar(0.04, 0.85) * H;
+    b.reloj = azar(2, 6);
+  }
+  function crear(x, y, opciones = {}) {
+    const chico = W < 640;
+    const tam = opciones.tam || (chico ? azar(22, 44) : azar(26, 60));
+    const k = tam / 60;
+    const el = document.createElement('div');
+    el.className = 'bat';
+    el.style.width = tam + 'px'; el.style.height = (tam * 0.6) + 'px';
+    el.style.opacity = (0.55 + 0.4 * k).toFixed(2);
+    el.style.setProperty('--aleteo', (0.12 + 0.16 * k).toFixed(2) + 's');
+    el.innerHTML = SVG;
+    cont.appendChild(el);
+    const b = { el, x, y, vx: azar(-40, 40), vy: azar(-20, 20), vel: opciones.vel || (70 + 150 * k), fase: azar(0, 6.28), ...opciones };
+    destino(b);
+    lista.push(b);
+    return b;
+  }
+  function cuadro(ahora) {
+    const dt = Math.min(0.05, (ahora - antes) / 1000 || 0.016); antes = ahora;
+    const t = ahora / 1000;
+    for (let i = lista.length - 1; i >= 0; i--) {
+      const b = lista[i];
+      const dx = b.tx - b.x, dy = b.ty - b.y, d = Math.hypot(dx, dy) || 1;
+      const gira = Math.min(1, dt * (b.vida !== undefined ? 3 : 1.4));
+      b.vx += ((dx / d) * b.vel - b.vx) * gira;
+      b.vy += ((dy / d) * b.vel - b.vy) * gira;
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      b.reloj -= dt;
+      if (b.vida !== undefined) {
+        b.vida -= dt;
+        if (b.vida <= 0) { b.el.remove(); lista.splice(i, 1); continue; }
+      } else if (d < 50 || b.reloj <= 0) destino(b);
+      const vaiven = Math.sin(t * 4 + b.fase) * 7;
+      const inclina = Math.max(-28, Math.min(28, b.vx / b.vel * 22));
+      b.el.style.transform = `translate(${b.x.toFixed(1)}px, ${(b.y + vaiven).toFixed(1)}px) rotate(${inclina.toFixed(1)}deg)`;
+    }
+    requestAnimationFrame(cuadro);
+  }
+  function completar() {
+    const n = W < 640 ? 5 : 9;
+    let fijos = lista.filter(b => b.vida === undefined).length;
+    for (; fijos < n; fijos++) crear(Math.random() < .5 ? azar(-150, -60) : W + azar(60, 150), azar(0.05, 0.8) * H);
+  }
+  function iniciar() {
+    if (SIN_MOVIMIENTO) return;
+    completar();
+    requestAnimationFrame(cuadro);
+    // Si la pantalla cambia de tamaño (girar el celular), todos buscan nuevo rumbo
+    addEventListener('resize', () => {
+      const cambio = Math.abs(innerWidth - W) > 60 || Math.abs(innerHeight - H) > 120;
+      W = innerWidth; H = innerHeight;
+      if (cambio) { lista.forEach(destino); completar(); }
+    }, { passive: true });
+    // De vez en cuando, uno se acerca a curiosear al mouse o al dedo
+    addEventListener('pointermove', e => { puntero = { x: e.clientX, y: e.clientY }; }, { passive: true });
+    setInterval(() => {
+      if (!puntero || !lista.length) return;
+      const b = lista[Math.floor(Math.random() * lista.length)];
+      if (b.vida !== undefined) return;
+      b.tx = puntero.x + azar(-90, 90); b.ty = puntero.y + azar(-70, 40); b.reloj = 2.5;
+    }, 4500);
+  }
+  return {
+    iniciar,
+    // Bandada que sale de un punto (al tocar la calabaza)
+    bandada(x, y) {
+      if (SIN_MOVIMIENTO) return;
+      for (let i = 0; i < 7; i++) {
+        const ang = azar(-Math.PI, 0);
+        crear(x - 20, y - 10, { vida: 4.5, vel: azar(260, 420), tam: azar(22, 40),
+          tx: x + Math.cos(ang) * (W + H), ty: y + Math.sin(ang) * (W + H), reloj: 99 });
+      }
+    },
+  };
+})();
+Murcielagos.iniciar();
+document.querySelector('.calabaza-hero').addEventListener('click', e => {
+  const r = e.currentTarget.getBoundingClientRect();
+  Murcielagos.bandada(r.left + r.width / 2, r.top + r.height / 2);
+});
+
+// ── La araña baja y sube al tocarla ──
+document.getElementById('arana').addEventListener('click', e => e.currentTarget.classList.toggle('baja'));
+
+// ════════════════════════════════════════════════════════════
+//  Adornos: siluetas grises translúcidas repartidas por toda la página
+// ════════════════════════════════════════════════════════════
+function pintarAdornos() {
+  const cont = document.getElementById('adornos');
+  const alto = document.documentElement.scrollHeight, chico = innerWidth < 640;
+  const figuras = ['s-fantasma', 's-calabaza', 's-sombrero', 's-gato', 's-dulce', 's-caldero', 's-diente', 's-escoba', 's-murcielago', 's-fantasma', 's-calabaza'];
+  const n = Math.max(12, Math.min(46, Math.round(alto / (chico ? 210 : 160))));
+  let html = '';
+  // Telarañas fijas en las esquinas de arriba
+  if (!chico)   // en el celular esa esquina es de la luna
+    html += `<div class="adorno" style="top:0;left:0;width:190px;height:190px;--op:.13;animation:none"><svg><use href="#s-telarana"/></svg></div>`;
+  html += `<div class="adorno" style="top:0;right:0;width:${chico ? 90 : 160}px;height:${chico ? 90 : 160}px;--op:.1;animation:none;transform:rotate(90deg)"><svg><use href="#s-telarana"/></svg></div>`;
+  for (let i = 0; i < n; i++) {
+    const tam = chico ? azar(42, 90) : azar(56, 150);
+    const lado = i % 5 === 4 ? azar(30, 62) : (i % 2 ? azar(0, 24) : azar(72, 94));   // el centro queda más despejado
+    const y = ((i + Math.random()) / n) * (alto - 200) + 60;
+    const fig = figuras[Math.floor(Math.random() * figuras.length)];
+    html += `<div class="adorno" style="top:${y.toFixed(0)}px;left:${lado.toFixed(1)}%;width:${tam.toFixed(0)}px;height:${tam.toFixed(0)}px;` +
+      `--op:${azar(0.05, 0.11).toFixed(3)};--rot:${azar(-18, 18).toFixed(0)}deg;--dx:${azar(8, 26).toFixed(0)}px;` +
+      `--dur:${azar(12, 24).toFixed(1)}s;--delay:${azar(-20, 0).toFixed(1)}s"><svg><use href="#${fig}"/></svg></div>`;
+  }
+  cont.innerHTML = html;
+}
+// Se pintan cuando la página terminó de cargar (así se conoce su alto real)
+if (document.readyState === 'complete') pintarAdornos(); else addEventListener('load', pintarAdornos);
+let _anchoAdornos = innerWidth;
+addEventListener('resize', () => {
+  if (Math.abs(innerWidth - _anchoAdornos) < 80) return;
+  _anchoAdornos = innerWidth;
+  clearTimeout(pintarAdornos._t); pintarAdornos._t = setTimeout(pintarAdornos, 300);
+}, { passive: true });
+
+// ── Las secciones aparecen suavemente al bajar ──
+(function () {
+  const piezas = document.querySelectorAll('.sec-titulo, .sec-sub, .tarjeta, .dulce, .disfraz, .video, .botones, .cierre p, .cierre .flota');
+  piezas.forEach(el => {
+    const hermanos = el.classList.contains('tarjeta') ? [...el.parentElement.children].indexOf(el) : 0;
+    el.style.setProperty('--d', (hermanos * 0.08) + 's');
+    el.classList.add('revelar');
+  });
+  if (!('IntersectionObserver' in window) || SIN_MOVIMIENTO) { piezas.forEach(el => el.classList.add('visto')); return; }
+  const io = new IntersectionObserver(entradas => entradas.forEach(en => {
+    if (en.isIntersecting) {
+      en.target.classList.add('visto'); io.unobserve(en.target);
+      setTimeout(() => en.target.style.setProperty('--d', '0s'), 1300);   // luego el hover responde sin demora
+    }
+  }), { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+  piezas.forEach(el => io.observe(el));
+})();
+
+// ── Lluvia de dulces al confirmar la reserva ──
+function lluviaDeDulces() {
+  if (SIN_MOVIMIENTO) return;
+  const cosas = ['🍬', '🍭', '🎃', '👻', '🦷', '🍫', '🦇'];
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('span');
+    s.className = 'confeti';
+    s.textContent = cosas[i % cosas.length];
+    s.style.left = azar(0, 100) + 'vw';
+    s.style.setProperty('--x', azar(-20, 20).toFixed(0) + 'vw');
+    s.style.setProperty('--r', azar(-540, 540).toFixed(0) + 'deg');
+    s.style.setProperty('--t', azar(2.4, 4.4).toFixed(2) + 's');
+    s.style.animationDelay = azar(0, 0.8).toFixed(2) + 's';
+    s.addEventListener('animationend', () => s.remove());
+    document.body.appendChild(s);
+  }
+}
 </script>
 </body>
 </html>
