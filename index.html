@@ -7,6 +7,9 @@
   // Los datos del evento esperan dentro del caldero hasta que la poción los lanza.
   // Respaldo: si por algo el caldero no arranca, a los 7 s se muestran igual.
   document.documentElement.classList.add("js");
+  // Pantalla de entrada (su toque arranca la música), salvo que la persona haya elegido sin sonido
+  try { if (localStorage.getItem("oh_musica") !== "off" && !matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("con-entrada"); } catch (e) {}
+  setTimeout(function () { if (!window.__entradaLista) document.documentElement.classList.remove("con-entrada"); }, 4000);
   setTimeout(function () { if (!window.__pocionLista) document.documentElement.classList.add("mostrar-todo"); }, 7000);
 </script>
 <title>Open House Halloween · Molar Clínica Dental</title>
@@ -476,6 +479,20 @@
   .cta-burbuja { margin-top: 0; }
   .cta-burbuja .cta { margin-top: calc(var(--vh) * 1.2); padding: clamp(11px, calc(var(--vh) * 1.8), 17px) 34px; }
   .cta-burbuja .cupos-pill { margin-top: calc(var(--vh) * 1.2); }
+
+  /* Pantalla de entrada: el toque para entrar arranca la música (los navegadores exigen un toque) */
+  .entrada { position: fixed; inset: 0; z-index: 80; display: none; place-items: center; padding: 24px; text-align: center;
+             background: radial-gradient(ellipse at center, rgba(51, 32, 90, .92), rgba(10, 5, 22, .97)); transition: opacity .6s ease, visibility .6s; }
+  .entrada.fuera { opacity: 0; visibility: hidden; pointer-events: none; }
+  .con-entrada .entrada { display: grid; }
+  .con-entrada body { overflow: hidden; }
+  .entrada-cal { font-size: clamp(72px, 16vh, 120px); line-height: 1; animation: entrada-bote 1.6s ease-in-out infinite; }
+  @keyframes entrada-bote { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-14px) rotate(6deg); } }
+  .entrada-marca { margin-top: 14px; font-family: Fredoka, sans-serif; font-weight: 700; letter-spacing: .2em; color: var(--luna); font-size: clamp(.9rem, 3.8vw, 1.3rem); }
+  .entrada-titulo { font-family: Creepster, Fredoka, cursive; color: var(--calabaza); font-size: clamp(3rem, 14vw, 5.5rem); line-height: 1;
+                    text-shadow: 0 4px 0 #B84A00, 0 12px 40px rgba(255, 122, 26, .35); }
+  .entrada .cta { margin-top: 22px; font-size: 1.3rem; }
+  .entrada-sin { display: block; margin: 16px auto 0; background: none; border: 0; color: var(--texto-2); text-decoration: underline; font: inherit; font-size: .92rem; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -504,6 +521,17 @@
 </div>
 
 <div class="murcielagos" id="murcielagos" aria-hidden="true"></div>
+
+<!-- Pantalla de entrada: el toque arranca la música y la animación -->
+<div class="entrada" id="entrada" role="dialog" aria-label="Entrar al Open House">
+  <div>
+    <div class="entrada-cal" aria-hidden="true">🎃</div>
+    <div class="entrada-marca">OPEN HOUSE MOLAR</div>
+    <div class="entrada-titulo">Halloween</div>
+    <button class="cta" id="btnEntrar" type="button">🔊 Toca para entrar</button>
+    <button class="entrada-sin" id="btnEntrarSin" type="button">Entrar sin sonido</button>
+  </div>
+</div>
 
 <button class="musica" id="btnMusica" type="button" aria-label="Silenciar la música" title="Silenciar la música">🔇</button>
 
@@ -1313,7 +1341,7 @@ const Musica = (() => {
     const filtro = ctx.createBiquadFilter(); filtro.type = 'lowpass'; filtro.frequency.value = 260; filtro.Q.value = 6;
     const lfo = ctx.createOscillator(), lfoG = ctx.createGain(); lfo.frequency.value = 0.09; lfoG.gain.value = 140;
     lfo.connect(lfoG); lfoG.connect(filtro.frequency);
-    const vol = ctx.createGain(); vol.gain.value = 0.0001; vol.gain.exponentialRampToValueAtTime(0.16, t + 3);
+    const vol = ctx.createGain(); vol.gain.value = 0.0001; vol.gain.exponentialRampToValueAtTime(0.08, t + 3);
     filtro.connect(vol); vol.connect(bus);
     zumbido = [lfo];
     [[hz(38), -7], [hz(38), 6], [hz(45), 3]].forEach(([f, det]) => {
@@ -1339,7 +1367,7 @@ const Musica = (() => {
 
   // ── Instrumentos ──
   function latido(t, fuerte) {                             // "bum-bum" grave con un golpecito audible en parlantes chicos
-    [[0, fuerte ? 0.9 : 0.55], [0.2, fuerte ? 0.6 : 0.35]].forEach(([d, v]) => {
+    [[0, fuerte ? 0.55 : 0.35], [0.2, fuerte ? 0.38 : 0.22]].forEach(([d, v]) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.frequency.setValueAtTime(95, t + d); o.frequency.exponentialRampToValueAtTime(38, t + d + 0.28);
       o.connect(g); g.connect(master);
@@ -1354,9 +1382,9 @@ const Musica = (() => {
     const o = ctx.createOscillator(), o2 = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     o.type = 'sawtooth'; o2.type = 'square'; o.frequency.value = hz(m); o2.frequency.value = hz(m) / 2;
     f.type = 'lowpass'; f.frequency.setValueAtTime(700, t); f.frequency.exponentialRampToValueAtTime(180, t + dur);
-    const g2 = ctx.createGain(); g2.gain.value = 0.35;
+    const g2 = ctx.createGain(); g2.gain.value = 0.2;
     o.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(bus);
-    env(g, t, 0.01, 0.2, dur, 0.1);
+    env(g, t, 0.01, 0.085, dur, 0.1);   // bajo más suave
     o.start(t); o2.start(t); o.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
   }
   function coro(raiz, t, dur) {                            // acordes oscuros, como un coro lejano
@@ -1491,24 +1519,70 @@ function pintarBtnMusica() {
   btnMusica.setAttribute('aria-label', on ? 'Silenciar la música' : 'Activar la música');
   btnMusica.title = on ? 'Silenciar la música' : 'Activar la música';
 }
+// ── iPhone: el audio generado respeta el interruptor de silencio. Para que suene como
+//    música: se pide sesión de "reproducción" (iOS 17+) y, para iOS anteriores, se
+//    reproduce en bucle un audio mudo dentro del mismo toque (cambia el modo de audio). ──
+function audioMudo() {
+  if (audioMudo.url) return audioMudo.url;
+  const n = 4000, buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+  const txt = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  txt(0, 'RIFF'); v.setUint32(4, 36 + n, true); txt(8, 'WAVE'); txt(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+  txt(36, 'data'); v.setUint32(40, n, true);
+  for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);       // silencio (8 bits)
+  return audioMudo.url = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+}
+function desbloquearAudio() {
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}
+  try {
+    if (!desbloquearAudio.a) { const a = new Audio(audioMudo()); a.loop = true; a.setAttribute('playsinline', ''); desbloquearAudio.a = a; }
+    desbloquearAudio.a.play().catch(() => {});
+  } catch (_) {}
+}
+async function sonarAhora() {
+  desbloquearAudio();
+  const ok = await Musica.encender();
+  pintarBtnMusica();
+  return ok;
+}
 btnMusica.addEventListener('click', async () => {
   try {
     if (Musica.sonando) { Musica.apagar(); prefMusica.guardar('off'); }
-    else { await Musica.encender(); prefMusica.guardar('on'); }
+    else { await sonarAhora(); prefMusica.guardar('on'); }
   } catch (e) { console.warn('[Open House] música:', e); }
   setTimeout(pintarBtnMusica, 60);
 });
 pintarBtnMusica();
+
+// ── Pantalla de entrada: su toque arranca la música y la animación del caldero ──
+const entrada = document.getElementById('entrada');
+const conEntrada = () => document.documentElement.classList.contains('con-entrada');
+function cerrarEntrada() {
+  entrada.classList.add('fuera');
+  setTimeout(() => { document.documentElement.classList.remove('con-entrada'); entrada.classList.remove('fuera'); }, 650);
+  window.dispatchEvent(new Event('oh-entro'));
+}
+function entrar(conSonido) {
+  if (conSonido) { sonarAhora(); prefMusica.guardar('on'); } else prefMusica.guardar('off');
+  cerrarEntrada();
+}
+document.getElementById('btnEntrar').addEventListener('click', () => entrar(true));
+document.getElementById('btnEntrarSin').addEventListener('click', () => entrar(false));
+window.__entradaLista = true;                     // el respaldo del head ya no hace falta
+
 if (prefMusica.leer() !== 'off' && !SIN_MOVIMIENTO) {
-  const alPrimerToque = e => {
-    if (e.target && e.target.closest && e.target.closest('#btnMusica')) return;   // el botón se maneja solo
-    quitar();
-    if (!Musica.sonando && prefMusica.leer() !== 'off') Musica.encender().then(pintarBtnMusica);
+  // Si el navegador deja sonar sin toque (p. ej. visitas repetidas en computadora), no hace falta la entrada
+  Musica.encender().then(ok => { if (ok) { pintarBtnMusica(); if (conEntrada()) cerrarEntrada(); } }).catch(() => {});
+  // Si no, cada toque, clic o tecla lo vuelve a intentar hasta que suene (en iPhone el primer toque a veces no alcanza)
+  const alTocar = e => {
+    if (Musica.sonando || prefMusica.leer() === 'off') return quitar();
+    if (e.target && e.target.closest && e.target.closest('#btnMusica, #btnEntrar, #btnEntrarSin')) return;   // se manejan solos
+    sonarAhora().then(ok => { if (ok) quitar(); });
   };
-  const eventos = ['pointerdown', 'keydown', 'touchend'];
-  const quitar = () => eventos.forEach(ev => removeEventListener(ev, alPrimerToque, true));
-  eventos.forEach(ev => addEventListener(ev, alPrimerToque, true));
-  Musica.encender().then(ok => { if (ok) { quitar(); pintarBtnMusica(); } }).catch(() => {});
+  const eventos = ['touchend', 'click', 'keydown', 'pointerup'];
+  const quitar = () => eventos.forEach(ev => removeEventListener(ev, alTocar, true));
+  eventos.forEach(ev => addEventListener(ev, alTocar, true));
 }
 document.addEventListener('visibilitychange', () => Musica.pausarOculta(document.hidden));
 
@@ -2281,7 +2355,10 @@ const Pocion = (() => {
     if (!en.isIntersecting || empezo) return;
     empezo = true; obs.disconnect();
     window.__pocionLista = true;                  // ya salen: el respaldo del head no hace falta
-    datos.forEach((el, i) => setTimeout(() => lanzarDato(el, i === datos.length - 1), 1700 + i * 1000));
+    const lanzarTodos = () => datos.forEach((el, i) => setTimeout(() => lanzarDato(el, i === datos.length - 1), 1700 + i * 1000));
+    // Con pantalla de entrada, la poción empieza cuando la persona entra (para que vea la animación)
+    if (document.documentElement.classList.contains('con-entrada')) addEventListener('oh-entro', () => setTimeout(lanzarTodos, 200), { once: true });
+    else lanzarTodos();
   }, { threshold: 0.2 }).observe(zona);
 
   let visible = true;
