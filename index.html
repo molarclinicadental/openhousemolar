@@ -1450,11 +1450,20 @@ const Musica = (() => {
     setTimeout(() => { if (sonando) trueno(ctx.currentTime + 0.05); }, 600);   // entrada con trueno
   }
 
+  let quiere = false;                                      // la persona quiere música (aunque el navegador aún no deje)
   return {
     get sonando() { return sonando; },
-    /** Intenta sonar. Devuelve true si el navegador lo permitió (si no, espera el primer toque). */
+    /** Intenta sonar. Devuelve true si ya suena; si el navegador tarda en habilitar el audio
+     *  (pasa en iPhone), la música arranca sola en cuanto lo habilita. */
     async encender() {
-      if (!ctx) iniciar();
+      quiere = true;
+      if (!ctx) {
+        iniciar();
+        ctx.onstatechange = () => {
+          if (ctx.state === 'running' && quiere && !sonando) empezar();
+          window.dispatchEvent(new Event('oh-musica'));
+        };
+      }
       if (ctx.state !== 'running') {
         try { await Promise.race([ctx.resume(), new Promise(r => setTimeout(r, 300))]); } catch (_) {}
       }
@@ -1463,6 +1472,7 @@ const Musica = (() => {
       return true;
     },
     apagar() {
+      quiere = false;
       if (!ctx || !sonando) return;
       sonando = false;
       clearTimeout(efectos);
@@ -1527,10 +1537,14 @@ btnMusica.addEventListener('click', async () => {
   setTimeout(pintarBtnMusica, 60);
 });
 pintarBtnMusica();
+addEventListener('oh-musica', pintarBtnMusica);   // si la música arranca más tarde (iPhone), el botón se actualiza
 
 if (prefMusica.leer() !== 'off' && !SIN_MOVIMIENTO) {
   // Si el navegador deja sonar sin toque (p. ej. visitas repetidas en computadora), suena de una vez
-  Musica.encender().then(ok => { if (ok) pintarBtnMusica(); }).catch(() => {});
+  // En iPhone/iPad no se intenta al abrir: nunca se permite sin toque, y preparar el audio antes
+  // lo deja en el modo que respeta el interruptor de silencio. Allá se prepara con el primer toque.
+  const esIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!esIOS) Musica.encender().then(ok => { if (ok) pintarBtnMusica(); }).catch(() => {});
   // Si no, cada toque, clic o tecla lo vuelve a intentar hasta que suene (en iPhone el primer toque a veces no alcanza)
   const alTocar = e => {
     if (Musica.sonando || prefMusica.leer() === 'off') return quitar();
