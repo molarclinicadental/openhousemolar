@@ -479,6 +479,8 @@
 
   /* iPhone: mientras la música espera el primer toque, toda la página cuenta como "tocable" */
   .toca-audio, .toca-audio body { cursor: pointer; }
+  .exito .btn { color: var(--texto); font: inherit; font-weight: 800; cursor: pointer; }
+  .exito .acciones { flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -801,6 +803,11 @@
       <div class="codigo" id="exCodigo">OH-0000</div>
       <p>Te esperamos el <b>sábado 31 de octubre</b> a las <b id="exHora"></b> en Torre Metromed · Consultorio 009.</p>
       <p class="ayuda" id="exPago" hidden>Recibimos tu comprobante. Nuestro equipo verificará el pago y te confirmará por WhatsApp.</p>
+      <!-- Carta de bienvenida y pase para guardar o compartir -->
+      <div class="acciones">
+        <a class="btn" id="exCarta" target="_blank" rel="noopener" style="flex:1;justify-content:center">📄 Mi carta de bienvenida</a>
+        <button class="btn" type="button" id="exPase" onclick="guardarPase()" style="flex:1;justify-content:center">🖼 Guardar mi pase</button>
+      </div>
       <div class="acciones"><a class="btn wa" id="exWa" target="_blank" rel="noopener" style="flex:1;justify-content:center">💬 Confirmar por WhatsApp</a></div>
       <div class="acciones"><button class="b-sec" type="button" onclick="cerrarReserva()">Cerrar</button></div>
     </div>
@@ -1237,6 +1244,9 @@ async function confirmarReserva() {
     document.getElementById('rComprobante').value = '';
     document.getElementById('rFoto').value = '';
     document.getElementById('exWa').href = 'https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent(msg);
+    // Carta de bienvenida y pase: los datos van después del # (no se envían a ningún servidor)
+    window.__pase = { nombre: (data.nombre || datos.nombre || '').split(' ')[0], hora: data.hora, codigo: numero };
+    document.getElementById('exCarta').href = 'bienvenida.html#' + new URLSearchParams({ n: window.__pase.nombre, h: data.hora, c: numero }).toString();
     irPaso(4);
     lluviaDeDulces();
     cargarEvento();
@@ -2447,6 +2457,87 @@ const Pocion = (() => {
   }
   setTimeout(asomar, 12000);
 })();
+
+// ════════════════════════════════════════════════════════════
+//  Pase monstruoso: imagen personalizada (1080 × 1350) para guardar o
+//  compartir por WhatsApp. Se dibuja en el celular con los datos de la
+//  reserva recién hecha (no consulta la base).
+// ════════════════════════════════════════════════════════════
+async function dibujarPase({ nombre, hora, codigo }) {
+  const W = 1080, H = 1350, c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  const cargarImg = src => new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+  try { await Promise.all(['190px Creepster', '700 60px Fredoka', '800 30px Nunito'].map(f => document.fonts.load(f))); } catch (_) {}
+  const [logo, monstruo] = await Promise.all([cargarImg('logo-molar-claro.png'), cargarImg('monstruos/colores.png')]);
+
+  // Fondo: noche morada con estrellas y luna
+  const fondo = g.createRadialGradient(W * 0.8, 0, 50, W * 0.5, H * 0.4, H);
+  fondo.addColorStop(0, '#4A2A86'); fondo.addColorStop(0.55, '#231440'); fondo.addColorStop(1, '#120A22');
+  g.fillStyle = fondo; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 90; i++) { g.globalAlpha = 0.25 + Math.random() * 0.6; g.fillStyle = '#FFF4D6'; g.beginPath(); g.arc(Math.random() * W, Math.random() * H, Math.random() * 2.4 + 0.6, 0, 7); g.fill(); }
+  g.globalAlpha = 1;
+  const luna = g.createRadialGradient(930, 150, 10, 930, 150, 170);
+  luna.addColorStop(0, 'rgba(255,231,163,.95)'); luna.addColorStop(0.45, 'rgba(255,231,163,.9)'); luna.addColorStop(0.5, 'rgba(255,231,163,.25)'); luna.addColorStop(1, 'rgba(255,231,163,0)');
+  g.fillStyle = luna; g.beginPath(); g.arc(930, 150, 170, 0, 7); g.fill();
+
+  // Borde de "entrada" con muescas
+  g.strokeStyle = 'rgba(155,229,100,.75)'; g.lineWidth = 5; g.setLineDash([22, 14]);
+  g.beginPath(); g.roundRect ? g.roundRect(40, 40, W - 80, H - 80, 48) : g.rect(40, 40, W - 80, H - 80); g.stroke(); g.setLineDash([]);
+
+  g.textAlign = 'center';
+  if (logo) { const lw = 300, lh = lw * logo.height / logo.width; g.drawImage(logo, (W - lw) / 2, 95, lw, lh); }
+  g.fillStyle = '#FFF4D6'; g.font = '700 46px Fredoka, sans-serif';
+  if ('letterSpacing' in g) g.letterSpacing = '10px';
+  g.fillText('PASE MONSTRUOSO', W / 2 + 5, 290);
+  if ('letterSpacing' in g) g.letterSpacing = '0px';
+  g.font = '190px Creepster, Fredoka, cursive';
+  g.fillStyle = '#B84A00'; g.fillText('Halloween', W / 2, 478);
+  g.shadowColor = 'rgba(255,122,26,.55)'; g.shadowBlur = 40;
+  g.fillStyle = '#FF7A1A'; g.fillText('Halloween', W / 2, 470);
+  g.shadowBlur = 0;
+
+  // Saludo + monstruo
+  g.fillStyle = '#FFFFFF'; g.font = '700 64px Fredoka, sans-serif';
+  g.fillText(nombre ? `¡Te esperamos, ${nombre}!` : '¡Te esperamos!', W / 2, 590);
+  if (monstruo) { const mw = 330, mh = mw * monstruo.height / monstruo.width; g.drawImage(monstruo, W / 2 - mw / 2, 625, mw, mh); }
+
+  // Datos: fecha · hora · código
+  const caja = (x, y, w, h, etiqueta, valor, verde) => {
+    g.fillStyle = 'rgba(18,10,34,.85)'; g.strokeStyle = verde ? '#9BE564' : 'rgba(255,255,255,.25)'; g.lineWidth = 4;
+    g.beginPath(); g.roundRect ? g.roundRect(x, y, w, h, 30) : g.rect(x, y, w, h); g.fill(); g.stroke();
+    g.fillStyle = '#D4FF8A'; g.font = '800 26px Nunito, sans-serif'; g.fillText(etiqueta, x + w / 2, y + 48);
+    g.fillStyle = '#FFFFFF'; g.font = '700 58px Fredoka, sans-serif'; g.fillText(valor, x + w / 2, y + 118);
+  };
+  const y = 990, w = 300, sep = 30, x0 = (W - (w * 3 + sep * 2)) / 2;
+  caja(x0, y, w, 150, 'FECHA', 'Sáb 31 oct');
+  caja(x0 + w + sep, y, w, 150, 'HORA', hora || '—');
+  caja(x0 + (w + sep) * 2, y, w, 150, 'CÓDIGO', codigo || '—', true);
+
+  g.fillStyle = '#FFF4D6'; g.font = '700 36px Fredoka, sans-serif';
+  g.fillText('📍 Torre Metromed · Consultorio 009', W / 2, 1200);
+  g.fillStyle = '#DCD2F2'; g.font = '800 30px Nunito, sans-serif';
+  g.fillText('👻 ¡Ven disfrazado!   ·   🍬 Trae tus dulces y cámbialos por premios', W / 2, 1255);
+  return new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.9));   // JPG: pesa poco para WhatsApp
+}
+
+async function guardarPase() {
+  const btn = document.getElementById('exPase'), texto = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Preparando…';
+  try {
+    const blob = await dibujarPase(window.__pase || {});
+    const archivo = new File([blob], `pase-open-house-molar-${(window.__pase && window.__pase.codigo) || 'halloween'}.jpg`, { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+      await navigator.share({ files: [archivo], title: 'Mi pase del Open House Halloween · Molar' }).catch(() => {});
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = archivo.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+  } catch (e) { console.warn('[Open House] pase:', e); }
+  btn.disabled = false; btn.textContent = texto;
+}
 
 // ── Lluvia de confeti de Halloween al confirmar la reserva ──
 function lluviaDeDulces() {
