@@ -131,48 +131,56 @@
   .m-lienzo { position: absolute; left: -30%; top: -35%; width: 160%; height: 140%; pointer-events: none;
               filter: drop-shadow(var(--sx, 0px) 12px 10px rgba(0, 0, 0, .5)) drop-shadow(0 0 16px rgba(255, 122, 26, .22)); }
 
-  /* La invitación (la sostienen dos monstruos) */
-  .inv-escena { position: relative; max-width: 600px; margin: 34px auto 0; animation: inv-llevan 4.2s ease-in-out infinite; }
-  @keyframes inv-llevan { 0%, 100% { transform: translateY(0) rotate(-.5deg); } 50% { transform: translateY(-8px) rotate(.5deg); } }
-  .invitacion { position: relative; z-index: 2; padding: 50px 24px 26px; border-radius: 28px; text-align: center;
-                background: linear-gradient(180deg, rgba(51, 32, 90, .97), rgba(26, 16, 48, .98)); border: 2px solid rgba(255, 162, 76, .6);
-                box-shadow: 0 0 0 6px rgba(255, 122, 26, .08), 0 30px 60px rgba(0, 0, 0, .5), inset 0 0 60px rgba(142, 92, 247, .18);
-                opacity: 0; transform: translateY(-50px) scale(.9); transition: opacity .6s ease, transform .9s cubic-bezier(.3, 1.5, .5, 1); }
-  .inv-escena.lista .invitacion { opacity: 1; transform: none; }
-  .invitacion::before { content: ''; position: absolute; inset: 10px; border: 1.5px dashed rgba(255, 162, 76, .35); border-radius: 20px; pointer-events: none; }
-  .inv-sello { position: absolute; top: -32px; left: 50%; margin-left: -32px; width: 64px; height: 64px; border-radius: 50%; font-size: 34px; line-height: 1;
-               border: 3px solid rgba(255, 244, 214, .85); background: radial-gradient(circle at 35% 30%, #4B2688, #1A1030); cursor: pointer;
-               box-shadow: 0 8px 20px rgba(0, 0, 0, .4), 0 0 24px rgba(255, 122, 26, .45); animation: sello 3s ease-in-out infinite; }
-  @keyframes sello { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg) scale(1.06); } }
-  .inv-pre { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 1.2rem; color: var(--luna); }
-  .invitacion .etiqueta { margin-top: 8px; }
-  .invitacion .titulo-halloween { margin-top: 8px; font-size: clamp(3.2rem, 11vw, 5.8rem); }
-  .inv-lema { color: var(--texto-2); font-size: 1.08rem; max-width: 430px; margin: 8px auto 0; }
-  .inv-datos { list-style: none; text-align: left; margin: 20px auto 4px; max-width: 450px; display: grid; gap: 10px; }
-  .inv-datos li { display: flex; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 16px; background: rgba(255, 255, 255, .06); border: 1px solid var(--linea); }
-  .inv-ico { font-size: 1.6rem; width: 36px; text-align: center; flex-shrink: 0; }
-  .inv-datos b { display: block; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 1.12rem; line-height: 1.25; }
-  .inv-datos small { display: block; color: var(--texto-2); font-size: .95rem; line-height: 1.35; }
-  .invitacion .cta { margin-top: 20px; }
-  .inv-izq, .inv-der { z-index: 1; width: 200px; opacity: 0; transition: transform 1s cubic-bezier(.3, 1.4, .5, 1), opacity .5s ease; }
-  .inv-izq { left: -160px; top: 24%; transform: translateX(-140px) rotate(-12deg); }
-  .inv-der { right: -160px; top: 18%; transform: translateX(140px) rotate(12deg); }
-  .inv-escena.lista .inv-izq, .inv-escena.lista .inv-der { opacity: 1; transform: none; }
-  .inv-escena.lista .inv-izq.asomado { transform: translate(-22px, -18px) rotate(-7deg); }
-  .inv-escena.lista .inv-der.asomado { transform: translate(22px, -18px) rotate(7deg); }
-  .inv-izq .monstruo, .inv-der .monstruo { transition-delay: 0s; }
-  @media (max-width: 960px) {
-    .inv-escena { margin-top: 150px; }
-    .inv-izq, .inv-der { top: -104px; width: 132px; }
-    /* El globo se abre hacia adentro de la pantalla */
-    .inv-izq .m-globo { left: 4px; transform: translateY(10px) scale(.6); transform-origin: left bottom; }
-    .inv-der .m-globo { left: auto; right: 4px; transform: translateY(10px) scale(.6); transform-origin: right bottom; }
-    .inv-izq .monstruo.habla .m-globo, .inv-der .monstruo.habla .m-globo { transform: none; }
-    .inv-izq .m-globo::after { left: 30px; } .inv-der .m-globo::after { left: auto; right: 22px; }
-    .inv-izq { left: 0; } .inv-der { right: 0; }
-    .inv-escena.lista .inv-izq.asomado { transform: translate(-6px, -22px) rotate(-6deg); }
-    .inv-escena.lista .inv-der.asomado { transform: translate(6px, -22px) rotate(6deg); }
+  /* La poción de la bruja: título, datos que salen del caldero como burbujas y el caldero */
+  .caldero-escena { position: relative; max-width: 820px; margin: 26px auto 0; }
+  .inv-pre { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 1.25rem; color: var(--luna); }
+  .caldero-escena .etiqueta { margin-top: 8px; }
+  .caldero-escena .titulo-halloween { margin-top: 6px; animation: vapor-titulo 1.3s ease .15s both, titilar 7s ease-in-out 1.5s infinite; }
+  @keyframes vapor-titulo { from { opacity: 0; filter: blur(14px); transform: translateY(24px) scale(.94); } to { opacity: 1; filter: none; transform: none; } }
+  .inv-lema { color: var(--texto-2); font-size: 1.1rem; max-width: 460px; margin: 8px auto 0; }
+  .pocion-datos { list-style: none; display: grid; gap: 12px; width: min(480px, 100%); margin: 22px auto 0; position: relative; z-index: 4; }
+  .pocion-datos li { position: relative; display: flex; gap: 12px; align-items: center; text-align: left; padding: 10px 22px 10px 10px; border-radius: 999px;
+                     background: radial-gradient(120% 150% at 12% 15%, rgba(212, 255, 138, .22), rgba(46, 158, 42, .16) 42%, rgba(22, 13, 40, .82) 100%);
+                     border: 1.5px solid rgba(155, 229, 100, .6);
+                     box-shadow: inset 0 0 22px rgba(155, 229, 100, .18), 0 10px 24px rgba(0, 0, 0, .35), 0 0 22px rgba(107, 227, 74, .14);
+                     animation: sube-burbuja 1.2s cubic-bezier(.2, 1.25, .4, 1) var(--d, 0s) both, burbuja-flota var(--f, 5s) ease-in-out calc(var(--d, 0s) + 1.2s) infinite; }
+  .pocion-datos li::before { content: ''; position: absolute; top: 6px; left: 20px; width: 26px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, .35); transform: rotate(-10deg); }
+  @keyframes sube-burbuja { 0% { opacity: 0; transform: translateY(var(--dy, 160px)) scale(.12); border-radius: 50%; }
+                            55% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+  @keyframes burbuja-flota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .pocion-datos .inv-ico { flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 1.45rem;
+                           background: rgba(255, 255, 255, .08); border: 1px solid rgba(155, 229, 100, .35); }
+  .pocion-datos b { display: block; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 1.12rem; line-height: 1.25; }
+  .pocion-datos small { display: block; color: var(--texto-2); font-size: .95rem; line-height: 1.35; }
+
+  .caldero-zona { position: relative; width: min(330px, 68vw); margin: 40px auto 0; z-index: 2; }
+  .caldero { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; position: relative; z-index: 2; }
+  .caldero svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .caldero .c-brillo { animation: c-brillo 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes c-brillo { 0%, 100% { opacity: .75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+  .caldero.chapoteo .c-brillo { animation: none; opacity: 1; transform: scale(1.25); transition: transform .2s; }
+  .caldero .llama { transform-box: fill-box; transform-origin: 50% 100%; animation: llama .45s ease-in-out infinite alternate; }
+  @keyframes llama { from { transform: scaleY(.82) skewX(-4deg); } to { transform: scaleY(1.12) skewX(4deg); } }
+  .caldero .c-cucharon { transform-box: view-box; transform-origin: 150px 92px; animation: revolver 3.2s ease-in-out infinite; }
+  @keyframes revolver { 0%, 100% { transform: translate(-34px, 0) rotate(-8deg); } 25% { transform: translate(0, 6px) rotate(0); }
+                        50% { transform: translate(34px, 0) rotate(8deg); } 75% { transform: translate(0, -4px) rotate(0); } }
+  .caldero .c-burb { transform-box: fill-box; transform-origin: center; animation: c-burb 2.2s ease-in infinite; }
+  @keyframes c-burb { 0% { transform: scale(0); opacity: 0; } 55% { transform: scale(1); opacity: 1; } 70% { transform: scale(1.35); opacity: 0; } 100% { transform: scale(0); opacity: 0; } }
+  .burbuja-libre { position: absolute; border-radius: 50%; pointer-events: none; z-index: 3;
+                   background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .8), rgba(155, 229, 100, .55) 45%, rgba(46, 158, 42, .25)); }
+  .ingrediente { position: absolute; left: 0; top: 0; font-size: 26px; pointer-events: none; z-index: 3; }
+  .ap-bruja { left: -48%; bottom: 4%; width: 60%; z-index: 3; transition: transform .6s cubic-bezier(.3, 1.4, .5, 1); }
+  .ap-mago { right: -46%; bottom: 10%; width: 56%; z-index: 1; transition: transform .6s cubic-bezier(.3, 1.4, .5, 1); }
+  .ap-bruja.asomado { transform: translate(-8px, -14px) rotate(-5deg); }
+  .ap-mago.asomado { transform: translate(8px, -14px) rotate(5deg); }
+  @media (max-width: 640px) {
+    .ap-bruja { left: -20%; width: 42%; } .ap-mago { right: -20%; width: 38%; }
+    .ap-bruja .m-globo { left: 4px; transform: translateY(10px) scale(.6); transform-origin: left bottom; }
+    .ap-mago .m-globo { left: auto; right: 4px; transform: translateY(10px) scale(.6); transform-origin: right bottom; }
+    .ap-bruja .monstruo.habla .m-globo, .ap-mago .monstruo.habla .m-globo { transform: none; }
+    .ap-bruja .m-globo::after { left: 30px; } .ap-mago .m-globo::after { left: auto; right: 22px; }
   }
+  .cta-burbuja { margin-top: 8px; animation: sube-burbuja 1s cubic-bezier(.2, 1.3, .4, 1) 2.6s both; --dy: 60px; position: relative; z-index: 4; }
   .cuenta-titulo { margin-top: 30px; color: var(--texto-2); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .8rem; }
   .cuenta-titulo + .cuenta { margin-top: 8px; }
 
@@ -190,9 +198,6 @@
   /* Monstruos repartidos por la página */
   .aparicion { position: absolute; z-index: 3; }
   .aparicion .monstruo { width: 100%; margin: 0; opacity: 1; transform: none; }
-  .fila-calabaza { display: flex; align-items: flex-end; justify-content: center; gap: clamp(10px, 4vw, 48px); margin-top: 46px; }
-  .fila-calabaza .aparicion { position: relative; width: clamp(96px, 13vw, 150px); }
-  .fila-calabaza .calabaza-hero { margin-bottom: 24px; }
   #info, .incluye { position: relative; }
   .ap-info { right: 0; top: 6px; width: clamp(84px, 11vw, 130px); }
   @media (max-width: 640px) { .ap-info { top: 70px; right: 6px; width: 84px; } }
@@ -229,7 +234,8 @@
   @media (prefers-reduced-motion: reduce) {
     .estrella, .flota, .adorno, .bat .ala-i, .bat .ala-d, .niebla span, .arana, .luna,
     .cementerio .fantasma-tumba, .cementerio .ojo-calabaza, .cementerio .niebla-baja, .titulo-halloween, .cta,
-    .m-bote, .m-sombra, .monstruo.salta .m-salto, .ap-tumba { animation: none !important; }
+    .m-bote, .m-sombra, .monstruo.salta .m-salto, .ap-tumba, .pocion-datos li, .cta-burbuja, .caldero-escena .titulo-halloween,
+    .caldero .llama, .caldero .c-cucharon, .caldero .c-burb, .caldero .c-brillo { animation: none !important; }
     .monstruo { opacity: 1; transform: none; transition: none; }
     .revelar { opacity: 1; transform: none; transition: none; }
   }
@@ -279,7 +285,6 @@
   .tarjeta .ico { display: inline-block; }
   .tarjeta:hover .ico { animation: menear .5s ease; }
   @keyframes menear { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-14deg) scale(1.15); } 75% { transform: rotate(12deg) scale(1.15); } }
-  .calabaza-hero { cursor: pointer; user-select: none; }
   .musica.sonando { animation: pulso-musica 1.1s ease-in-out infinite; }
   @keyframes pulso-musica { 0%, 100% { box-shadow: 0 0 0 0 rgba(142, 92, 247, .6); } 50% { box-shadow: 0 0 0 10px rgba(142, 92, 247, 0); } }
   .cupos-pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 8px 16px; border-radius: 999px;
@@ -291,7 +296,6 @@
   .cuenta div { min-width: 74px; padding: 12px 8px; border-radius: 16px; background: var(--noche-2); border: 1px solid var(--linea); }
   .cuenta b { display: block; font-family: Fredoka, sans-serif; font-size: 1.9rem; line-height: 1; color: var(--luna); }
   .cuenta small { color: var(--texto-2); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 800; }
-  .calabaza-hero { font-size: 64px; display: inline-block; margin-top: 8px; }
   .flota { animation: flotar 4s ease-in-out infinite; }
 
   /* ── Secciones ────────────────────────────── */
@@ -447,25 +451,53 @@
     <svg viewBox="0 0 40 40"><g stroke="#1B0F30" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M14 18L4 10M14 21L2 21M14 24L4 32M26 18L36 10M26 21L38 21M26 24L36 32M16 26l-6 10M24 26l6 10"/></g><ellipse cx="20" cy="22" rx="8" ry="9" fill="#1B0F30"/><circle cx="20" cy="12" r="5.5" fill="#1B0F30"/><circle cx="18" cy="11.5" r="1.4" fill="#FF7A1A"/><circle cx="22" cy="11.5" r="1.4" fill="#FF7A1A"/></svg>
   </div>
   <span class="logo-caja"><img src="logo-molar-claro.png" alt="Molar Clínica Dental" class="logo" width="150" height="56"></span>
-  <!-- La invitación: la traen la bruja verde y el mago de colores -->
-  <div class="inv-escena" id="invEscena">
-    <div class="aparicion inv-izq" data-monstruo="verde"></div>
-    <div class="aparicion inv-der" data-monstruo="colores"></div>
-    <article class="invitacion" id="invitacion" aria-labelledby="invTitulo">
-      <button class="inv-sello calabaza-hero" type="button" aria-label="Calabaza: ¡tócala!">🎃</button>
-      <p class="inv-pre">¡Estás invitado!</p>
-      <p class="etiqueta">Open House Molar</p>
-      <h1 class="titulo-halloween" id="invTitulo">Halloween</h1>
-      <p class="inv-lema">Una mañana de disfraces, diversión y cuidado dental para los peques 🍬</p>
-      <ul class="inv-datos">
-        <li><span class="inv-ico">📅</span><div><b>Sábado 31 de octubre</b><small id="invHorario">9:00 a 14:00 · citas de 20 minutos</small></div></li>
-        <li><span class="inv-ico">📍</span><div><b>Torre Metromed · Consultorio 009</b><small>Parque Ciudad Blanca · Galo Plaza Lasso, Quito</small></div></li>
-        <li><span class="inv-ico">🦷</span><div><b>Profilaxis dental · <span id="invPrecio">$15</span></b><small>Para niños y niñas de 0 a 12 años</small></div></li>
-        <li><span class="inv-ico">👻</span><div><b>¡Ven disfrazado!</b><small>El disfraz es obligatorio para los peques</small></div></li>
-      </ul>
+  <!-- La poción de la bruja: los datos del evento salen del caldero como burbujas -->
+  <div class="caldero-escena" id="calderoEscena">
+    <p class="inv-pre">¡Estás invitado!</p>
+    <p class="etiqueta">Open House Molar</p>
+    <h1 class="titulo-halloween">Halloween</h1>
+    <p class="inv-lema">Una mañana de disfraces, diversión y cuidado dental para los peques</p>
+    <ul class="pocion-datos" id="pocionDatos">
+      <li style="--d:.5s;--dy:330px;--f:5.2s"><span class="inv-ico">📅</span><div><b>Sábado 31 de octubre</b><small id="invHorario">9:00 a 14:00 · citas de 20 minutos</small></div></li>
+      <li style="--d:1s;--dy:260px;--f:4.6s"><span class="inv-ico">📍</span><div><b>Torre Metromed · Consultorio 009</b><small>Parque Ciudad Blanca · Galo Plaza Lasso, Quito</small></div></li>
+      <li style="--d:1.5s;--dy:190px;--f:5.6s"><span class="inv-ico">🦷</span><div><b>Profilaxis dental · <span id="invPrecio">$15</span></b><small>Para niños y niñas de 0 a 12 años</small></div></li>
+      <li style="--d:2s;--dy:120px;--f:4.9s"><span class="inv-ico">👻</span><div><b>¡Ven disfrazado!</b><small>El disfraz es obligatorio para los peques</small></div></li>
+    </ul>
+    <div class="caldero-zona" id="calderoZona">
+      <div class="aparicion ap-mago" data-monstruo="colores"></div>
+      <button class="caldero" id="caldero" type="button" aria-label="Caldero de la bruja: ¡tócalo!">
+        <svg viewBox="0 0 300 250" aria-hidden="true">
+          <defs>
+            <radialGradient id="c-luz" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#9BE564" stop-opacity=".55"/><stop offset="1" stop-color="#9BE564" stop-opacity="0"/></radialGradient>
+            <linearGradient id="c-olla" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0E0A1A"/><stop offset=".35" stop-color="#2E2548"/><stop offset=".6" stop-color="#1A1430"/><stop offset="1" stop-color="#0B0716"/></linearGradient>
+            <radialGradient id="c-pocion" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#D4FF8A"/><stop offset=".6" stop-color="#6BE34A"/><stop offset="1" stop-color="#2E9E2A"/></radialGradient>
+          </defs>
+          <ellipse class="c-brillo" cx="150" cy="70" rx="160" ry="90" fill="url(#c-luz)"/>
+          <g class="c-fuego">
+            <path class="llama" d="M108 240c-10-18 4-30 8-44 6 14 18 22 10 44z" fill="#FF7A1A"/>
+            <path class="llama" style="animation-delay:-.3s" d="M138 242c-12-24 6-38 12-58 8 18 20 32 10 58z" fill="#FFB347"/>
+            <path class="llama" style="animation-delay:-.6s" d="M172 240c-8-16 4-28 8-40 6 12 16 22 8 40z" fill="#FF7A1A"/>
+            <path d="M104 246c16-8 30-8 46-2 16-6 30-6 46 2" fill="none" stroke="#5A3A1E" stroke-width="7" stroke-linecap="round"/>
+          </g>
+          <path d="M74 196l-16 40h13l16-34zM226 196l16 40h-13l-16-34z" fill="#0B0716"/>
+          <path d="M34 92h232c8 60-20 118-116 124C54 210 26 152 34 92z" fill="url(#c-olla)" stroke="#05030C" stroke-width="4"/>
+          <path d="M62 116c-4 38 10 64 38 80" stroke="rgba(255,255,255,.13)" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <ellipse cx="150" cy="90" rx="128" ry="24" fill="#2E2548" stroke="#05030C" stroke-width="4"/>
+          <g class="c-cucharon"><path d="M150 96L96 -18" stroke="#7A5530" stroke-width="9" stroke-linecap="round"/><path d="M150 96L96 -18" stroke="#9C7445" stroke-width="3" stroke-linecap="round"/></g>
+          <ellipse class="c-pocion" cx="150" cy="90" rx="112" ry="16" fill="url(#c-pocion)"/>
+          <path d="M66 104q4 18 9 1zM214 108q5 22 11 0zM112 110q3 12 7 0z" fill="#6BE34A" stroke="#2E9E2A" stroke-width="1.5"/>
+          <circle class="c-burb" cx="110" cy="88" r="7" fill="#C6FF7E" stroke="#2E9E2A" stroke-width="2"/>
+          <circle class="c-burb" style="animation-delay:-.7s" cx="172" cy="92" r="9" fill="#C6FF7E" stroke="#2E9E2A" stroke-width="2"/>
+          <circle class="c-burb" style="animation-delay:-1.3s" cx="206" cy="86" r="5" fill="#C6FF7E" stroke="#2E9E2A" stroke-width="2"/>
+          <circle class="c-burb" style="animation-delay:-1.8s" cx="136" cy="84" r="4" fill="#C6FF7E" stroke="#2E9E2A" stroke-width="2"/>
+        </svg>
+      </button>
+      <div class="aparicion ap-bruja" data-monstruo="verde"></div>
+    </div>
+    <div class="cta-burbuja">
       <button class="cta" id="btnReservar" type="button" onclick="abrirReserva()">🎃 Reservar mi cupo</button>
       <div><span class="cupos-pill" id="cuposPill"><span class="punto"></span><span id="cuposTexto">Cargando cupos…</span></span></div>
-    </article>
+    </div>
   </div>
   <p class="cuenta-titulo">Faltan</p>
   <div class="cuenta" aria-label="Cuenta regresiva">
@@ -1391,10 +1423,6 @@ const Murcielagos = (() => {
   };
 })();
 Murcielagos.iniciar();
-document.querySelector('.calabaza-hero').addEventListener('click', e => {
-  const r = e.currentTarget.getBoundingClientRect();
-  Murcielagos.bandada(r.left + r.width / 2, r.top + r.height / 2);
-});
 
 // ── La araña baja y sube al tocarla ──
 document.getElementById('arana').addEventListener('click', e => e.currentTarget.classList.toggle('baja'));
@@ -1753,51 +1781,91 @@ document.querySelectorAll('.aparicion[data-monstruo]').forEach((ap, i) => {
   ap.appendChild(el);
 });
 
-// ── La invitación: la bruja y el mago la traen, se asoman y te hablan ──
+// ── La poción de la bruja: el caldero burbujea, el mago le echa ingredientes y los dos te hablan ──
 (function () {
-  const escena = document.getElementById('invEscena'), inv = document.getElementById('invitacion');
-  const lados = { izq: escena.querySelector('.inv-izq'), der: escena.querySelector('.inv-der') };
+  const escena = document.getElementById('calderoEscena');
+  const zona = document.getElementById('calderoZona');
+  const caldero = document.getElementById('caldero');
+  const lados = { izq: zona.querySelector('.ap-bruja'), der: zona.querySelector('.ap-mago') };
   const frases = {
-    izq: ['¡Te esperamos el 31! 🎃', '¡Ven disfrazado! 👻', '¡Habrá inflables y show de mago! 🎩'],
-    der: ['¡Reserva tu cupo aquí! 👇', '¡Hay dulces y premios! 🍬', '¡Cuida tu sonrisa este Halloween! 🦷'],
+    izq: ['¡Mi poción secreta: sonrisas sanas! 🧪', '¡Te esperamos el 31! 🎃', '¡Ven disfrazado! 👻'],
+    der: ['¡Una pizca de dulces… y cepillo! 🦷', '¡Reserva tu cupo aquí! 👇', '¡Hay premios y dulces! 🍬'],
   };
   const cuenta = { izq: 0, der: 0 };
-  setTimeout(() => escena.classList.add('lista'), 250);
-  setTimeout(() => { inv.style.transition = 'transform .3s ease-out, opacity .6s ease'; }, 1400);   // después de entrar, la inclinación responde rápido
+  const monstruo = lado => lados[lado] && lados[lado].querySelector('.monstruo');
+  const saltar = m => { if (m) { m.classList.remove('salta'); void m.offsetWidth; m.classList.add('salta'); } };
+
+  // Al tocar el caldero: murciélagos, explosión de burbujas y los dos saltan
+  caldero.addEventListener('click', () => {
+    const r = caldero.getBoundingClientRect();
+    Murcielagos.bandada(r.left + r.width / 2, r.top + r.height * 0.35);
+    for (let i = 0; i < 18; i++) burbuja(true);
+    saltar(monstruo('izq')); saltar(monstruo('der'));
+  });
   if (SIN_MOVIMIENTO) return;
 
+  let visible = true;
+  new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(zona);
+
   function hablar(lado) {
-    const ap = lados[lado], m = ap && ap.querySelector('.monstruo');
+    const ap = lados[lado], m = monstruo(lado);
     if (!m) return;
     m.querySelector('.m-globo').textContent = frases[lado][cuenta[lado]++ % frases[lado].length];
-    m.classList.add('habla'); ap.classList.add('asomado'); ap.style.zIndex = 3;   // el globo queda sobre la tarjeta
+    m.classList.add('habla'); ap.classList.add('asomado'); ap.style.zIndex = 5;
     if (m._titere) Titeres.saludar(m._titere);
     setTimeout(() => { m.classList.remove('habla'); ap.classList.remove('asomado'); ap.style.zIndex = ''; }, 3000);
   }
   let turno = 0;
-  setTimeout(() => hablar('izq'), 1700);
-  setInterval(() => {
-    const r = inv.getBoundingClientRect();
-    if (document.hidden || r.bottom < 0 || r.top > innerHeight) return;
-    hablar(turno++ % 2 ? 'izq' : 'der');
-  }, 5200);
+  setTimeout(() => hablar('izq'), 3200);
+  setInterval(() => { if (visible && !document.hidden) hablar(turno++ % 2 ? 'izq' : 'der'); }, 5400);
+
+  // Burbujas y vapor que suben de la boca del caldero (la boca está al 36 % de alto)
+  function burbuja(fuerte) {
+    const W = zona.clientWidth, H = caldero.clientHeight;
+    const b = document.createElement('span');
+    const tam = fuerte ? azar(8, 22) : azar(5, 14);
+    b.className = 'burbuja-libre';
+    b.style.width = b.style.height = tam + 'px';
+    b.style.left = (W * azar(0.25, 0.72)) + 'px';
+    b.style.top = (H * 0.33) + 'px';
+    zona.appendChild(b);
+    const sube = fuerte ? azar(140, 260) : azar(80, 170), deriva = azar(-40, 40);
+    const anim = b.animate([
+      { transform: 'translate(0, 0) scale(.4)', opacity: 0 },
+      { transform: `translate(${deriva * 0.4}px, ${-sube * 0.3}px) scale(1)`, opacity: 0.95, offset: 0.25 },
+      { transform: `translate(${deriva}px, ${-sube}px) scale(1.15)`, opacity: 0 },
+    ], { duration: azar(1400, 2400), easing: 'ease-out' });
+    anim.onfinish = () => b.remove();
+  }
+  setInterval(() => { if (visible && !document.hidden) burbuja(false); }, 320);
+
+  // El mago lanza ingredientes al caldero y salpican
+  const INGREDIENTES = ['🦷', '🍬', '⭐', '🍭', '🦇', '🍫'];
+  let n = 0;
+  function lanzar() {
+    if (!visible || document.hidden) return;
+    const W = zona.clientWidth, H = caldero.clientHeight;
+    const ing = document.createElement('span');
+    ing.className = 'ingrediente';
+    ing.textContent = INGREDIENTES[n++ % INGREDIENTES.length];
+    zona.appendChild(ing);
+    const x0 = W * 1.05, y0 = -H * 0.25, x1 = W * azar(0.4, 0.6), y1 = H * 0.3;
+    const anim = ing.animate([
+      { transform: `translate(${x0}px, ${y0}px) rotate(0deg) scale(1)`, opacity: 0 },
+      { transform: `translate(${(x0 + x1) / 2}px, ${y0 - H * 0.45}px) rotate(200deg) scale(1.1)`, opacity: 1, offset: 0.45 },
+      { transform: `translate(${x1}px, ${y1}px) rotate(420deg) scale(.5)`, opacity: 1 },
+    ], { duration: 1100, easing: 'cubic-bezier(.3, .1, .6, 1)' });
+    anim.onfinish = () => {
+      ing.remove();
+      caldero.classList.add('chapoteo');
+      setTimeout(() => caldero.classList.remove('chapoteo'), 260);
+      for (let i = 0; i < 6; i++) burbuja(true);
+    };
+  }
+  setTimeout(() => { lanzar(); setInterval(lanzar, 4200); }, 2800);
 
   // Al pasar por el botón de reservar, los dos saltan de emoción
-  document.getElementById('btnReservar').addEventListener('mouseenter', () => {
-    Object.values(lados).forEach(ap => {
-      const m = ap.querySelector('.monstruo');
-      if (m) { m.classList.remove('salta'); void m.offsetWidth; m.classList.add('salta'); }
-    });
-  });
-
-  // La tarjeta se inclina un poco hacia el mouse
-  addEventListener('pointermove', e => {
-    if (!escena.classList.contains('lista')) return;
-    const r = inv.getBoundingClientRect();
-    if (r.bottom < 0 || r.top > innerHeight) return;
-    const x = (e.clientX - (r.left + r.width / 2)) / r.width, y = (e.clientY - (r.top + r.height / 2)) / r.height;
-    inv.style.transform = `perspective(1200px) rotateY(${(x * 6).toFixed(2)}deg) rotateX(${(-y * 5).toFixed(2)}deg)`;
-  }, { passive: true });
+  document.getElementById('btnReservar').addEventListener('mouseenter', () => { saltar(monstruo('izq')); saltar(monstruo('der')); });
 })();
 
 (function () {
