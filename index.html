@@ -907,11 +907,12 @@ function limpiarErrores() {
 // el horario (la base usa los datos de su ficha). Si es nuevo, formulario.
 let registrado = null;       // respuesta de publico_oh_paciente
 let _cedulaTimer = null, _cedulaConsulta = 0;
-/** Cédula ecuatoriana: provincia, tercer dígito y dígito verificador (módulo 10). */
+/** Cédula ecuatoriana: provincia (01-24 o 30) y dígito verificador (módulo 10).
+ *  El tercer dígito NO se restringe: las cédulas nuevas de Pichincha empiezan con 176… (niños recientes). */
 function cedulaValida(c) {
   if (!/^\d{10}$/.test(c)) return false;
   const prov = Number(c.slice(0, 2));
-  if (!((prov >= 1 && prov <= 24) || prov === 30) || Number(c[2]) > 5) return false;
+  if (!((prov >= 1 && prov <= 24) || prov === 30)) return false;
   let suma = 0;
   for (let i = 0; i < 9; i++) {
     let d = Number(c[i]) * (i % 2 === 0 ? 2 : 1);
