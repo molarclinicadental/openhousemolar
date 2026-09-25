@@ -10,9 +10,9 @@
   setTimeout(function () { if (!window.__pocionLista) document.documentElement.classList.add("mostrar-todo"); }, 7000);
 </script>
 <title>Open House Halloween · Molar Clínica Dental</title>
-<meta name="description" content="Open House Molar edición Halloween. Sábado 31 de octubre, 9:00 a 14:00. Profilaxis dental por $15, inflables, show de mago, bocaditos y premios para niños de 0 a 12 años. ¡Ven disfrazado!">
+<meta name="description" content="Open House Molar edición Halloween. Sábado 31 de octubre, 9:00 a 14:00. Profilaxis + fluorización por $15, inflables, show de magia, bocaditos y premios para niños de 0 a 12 años. ¡Ven disfrazado!">
 <meta property="og:title" content="Open House Halloween · Molar">
-<meta property="og:description" content="Sábado 31 de octubre · ¡Dulce o premio! Profilaxis dental por $15, inflables, show de mago y premios. Disfraz obligatorio.">
+<meta property="og:description" content="Sábado 31 de octubre · ¡Dulce o premio! Profilaxis + fluorización por $15, inflables, show de magia y premios. Disfraz obligatorio.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#1A1030">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%83%3C/text%3E%3C/svg%3E">
@@ -56,8 +56,11 @@
   .luna { position: absolute; top: 60px; right: 7%; width: 120px; height: 120px; border-radius: 50%;
           background: radial-gradient(circle at 35% 35%, #FFFBEA, #FFE7A3 60%, #F7C967);
           box-shadow: 0 0 80px 20px rgba(255, 231, 163, .25); }
-  .luna { animation: brillo-luna 6s ease-in-out infinite; }
-  @keyframes brillo-luna { 0%, 100% { box-shadow: 0 0 80px 20px rgba(255, 231, 163, .22); } 50% { box-shadow: 0 0 110px 34px rgba(255, 231, 163, .34); } }
+  /* El brillo de la luna es una capa aparte que solo cambia de opacidad (no se repinta) */
+  .luna::after { content: ""; position: absolute; inset: -60px; border-radius: 50%; pointer-events: none;
+                 background: radial-gradient(circle, rgba(255, 231, 163, .38) 0%, rgba(255, 231, 163, .12) 45%, transparent 70%);
+                 animation: brillo-luna 6s ease-in-out infinite; will-change: opacity; }
+  @keyframes brillo-luna { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
   @media (max-width: 640px) { .luna { width: 58px; height: 58px; top: 16px; right: auto; left: 16px; opacity: .55; box-shadow: 0 0 40px 10px rgba(255, 231, 163, .18); animation: none; } }
   @keyframes parpadeo { 0%, 100% { opacity: .2; } 50% { opacity: .9; } }
   @keyframes flotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -76,7 +79,7 @@
   /* Murciélagos: vuelan por toda la pantalla (los mueve el script) */
   .murcielagos { position: fixed; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
   .bat { position: absolute; left: 0; top: 0; will-change: transform; color: #0B0616;
-         filter: drop-shadow(0 0 1.5px rgba(214, 200, 245, .75)) drop-shadow(0 0 10px rgba(142, 92, 247, .55)); }
+         }
   .bat svg { display: block; width: 100%; height: 100%; overflow: visible; }
   .bat .ala-i, .bat .ala-d { transform-origin: 50px 28px; animation: aleteo var(--aleteo, .22s) ease-in-out infinite alternate; }
   @keyframes aleteo { from { transform: scaleY(1); } to { transform: scaleY(-.55); } }
@@ -135,7 +138,7 @@
   .m-cuerpo { position: relative; transform-style: preserve-3d; will-change: transform; }
   /* El títere se dibuja en un lienzo más grande que el monstruo (deja lugar al sombrero, alas y saludo) */
   .m-lienzo { position: absolute; left: -30%; top: -35%; width: 160%; height: 140%; pointer-events: none;
-              filter: drop-shadow(var(--sx, 0px) 12px 10px rgba(0, 0, 0, .5)) drop-shadow(0 0 16px rgba(255, 122, 26, .22)); }
+              }
 
   /* La poción de la bruja: título, datos que salen del caldero como burbujas y el caldero */
   .caldero-escena { position: relative; max-width: 820px; margin: 26px auto 0; }
@@ -145,7 +148,7 @@
                   text-transform: uppercase; color: var(--luna); text-align: center; margin-top: 14px; padding-left: .2em;
                   text-shadow: 0 2px 14px rgba(255, 162, 76, .35); }
   .caldero-escena .titulo-halloween { display: block; width: 100%; text-align: center; margin: 2px auto 0; font-size: clamp(4.2rem, 18vw, 10rem); line-height: .9; animation: vapor-titulo 1.3s ease .15s both, titilar 7s ease-in-out 1.5s infinite; }
-  @keyframes vapor-titulo { from { opacity: 0; filter: blur(14px); transform: translateY(24px) scale(.94); } to { opacity: 1; filter: none; transform: none; } }
+  @keyframes vapor-titulo { from { opacity: 0; transform: translateY(24px) scale(.94); } to { opacity: 1; transform: none; } }
   .inv-lema { color: var(--texto); font-size: clamp(1.15rem, 3.6vw, 1.4rem); font-weight: 700; max-width: 520px; margin: 10px auto 0; }
   /* Datos del evento: burbujas grandes que el caldero lanza una por una (después de hervir un momento) */
   .pocion-datos { list-style: none; display: grid; gap: 14px; width: min(600px, 100%); margin: 24px auto 0; position: relative; z-index: 4; }
@@ -307,15 +310,13 @@
   .cta:hover { transform: translateY(-2px); }
   .cta:active { transform: translateY(3px); box-shadow: 0 3px 0 #B84A00; }
   .cta:disabled { filter: grayscale(.7); cursor: not-allowed; transform: none; animation: none; }
-  .cta { animation: latido 2.6s ease-in-out infinite; }
-  @keyframes latido { 0%, 100% { box-shadow: 0 6px 0 #B84A00, 0 14px 30px rgba(255, 122, 26, .35), 0 0 0 0 rgba(255, 122, 26, .45); }
-                      50% { box-shadow: 0 6px 0 #B84A00, 0 14px 30px rgba(255, 122, 26, .5), 0 0 0 14px rgba(255, 122, 26, 0); } }
+  .cta { position: relative; }
+  .cta::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 0 3px rgba(255, 122, 26, .55);
+                animation: latido 2.6s ease-out infinite; will-change: transform, opacity; }
+  .cta:disabled::after { animation: none; opacity: 0; }
+  @keyframes latido { 0% { transform: scale(1); opacity: .9; } 70%, 100% { transform: scale(1.12, 1.35); opacity: 0; } }
   .titulo-halloween { animation: titilar 7s ease-in-out infinite; }
-  @keyframes titilar {
-    0%, 100%, 44%, 50%, 56% { text-shadow: 0 4px 0 #B84A00, 0 12px 40px rgba(255, 122, 26, .35); opacity: 1; }
-    46%, 54% { text-shadow: 0 4px 0 #B84A00, 0 0 70px rgba(255, 122, 26, .8); opacity: .85; }
-    48% { opacity: .55; }
-  }
+  @keyframes titilar { 0%, 44%, 50%, 56%, 100% { opacity: 1; } 46%, 54% { opacity: .82; } 48% { opacity: .55; } }
   .cuenta b.salto { animation: salto .35s ease; }
   @keyframes salto { 0% { transform: scale(1); } 40% { transform: scale(1.18); color: var(--calabaza-2); } 100% { transform: scale(1); } }
   .tarjeta { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
@@ -498,7 +499,7 @@
     <p class="inv-lema">Disfraces, diversión y sonrisas sanas 🎃</p>
     <ul class="pocion-datos" id="pocionDatos">
       <li style="--d:.5s;--dy:220px;--f:5.2s"><small>Sábado</small><b>31 oct</b></li>
-      <li style="--d:1s;--dy:220px;--f:4.6s"><small>Profilaxis dental</small><b id="invPrecio">$15</b></li>
+      <li style="--d:1s;--dy:220px;--f:4.6s"><small>Profilaxis + fluorización</small><b id="invPrecio">$15</b></li>
     </ul>
     <div class="caldero-zona" id="calderoZona">
       <div class="aparicion ap-mago" data-monstruo="colores"></div>
@@ -555,7 +556,7 @@
     <h2 class="sec-titulo">Reserva en 3 pasos</h2>
     <ol class="pasos-reserva">
       <li class="paso-r"><span class="num">1</span><div><h3>Cédula del niño</h3><p>Si ya es paciente, lo reconocemos.</p></div></li>
-      <li class="paso-r"><span class="num">2</span><div><h3>Elige el horario</h3><p>Citas de 20 minutos.</p></div></li>
+      <li class="paso-r"><span class="num">2</span><div><h3>Elige el horario</h3><p>El que mejor te quede.</p></div></li>
       <li class="paso-r"><span class="num">3</span><div><h3>Tu código</h3><p>OH + los 4 últimos dígitos de la cédula del niño. Dilo en recepción.</p></div></li>
     </ol>
     <div class="centrado"><button class="cta cta-sec" type="button" onclick="abrirReserva()">Reservar ahora →</button></div>
@@ -579,9 +580,11 @@
   <section class="contenedor incluye">
     <h2 class="sec-titulo">Lo que habrá ese día</h2>
     <div class="rejilla">
-      <div class="tarjeta"><div class="ico">🦷</div><div class="val">Profilaxis</div><div class="det">Limpieza dental completa</div></div>
+      <div class="tarjeta"><div class="ico">🦷</div><div class="val">Profilaxis + flúor</div><div class="det">Limpieza dental y fluorización</div></div>
       <div class="tarjeta"><div class="ico">🎪</div><div class="val">Inflables</div><div class="det">Diversión sin parar</div></div>
-      <div class="tarjeta"><div class="ico">🎩</div><div class="val">Show de mago</div><div class="det">Magia y sorpresas</div></div>
+      <div class="tarjeta"><div class="ico">🎩</div><div class="val">Show de magia</div><div class="det">Magia y sorpresas</div></div>
+      <div class="tarjeta"><div class="ico">🎭</div><div class="val">Cabezones</div><div class="det">Personajes gigantes para fotos</div></div>
+      <div class="tarjeta"><div class="ico">💀</div><div class="val">Esqueletos</div><div class="det">Sustos divertidos para los peques</div></div>
       <div class="tarjeta"><div class="ico">🎨</div><div class="val">Pinta caritas</div><div class="det">Calabazas, gatitos y fantasmas</div></div>
       <div class="tarjeta"><div class="ico">🧁</div><div class="val">Bocaditos</div><div class="det">Para reponer energía</div></div>
       <div class="tarjeta"><div class="ico">🎁</div><div class="val">Premios</div><div class="det">Regalitos para los asistentes</div></div>
@@ -612,10 +615,10 @@
     <div class="aparicion ap-info" data-monstruo="cafe"></div>
     <h2 class="sec-titulo">Detalles del evento</h2>
     <div class="rejilla">
-      <div class="tarjeta"><div class="ico">📅</div><div class="lbl">Fecha y hora</div><div class="val">Sábado 31 de octubre</div><div class="det" id="infoHorario">9:00 a 14:00 · citas de 20 minutos</div></div>
+      <div class="tarjeta"><div class="ico">📅</div><div class="lbl">Fecha y hora</div><div class="val">Sábado 31 de octubre</div><div class="det" id="infoHorario">9:00 a 14:00</div></div>
       <div class="tarjeta"><div class="ico">📍</div><div class="lbl">Ubicación</div><div class="val">Torre Metromed</div><div class="det">Consultorio 009 · Galo Plaza Lasso</div></div>
       <div class="tarjeta"><div class="ico">🧒</div><div class="lbl">Para quién</div><div class="val">Niños y niñas</div><div class="det">De 0 a 12 años</div></div>
-      <div class="tarjeta"><div class="ico">🦷</div><div class="lbl">Precio</div><div class="val" id="infoPrecio">$15</div><div class="det">Profilaxis dental · cupos limitados</div></div>
+      <div class="tarjeta"><div class="ico">🦷</div><div class="lbl">Precio</div><div class="val" id="infoPrecio">$15</div><div class="det">Profilaxis + fluorización · cupos limitados</div></div>
     </div>
   </section>
 
@@ -729,7 +732,7 @@
       <div class="acciones" id="accionesPaso1" hidden><button class="b-pri" type="button" id="btnPaso1" onclick="paso1Siguiente()">Continuar →</button></div>
     </div>
     <div class="paso" id="paso2">
-      <p class="ayuda">🕒 Elige el horario. Cada cita dura 20 minutos.</p>
+      <p class="ayuda">🕒 Elige el horario que mejor te quede.</p>
       <div class="turnos" id="turnos"></div>
       <div class="aviso" id="avisoTurnos"></div>
       <div class="acciones"><button class="b-sec" type="button" onclick="irPaso(1)">← Atrás</button>
@@ -743,7 +746,7 @@
         <div><span>Celular</span><b id="resTel"></b></div>
         <div><span>Fecha</span><b>Sábado 31 de octubre</b></div>
         <div><span>Hora</span><b id="resHora"></b></div>
-        <div><span>Servicio</span><b id="resServicio">Profilaxis dental</b></div>
+        <div><span>Servicio</span><b id="resServicio">Profilaxis + fluorización</b></div>
       </div>
       <p class="precio"><span id="resPrecioTexto">Valor a pagar el día del evento:</span> <b id="resPrecio">$15</b></p>
 
@@ -779,7 +782,8 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js"></script>
+<!-- La librería de la base se carga sin frenar la página; al llegar, se leen los cupos -->
+<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js" onload="window.__sbListo && window.__sbListo()"></script>
 <script>
 // ════════════════════════════════════════════════════════════
 //  El evento se configura en la base (tabla "eventos", SQL 27 de Molar):
@@ -805,20 +809,23 @@ function cliente() {
 (function () {
   const cont = document.getElementById('estrellas');
   let html = '';
-  for (let i = 0; i < 60; i++) {
+  const cuantas = innerWidth < 640 ? 26 : 44;              // menos estrellas en el celular
+  for (let i = 0; i < cuantas; i++) {
     html += `<span class="estrella" style="top:${Math.random() * 100}%;left:${Math.random() * 100}%;animation-delay:${(Math.random() * 3).toFixed(2)}s"></span>`;
   }
   cont.innerHTML = html;
 })();
 
 // ── Cuenta regresiva ──
+const MENOS_MOVIMIENTO = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 function tic() {
   const d = FECHA_EVENTO - new Date();
   const set = (id, v) => {
     const el = document.getElementById(id), txt = String(Math.max(0, v)).padStart(2, '0');
     if (el.textContent === txt) return;
     el.textContent = txt;
-    el.classList.remove('salto'); void el.offsetWidth; el.classList.add('salto');   // pequeño salto al cambiar
+    // Pequeño salto al cambiar (animación directa: no obliga a recalcular la página)
+    if (el.animate && !MENOS_MOVIMIENTO) el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.18)', color: '#FFA24C' }, { transform: 'scale(1)' }], { duration: 350, easing: 'ease' });
   };
   if (d <= 0) { ['cDias', 'cHoras', 'cMin', 'cSeg'].forEach(id => set(id, 0)); return; }
   set('cDias', Math.floor(d / 86400000));
@@ -848,15 +855,15 @@ async function cargarEvento() {
     txt.innerHTML = `<b>${libres}</b> de ${evento.cupos_total} cupos disponibles`;
     btn.disabled = false;
   }
-  document.getElementById('infoHorario').textContent = `${evento.hora_inicio} a ${evento.hora_fin} · citas de ${evento.duracion_min} minutos`;
+  document.getElementById('infoHorario').textContent = `${evento.hora_inicio} a ${evento.hora_fin}`;
   document.getElementById('infoPrecio').textContent = '$' + Number(evento.precio);
   const invHorario = document.getElementById('invHorario');
-  if (invHorario) invHorario.textContent = `${evento.hora_inicio} a ${evento.hora_fin} · citas de ${evento.duracion_min} minutos`;
+  if (invHorario) invHorario.textContent = `${evento.hora_inicio} a ${evento.hora_fin}`;
   document.getElementById('invPrecio').textContent = '$' + Number(evento.precio);
   document.getElementById('resPrecio').textContent = '$' + Number(evento.precio);
   document.getElementById('resServicio').textContent = evento.servicio;
 }
-cargarEvento();
+if (window.supabase) cargarEvento(); else window.__sbListo = cargarEvento;
 setInterval(cargarEvento, 60000);
 
 // ── Ventana de reserva ──
@@ -1379,9 +1386,9 @@ const Murcielagos = (() => {
   const cont = document.getElementById('murcielagos');
   const lista = [];
   let W = innerWidth, H = innerHeight, antes = 0, puntero = null;
-  const SVG = '<svg viewBox="0 0 100 60"><path class="ala-i" fill="currentColor" d="M46 26C36 10 18 6 2 14c8 4 10 12 8 20 8-4 16-2 20 6 4-6 10-8 16-6z"/>' +
-    '<path class="ala-d" fill="currentColor" d="M54 26c10-16 28-20 44-12-8 4-10 12-8 20-8-4-16-2-20 6-4-6-10-8-16-6z"/>' +
-    '<ellipse cx="50" cy="31" rx="7" ry="10" fill="currentColor"/><path fill="currentColor" d="M44 23l1-11 4 8zM56 23l-1-11-4 8z"/>' +
+  const SVG = '<svg viewBox="0 0 100 60"><path class="ala-i" fill="currentColor" stroke="#B9A2EE" stroke-width="2.4" stroke-linejoin="round" d="M46 26C36 10 18 6 2 14c8 4 10 12 8 20 8-4 16-2 20 6 4-6 10-8 16-6z"/>' +
+    '<path class="ala-d" fill="currentColor" stroke="#B9A2EE" stroke-width="2.4" stroke-linejoin="round" d="M54 26c10-16 28-20 44-12-8 4-10 12-8 20-8-4-16-2-20 6-4-6-10-8-16-6z"/>' +
+    '<ellipse cx="50" cy="31" rx="7" ry="10" fill="currentColor" stroke="#B9A2EE" stroke-width="2"/><path fill="currentColor" d="M44 23l1-11 4 8zM56 23l-1-11-4 8z"/>' +
     '<circle cx="47.5" cy="25" r="1.4" fill="#FF7A1A"/><circle cx="52.5" cy="25" r="1.4" fill="#FF7A1A"/></svg>';
 
   function destino(b) {
@@ -1465,7 +1472,9 @@ const Murcielagos = (() => {
     },
   };
 })();
-Murcielagos.iniciar();
+// Los murciélagos arrancan cuando la página ya respondió (no compiten con la carga)
+const alRato = window.requestIdleCallback ? (f, t) => window.requestIdleCallback(f, { timeout: t }) : (f, t) => setTimeout(f, Math.min(t, 900));
+alRato(() => Murcielagos.iniciar(), 1500);
 
 // ── La araña baja y sube al tocarla ──
 document.getElementById('arana').addEventListener('click', e => e.currentTarget.classList.toggle('baja'));
@@ -1477,7 +1486,7 @@ function pintarAdornos() {
   const cont = document.getElementById('adornos');
   const alto = document.documentElement.scrollHeight, chico = innerWidth < 640;
   const figuras = ['s-fantasma', 's-calabaza', 's-sombrero', 's-gato', 's-caldero', 's-diente', 's-escoba', 's-murcielago', 's-fantasma', 's-calabaza'];
-  const n = Math.max(12, Math.min(46, Math.round(alto / (chico ? 210 : 160))));
+  const n = Math.max(10, Math.min(30, Math.round(alto / (chico ? 300 : 220))));   // suficientes para decorar, sin recargar
   let html = '';
   // Telarañas fijas en las esquinas de arriba
   if (!chico)   // en el celular esa esquina es de la luna
@@ -1679,9 +1688,19 @@ const Titeres = (() => {
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
     gl.uniform1i(loc.uTex, 0);
   }
-  try { prepararGL(); } catch (e) { console.warn('[Open House] títeres sin WebGL:', e); gl = null; }
+  // El motor gráfico se prepara recién cuando hace falta el primer monstruo (no frena la apertura de la página)
+  let glPedido = false;
+  function asegurarGL() {
+    if (glPedido) return;
+    glPedido = true;
+    try { prepararGL(); } catch (e) { console.warn('[Open House] títeres sin WebGL:', e); gl = null; }
+  }
 
-  const cargar = src => new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mal; i.src = src; });
+  // La imagen se decodifica fuera del hilo principal (no traba la página al dibujarla)
+  const cargar = src => new Promise((ok, mal) => {
+    const i = new Image(); i.src = src;
+    (i.decode ? i.decode() : new Promise((a, b) => { i.onload = a; i.onerror = b; })).then(() => ok(i), mal);
+  });
 
   // Monstruo + disfraz en una sola imagen (con margen para sombreros, alas y el saludo)
   function componer(m) {
@@ -1724,7 +1743,7 @@ const Titeres = (() => {
 
   function medir(it) {
     const r = it.canvas.getBoundingClientRect();
-    const esc = Math.min(Math.min(devicePixelRatio || 1, 2), LADO / Math.max(r.width, 1), LADO / Math.max(r.height, 1));
+    const esc = Math.min(Math.min(devicePixelRatio || 1, 1.5), LADO / Math.max(r.width, 1), LADO / Math.max(r.height, 1));
     const w = Math.max(1, Math.round(r.width * esc)), h = Math.max(1, Math.round(r.height * esc));
     if (it.canvas.width !== w || it.canvas.height !== h) { it.canvas.width = w; it.canvas.height = h; it.quieto = false; }
   }
@@ -1754,8 +1773,11 @@ const Titeres = (() => {
     it.ctx.drawImage(gl.canvas, 0, LADO - h, w, h, 0, 0, w, h);
   }
 
-  let corriendo = false;
+  let corriendo = false, ultimoCuadro = 0;
   function cuadro(ahora) {
+    // 30 cuadros por segundo alcanzan para un títere y dejan la mitad del trabajo libre
+    if (ahora - ultimoCuadro < 31) { requestAnimationFrame(cuadro); return; }
+    ultimoCuadro = ahora;
     const t = ahora / 1000;
     let alguno = false;
     for (const it of lista) {
@@ -1763,33 +1785,40 @@ const Titeres = (() => {
       alguno = true;
       // Saluda un rato cada tanto (y cuando lo tocan)
       if (ahora > it.proximoSaludo) { it.saludaHasta = ahora + azar(1800, 2600); it.proximoSaludo = ahora + azar(6000, 11000); }
-      it.ola += ((ahora < it.saludaHasta ? 1 : 0) - it.ola) * 0.06;
+      it.ola += ((ahora < it.saludaHasta ? 1 : 0) - it.ola) * 0.12;
       dibujar(it, t);
     }
     if (alguno && gl) requestAnimationFrame(cuadro); else corriendo = false;
   }
   function arrancar() { if (!corriendo && gl) { corriendo = true; requestAnimationFrame(cuadro); } }
 
+  // Cada monstruo se prepara (imagen + disfraz + textura) recién cuando está por aparecer en pantalla
+  function preparar(it) {
+    if (it.preparando) return;
+    asegurarGL();
+    it.preparando = true;
+    componer(it.m).then(d => {
+      it.dibujo = d;
+      if (gl) it.tex = textura(it.m, d);
+      medir(it);
+      if (it.visible) { if (gl) arrancar(); else dibujarQuieto(it); }
+    }).catch(e => console.warn('[Open House] monstruo:', e));
+  }
+
   const io = 'IntersectionObserver' in window ? new IntersectionObserver(entradas => entradas.forEach(en => {
     const it = lista.find(x => x.canvas === en.target);
     if (!it) return;
     it.visible = en.isIntersecting;
-    if (it.visible) { medir(it); if (!gl) dibujarQuieto(it); else arrancar(); }
-  }), { rootMargin: '80px' }) : null;
+    if (it.visible) { medir(it); alRato(() => { preparar(it); if (gl) arrancar(); }, 700); }
+  }), { rootMargin: '300px' }) : null;
   addEventListener('resize', () => lista.forEach(it => { if (it.visible) { medir(it); if (!gl) dibujarQuieto(it); } }), { passive: true });
 
   return {
     registrar(m, canvas) {
       const it = { m, canvas, ctx: canvas.getContext('2d'), visible: !io, dibujo: null, tex: null, ola: 0, saludaHasta: 0,
-                   proximoSaludo: performance.now() + azar(1500, 7000), fase: azar(0, 20), quieto: false };
+                   proximoSaludo: performance.now() + azar(1500, 7000), fase: azar(0, 20), quieto: false, preparando: false };
       lista.push(it);
-      componer(m).then(d => {
-        it.dibujo = d;
-        if (gl) it.tex = textura(m, d);
-        medir(it);
-        if (it.visible) { if (gl) arrancar(); else dibujarQuieto(it); }
-      }).catch(e => console.warn('[Open House] monstruo:', e));
-      if (io) io.observe(canvas); else medir(it);
+      if (io) io.observe(canvas); else { medir(it); preparar(it); }
       return it;
     },
     quitar(canvas) { const i = lista.findIndex(x => x.canvas === canvas); if (i >= 0) { io && io.unobserve(canvas); lista.splice(i, 1); } },
@@ -1839,6 +1868,14 @@ const Pocion = (() => {
   const cucharon = document.getElementById('cucharon');
   const svg = caldero.querySelector('svg');
   const ctx = lienzo.getContext('2d');
+  // Imagen difusa del vapor, preparada una sola vez
+  const SOPLO = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(210,255,190,1)'); gr.addColorStop(1, 'rgba(210,255,190,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    return c;
+  })();
   const X0 = -60, Y0 = -200, AW = 420;                 // el lienzo cubre x -60…360, y -200…260
   const S = { cx: 150, cy: 90, rx: 110, ry: 15 };        // superficie de la poción
   const SUELO = 246, G = 520;
@@ -1862,7 +1899,7 @@ const Pocion = (() => {
   const dentro = (x, y, k = 1) => ((x - S.cx) / (S.rx * k)) ** 2 + ((y - S.cy) / (S.ry * k)) ** 2 <= 1;
 
   function medir() {
-    const r = lienzo.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    const r = lienzo.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 1.5);
     lienzo.width = Math.max(1, Math.round(r.width * dpr)); lienzo.height = Math.max(1, Math.round(r.height * dpr));
     esc = lienzo.width / AW;
   }
@@ -1908,7 +1945,7 @@ const Pocion = (() => {
       const a = azar(0, Math.PI * 2), k = Math.sqrt(Math.random()) * 0.8;
       burbujas.push({ x: S.cx + Math.cos(a) * S.rx * k, y: S.cy + Math.sin(a) * S.ry * k, r: 0.5, max: azar(2.5, 8), v: azar(5, 12) });
     }
-    if ((tVapor -= dt) <= 0) { tVapor = 0.16; soplo(S.cx + azar(-80, 80)); }
+    if ((tVapor -= dt) <= 0) { tVapor = 0.22; soplo(S.cx + azar(-80, 80)); }
     if ((tRebalse -= dt) <= 0) { tRebalse = azar(2.5, 5); rebalsar(); }
 
     for (let i = burbujas.length - 1; i >= 0; i--) {
@@ -1993,11 +2030,11 @@ const Pocion = (() => {
     ctx.clearRect(0, 0, lienzo.width, lienzo.height);
     ctx.setTransform(esc, 0, 0, esc, -X0 * esc, -Y0 * esc);
 
-    for (const v of vapor) {                              // vapor
-      const g = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, v.r);
-      g.addColorStop(0, `rgba(210,255,190,${(v.a * 0.5).toFixed(3)})`); g.addColorStop(1, 'rgba(210,255,190,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(v.x, v.y, v.r, 0, Math.PI * 2); ctx.fill();
+    for (const v of vapor) {                              // vapor: una misma imagen difusa, dibujada con transparencia
+      ctx.globalAlpha = Math.max(0, v.a * 0.5);
+      ctx.drawImage(SOPLO, v.x - v.r, v.y - v.r, v.r * 2, v.r * 2);
     }
+    ctx.globalAlpha = 1;
     for (const c of charcos) {                            // charcos en el suelo
       ctx.globalAlpha = Math.max(0, c.a);
       ctx.beginPath(); ctx.ellipse(c.x, SUELO, c.r, c.r * 0.24, 0, 0, Math.PI * 2);
@@ -2080,7 +2117,7 @@ const Pocion = (() => {
   const lados = { izq: zona.querySelector('.ap-bruja'), der: zona.querySelector('.ap-mago') };
   const frases = {
     izq: ['¡Mi poción secreta: sonrisas sanas! 🧪', '¡Te esperamos el 31! 🎃', '¡Ven disfrazado! 👻'],
-    der: ['¡Cambia tus dulces por premios! 🎁', '¡Reserva tu cupo aquí! 👇', '¡Hay premios y show de mago! 🎩'],
+    der: ['¡Cambia tus dulces por premios! 🎁', '¡Reserva tu cupo aquí! 👇', '¡Hay premios y show de magia! 🎩'],
   };
   const cuenta = { izq: 0, der: 0 };
   const monstruo = lado => lados[lado] && lados[lado].querySelector('.monstruo');
@@ -2164,26 +2201,37 @@ const Pocion = (() => {
   });
   if (SIN_MOVIMIENTO) { escenario.classList.add('visto'); return; }
 
-  // Todos los monstruos (los del escenario y los repartidos) giran en 3D hacia el mouse o el dedo
-  const todos = () => [...document.querySelectorAll('.monstruo:not(.asoma)')].map(el => el._giro || (el._giro = { el, cuerpo: el.querySelector('.m-cuerpo'), rx: 0, ry: 0, fase: azar(0, 6) }));
-  let puntero = null;
+  // Todos los monstruos (los del escenario y los repartidos) giran en 3D hacia el mouse o el dedo.
+  // Solo se calculan los que están en pantalla, y su posición se mide junta (no en cada cuadro).
+  const giros = new Map();
+  const ioGiro = new IntersectionObserver(ents => ents.forEach(en => {
+    const g = giros.get(en.target);
+    if (g) { g.visible = en.isIntersecting; g.r = en.boundingClientRect; }
+  }));
+  document.querySelectorAll('.monstruo:not(.asoma)').forEach(el => {
+    giros.set(el, { el, cuerpo: el.querySelector('.m-cuerpo'), rx: 0, ry: 0, fase: azar(0, 6), visible: false, r: null });
+    ioGiro.observe(el);
+  });
+  let puntero = null, remedir = true;
   addEventListener('pointermove', e => { puntero = { x: e.clientX, y: e.clientY, t: performance.now() }; }, { passive: true });
+  addEventListener('scroll', () => { remedir = true; }, { passive: true });
+  addEventListener('resize', () => { remedir = true; }, { passive: true });
   function cuadro(ahora) {
     const t = ahora / 1000, activo = puntero && ahora - puntero.t < 2500;
-    for (const m of todos()) {
-      const r = m.el.getBoundingClientRect();
-      if (r.bottom < -50 || r.top > innerHeight + 50) continue;       // fuera de pantalla: no se calcula
+    const vis = [];
+    giros.forEach(g => { if (g.visible) vis.push(g); });
+    if (activo && remedir) { vis.forEach(g => { g.r = g.el.getBoundingClientRect(); }); remedir = false; }   // lecturas juntas, antes de escribir
+    for (const m of vis) {
       let ty, tx;
-      if (activo) {
-        ty = Math.max(-32, Math.min(32, (puntero.x - (r.left + r.width / 2)) / innerWidth * 70));
-        tx = Math.max(-16, Math.min(16, -(puntero.y - (r.top + r.height / 2)) / innerHeight * 30));
+      if (activo && m.r) {
+        ty = Math.max(-32, Math.min(32, (puntero.x - (m.r.left + m.r.width / 2)) / innerWidth * 70));
+        tx = Math.max(-16, Math.min(16, -(puntero.y - (m.r.top + m.r.height / 2)) / innerHeight * 30));
       } else {
         ty = Math.sin(t * 0.7 + m.fase) * 22;
         tx = Math.sin(t * 0.9 + m.fase) * 5;
       }
       m.ry += (ty - m.ry) * 0.08; m.rx += (tx - m.rx) * 0.08;
       m.cuerpo.style.transform = `rotateX(${m.rx.toFixed(2)}deg) rotateY(${m.ry.toFixed(2)}deg)`;
-      m.cuerpo.style.setProperty('--sx', (-m.ry * 0.5).toFixed(1) + 'px');
     }
     requestAnimationFrame(cuadro);
   }
