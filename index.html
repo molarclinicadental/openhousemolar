@@ -24,7 +24,7 @@
     --morado: #8E5CF7;
     --luna: #FFF4D6;
     --texto: #F6F0FF;
-    --texto-2: #C9BDE6;
+    --texto-2: #DCD2F2;
     --linea: rgba(255, 255, 255, 0.12);
     --radio: 22px;
   }
@@ -36,7 +36,8 @@
                 radial-gradient(900px 600px at -10% 30%, #3A1C5F 0%, transparent 55%),
                 var(--noche);
     color: var(--texto);
-    line-height: 1.55;
+    line-height: 1.6;
+    font-size: 17px;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -129,6 +130,62 @@
   /* El títere se dibuja en un lienzo más grande que el monstruo (deja lugar al sombrero, alas y saludo) */
   .m-lienzo { position: absolute; left: -30%; top: -35%; width: 160%; height: 140%; pointer-events: none;
               filter: drop-shadow(var(--sx, 0px) 12px 10px rgba(0, 0, 0, .5)) drop-shadow(0 0 16px rgba(255, 122, 26, .22)); }
+
+  /* La invitación (la sostienen dos monstruos) */
+  .inv-escena { position: relative; max-width: 600px; margin: 34px auto 0; animation: inv-llevan 4.2s ease-in-out infinite; }
+  @keyframes inv-llevan { 0%, 100% { transform: translateY(0) rotate(-.5deg); } 50% { transform: translateY(-8px) rotate(.5deg); } }
+  .invitacion { position: relative; z-index: 2; padding: 50px 24px 26px; border-radius: 28px; text-align: center;
+                background: linear-gradient(180deg, rgba(51, 32, 90, .97), rgba(26, 16, 48, .98)); border: 2px solid rgba(255, 162, 76, .6);
+                box-shadow: 0 0 0 6px rgba(255, 122, 26, .08), 0 30px 60px rgba(0, 0, 0, .5), inset 0 0 60px rgba(142, 92, 247, .18);
+                opacity: 0; transform: translateY(-50px) scale(.9); transition: opacity .6s ease, transform .9s cubic-bezier(.3, 1.5, .5, 1); }
+  .inv-escena.lista .invitacion { opacity: 1; transform: none; }
+  .invitacion::before { content: ''; position: absolute; inset: 10px; border: 1.5px dashed rgba(255, 162, 76, .35); border-radius: 20px; pointer-events: none; }
+  .inv-sello { position: absolute; top: -32px; left: 50%; margin-left: -32px; width: 64px; height: 64px; border-radius: 50%; font-size: 34px; line-height: 1;
+               border: 3px solid rgba(255, 244, 214, .85); background: radial-gradient(circle at 35% 30%, #4B2688, #1A1030); cursor: pointer;
+               box-shadow: 0 8px 20px rgba(0, 0, 0, .4), 0 0 24px rgba(255, 122, 26, .45); animation: sello 3s ease-in-out infinite; }
+  @keyframes sello { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg) scale(1.06); } }
+  .inv-pre { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 1.2rem; color: var(--luna); }
+  .invitacion .etiqueta { margin-top: 8px; }
+  .invitacion .titulo-halloween { margin-top: 8px; font-size: clamp(3.2rem, 11vw, 5.8rem); }
+  .inv-lema { color: var(--texto-2); font-size: 1.08rem; max-width: 430px; margin: 8px auto 0; }
+  .inv-datos { list-style: none; text-align: left; margin: 20px auto 4px; max-width: 450px; display: grid; gap: 10px; }
+  .inv-datos li { display: flex; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 16px; background: rgba(255, 255, 255, .06); border: 1px solid var(--linea); }
+  .inv-ico { font-size: 1.6rem; width: 36px; text-align: center; flex-shrink: 0; }
+  .inv-datos b { display: block; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 1.12rem; line-height: 1.25; }
+  .inv-datos small { display: block; color: var(--texto-2); font-size: .95rem; line-height: 1.35; }
+  .invitacion .cta { margin-top: 20px; }
+  .inv-izq, .inv-der { z-index: 1; width: 200px; opacity: 0; transition: transform 1s cubic-bezier(.3, 1.4, .5, 1), opacity .5s ease; }
+  .inv-izq { left: -160px; top: 24%; transform: translateX(-140px) rotate(-12deg); }
+  .inv-der { right: -160px; top: 18%; transform: translateX(140px) rotate(12deg); }
+  .inv-escena.lista .inv-izq, .inv-escena.lista .inv-der { opacity: 1; transform: none; }
+  .inv-escena.lista .inv-izq.asomado { transform: translate(-22px, -18px) rotate(-7deg); }
+  .inv-escena.lista .inv-der.asomado { transform: translate(22px, -18px) rotate(7deg); }
+  .inv-izq .monstruo, .inv-der .monstruo { transition-delay: 0s; }
+  @media (max-width: 960px) {
+    .inv-escena { margin-top: 150px; }
+    .inv-izq, .inv-der { top: -104px; width: 132px; }
+    /* El globo se abre hacia adentro de la pantalla */
+    .inv-izq .m-globo { left: 4px; transform: translateY(10px) scale(.6); transform-origin: left bottom; }
+    .inv-der .m-globo { left: auto; right: 4px; transform: translateY(10px) scale(.6); transform-origin: right bottom; }
+    .inv-izq .monstruo.habla .m-globo, .inv-der .monstruo.habla .m-globo { transform: none; }
+    .inv-izq .m-globo::after { left: 30px; } .inv-der .m-globo::after { left: auto; right: 22px; }
+    .inv-izq { left: 0; } .inv-der { right: 0; }
+    .inv-escena.lista .inv-izq.asomado { transform: translate(-6px, -22px) rotate(-6deg); }
+    .inv-escena.lista .inv-der.asomado { transform: translate(6px, -22px) rotate(6deg); }
+  }
+  .cuenta-titulo { margin-top: 30px; color: var(--texto-2); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .8rem; }
+  .cuenta-titulo + .cuenta { margin-top: 8px; }
+
+  /* ¿Cómo reservar? en 3 pasos */
+  .pasos-reserva { list-style: none; display: grid; gap: 14px; margin-top: 26px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .paso-r { display: flex; gap: 14px; align-items: flex-start; padding: 20px; border-radius: var(--radio);
+            background: linear-gradient(180deg, var(--noche-2), var(--noche)); border: 1px solid var(--linea); }
+  .paso-r .num { flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-family: Fredoka, sans-serif;
+                 font-weight: 700; font-size: 1.4rem; color: #2A1300; background: linear-gradient(180deg, var(--calabaza-2), var(--calabaza)); box-shadow: 0 4px 0 #B84A00; }
+  .paso-r h3 { font-family: Fredoka, sans-serif; font-weight: 600; font-size: 1.18rem; line-height: 1.25; }
+  .paso-r p { color: var(--texto-2); margin-top: 4px; }
+  .centrado { text-align: center; }
+  .cta-sec { font-size: 1.1rem; padding: 14px 30px; margin-top: 24px; }
 
   /* Monstruos repartidos por la página */
   .aparicion { position: absolute; z-index: 3; }
@@ -246,7 +303,7 @@
   .tarjeta .ico { font-size: 30px; }
   .tarjeta .lbl { color: var(--texto-2); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-top: 8px; }
   .tarjeta .val { font-family: Fredoka, sans-serif; font-size: 1.25rem; font-weight: 700; margin-top: 2px; }
-  .tarjeta .det { color: var(--texto-2); font-size: .95rem; }
+  .tarjeta .det { color: var(--texto-2); font-size: 1rem; }
   .incluye .tarjeta { text-align: center; }
   .incluye .rejilla { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
   .dulce { display: flex; gap: 18px; align-items: center; margin-top: 22px; padding: 22px; border-radius: var(--radio);
@@ -390,21 +447,27 @@
     <svg viewBox="0 0 40 40"><g stroke="#1B0F30" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M14 18L4 10M14 21L2 21M14 24L4 32M26 18L36 10M26 21L38 21M26 24L36 32M16 26l-6 10M24 26l6 10"/></g><ellipse cx="20" cy="22" rx="8" ry="9" fill="#1B0F30"/><circle cx="20" cy="12" r="5.5" fill="#1B0F30"/><circle cx="18" cy="11.5" r="1.4" fill="#FF7A1A"/><circle cx="22" cy="11.5" r="1.4" fill="#FF7A1A"/></svg>
   </div>
   <span class="logo-caja"><img src="logo-molar-claro.png" alt="Molar Clínica Dental" class="logo" width="150" height="56"></span>
-  <div><span class="etiqueta">Open House · Edición Halloween</span></div>
-  <h1 class="titulo-halloween">Halloween</h1>
-  <p class="fecha">Sábado <span>31 de octubre</span></p>
-  <p class="lema">¡Dulce o premio! Una mañana de disfraces, diversión y cuidado dental para los peques.</p>
-  <div class="fila-calabaza">
-    <div class="aparicion" data-monstruo="verde"></div>
-    <div class="calabaza-hero flota" aria-hidden="true">🎃</div>
-    <div class="aparicion" data-monstruo="colores"></div>
+  <!-- La invitación: la traen la bruja verde y el mago de colores -->
+  <div class="inv-escena" id="invEscena">
+    <div class="aparicion inv-izq" data-monstruo="verde"></div>
+    <div class="aparicion inv-der" data-monstruo="colores"></div>
+    <article class="invitacion" id="invitacion" aria-labelledby="invTitulo">
+      <button class="inv-sello calabaza-hero" type="button" aria-label="Calabaza: ¡tócala!">🎃</button>
+      <p class="inv-pre">¡Estás invitado!</p>
+      <p class="etiqueta">Open House Molar</p>
+      <h1 class="titulo-halloween" id="invTitulo">Halloween</h1>
+      <p class="inv-lema">Una mañana de disfraces, diversión y cuidado dental para los peques 🍬</p>
+      <ul class="inv-datos">
+        <li><span class="inv-ico">📅</span><div><b>Sábado 31 de octubre</b><small id="invHorario">9:00 a 14:00 · citas de 20 minutos</small></div></li>
+        <li><span class="inv-ico">📍</span><div><b>Torre Metromed · Consultorio 009</b><small>Parque Ciudad Blanca · Galo Plaza Lasso, Quito</small></div></li>
+        <li><span class="inv-ico">🦷</span><div><b>Profilaxis dental · <span id="invPrecio">$15</span></b><small>Para niños y niñas de 0 a 12 años</small></div></li>
+        <li><span class="inv-ico">👻</span><div><b>¡Ven disfrazado!</b><small>El disfraz es obligatorio para los peques</small></div></li>
+      </ul>
+      <button class="cta" id="btnReservar" type="button" onclick="abrirReserva()">🎃 Reservar mi cupo</button>
+      <div><span class="cupos-pill" id="cuposPill"><span class="punto"></span><span id="cuposTexto">Cargando cupos…</span></span></div>
+    </article>
   </div>
-  <div class="chips">
-    <span class="chip">🦷 Profilaxis</span><span class="chip">🎪 Inflables</span><span class="chip">🎩 Show de mago</span>
-    <span class="chip">🎨 Pinta caritas</span><span class="chip">🧁 Bocaditos</span><span class="chip">🎁 Premios</span><span class="chip">🍬 Dulce o premio</span>
-  </div>
-  <button class="cta" id="btnReservar" type="button" onclick="abrirReserva()">🎃 Reservar mi cupo</button>
-  <div><span class="cupos-pill" id="cuposPill"><span class="punto"></span><span id="cuposTexto">Cargando cupos…</span></span></div>
+  <p class="cuenta-titulo">Faltan</p>
   <div class="cuenta" aria-label="Cuenta regresiva">
     <div><b id="cDias">--</b><small>Días</small></div>
     <div><b id="cHoras">--</b><small>Horas</small></div>
@@ -414,9 +477,23 @@
 </header>
 
 <main>
+  <section class="contenedor" id="como">
+    <h2 class="sec-titulo">¿Cómo reservar?</h2>
+    <p class="sec-sub">Toma menos de un minuto</p>
+    <ol class="pasos-reserva">
+      <li class="paso-r"><span class="num">1</span><div><h3>Escribe la cédula del niño o niña</h3>
+        <p>Si ya es paciente de Molar, lo reconocemos al instante y no tienes que llenar nada más.</p></div></li>
+      <li class="paso-r"><span class="num">2</span><div><h3>Elige el horario</h3>
+        <p>Cada cita dura 20 minutos. Los cupos son limitados: elige el que mejor te quede.</p></div></li>
+      <li class="paso-r"><span class="num">3</span><div><h3>Guarda tu código</h3>
+        <p>Recibes un código de reserva. Confírmalo por WhatsApp y preséntalo el día del evento.</p></div></li>
+    </ol>
+    <div class="centrado"><button class="cta cta-sec" type="button" onclick="abrirReserva()">Reservar ahora →</button></div>
+  </section>
+
   <section class="contenedor" id="info">
     <div class="aparicion ap-info" data-monstruo="cafe"></div>
-    <h2 class="sec-titulo">Lo que necesitas saber</h2>
+    <h2 class="sec-titulo">Detalles del evento</h2>
     <div class="rejilla">
       <div class="tarjeta"><div class="ico">📅</div><div class="lbl">Fecha y hora</div><div class="val">Sábado 31 de octubre</div><div class="det" id="infoHorario">9:00 a 14:00 · citas de 20 minutos</div></div>
       <div class="tarjeta"><div class="ico">📍</div><div class="lbl">Ubicación</div><div class="val">Torre Metromed</div><div class="det">Consultorio 009 · Galo Plaza Lasso</div></div>
@@ -700,6 +777,8 @@ async function cargarEvento() {
   }
   document.getElementById('infoHorario').textContent = `${evento.hora_inicio} a ${evento.hora_fin} · citas de ${evento.duracion_min} minutos`;
   document.getElementById('infoPrecio').textContent = '$' + Number(evento.precio);
+  document.getElementById('invHorario').textContent = `${evento.hora_inicio} a ${evento.hora_fin} · citas de ${evento.duracion_min} minutos`;
+  document.getElementById('invPrecio').textContent = '$' + Number(evento.precio);
   document.getElementById('resPrecio').textContent = '$' + Number(evento.precio);
   document.getElementById('resServicio').textContent = evento.servicio;
 }
@@ -1355,9 +1434,9 @@ addEventListener('resize', () => {
 
 // ── Las secciones aparecen suavemente al bajar ──
 (function () {
-  const piezas = document.querySelectorAll('.sec-titulo, .sec-sub, .tarjeta, .dulce, .disfraz, .video, .botones, .cierre p, .cierre .flota');
+  const piezas = document.querySelectorAll('.sec-titulo, .sec-sub, .tarjeta, .paso-r, .dulce, .disfraz, .video, .botones, .cierre p, .cierre .flota, #como .centrado');
   piezas.forEach(el => {
-    const hermanos = el.classList.contains('tarjeta') ? [...el.parentElement.children].indexOf(el) : 0;
+    const hermanos = (el.classList.contains('tarjeta') || el.classList.contains('paso-r')) ? [...el.parentElement.children].indexOf(el) : 0;
     el.style.setProperty('--d', (hermanos * 0.08) + 's');
     el.classList.add('revelar');
   });
@@ -1429,22 +1508,24 @@ DISFRACES.sabana = ['0 0 430 479', `
 
 // Cada monstruo: su dibujo, su disfraz y su "esqueleto" para animarlo (en proporción del dibujo: 0 a 1)
 //   base = pies (desde donde se balancea y respira) · cuello = altura desde donde ladea la cabeza
-//   hombro / mano = el brazo que saluda (rota desde el hombro)
+//   hombro / mano = el brazo que saluda (rota desde el hombro; en el naranja, desde el codo para no mover los dientes)
+//   brazo = [ancho del brazo, ancho de la mano, desde, hasta]: solo se mueve la franja del brazo; la parte
+//           cercana al hombro casi no se mueve (desde → hasta es la transición a movimiento completo)
 const MONSTRUOS = [
   { img: 'verde', w: 460, h: 477, capas: [['sombreroBruja', 'left:21%;top:-28%;width:57%']],
-    base: [0.42, 0.98], cuello: 0.6, hombro: [0.72, 0.5], mano: [0.9, 0.4], saludo: 1,
+    base: [0.42, 0.98], cuello: 0.6, hombro: [0.72, 0.57], mano: [0.88, 0.42], brazo: [0.075, 0.13, 0.12, 0.6], saludo: 1,
     frases: ['¡Dulce o premio… y después, cepillo! 🦷', '¡Soy una brujita con dientes limpios! ✨'] },
   { img: 'naranja', w: 436, h: 483, capas: [['cubeta', 'left:73%;top:22%;width:30%']],
-    base: [0.45, 0.98], cuello: 0.55, hombro: [0.74, 0.6], mano: [0.9, 0.38], saludo: 0.8,
+    base: [0.45, 0.98], cuello: 0.55, hombro: [0.82, 0.48], mano: [0.87, 0.33], brazo: [0.05, 0.17, 0.08, 0.55], saludo: 0.8,
     frases: ['¡Traje mi cubeta para los dulces! 🍬', 'Los dulces se cambian por premios en Molar 🎁'] },
   { img: 'rojo', w: 394, h: 475, capas: [['capa', 'left:-9%;top:24%;width:118%;height:74%', 'none'], ['medalla', 'left:42%;top:53%;width:16%']],
-    base: [0.5, 0.98], cuello: 0.62, hombro: [0.9, 0.5], mano: [0.95, 0.72], saludo: 0,
+    base: [0.5, 0.98], cuello: 0.62, hombro: [0.9, 0.5], mano: [0.95, 0.72], brazo: [0.05, 0.05, 0.2, 0.6], saludo: 0,
     frases: ['Soy vampiro… ¡pero uso hilo dental! 🦇', '¡Buuu! ¿Ya te lavaste los dientes?'] },
   { img: 'cafe', w: 430, h: 479, capas: [['sabana', 'left:0;top:0;width:100%;height:100%', 'none']],
-    base: [0.42, 0.98], cuello: 0.62, hombro: [0.72, 0.58], mano: [0.92, 0.52], saludo: 1,
+    base: [0.42, 0.98], cuello: 0.62, hombro: [0.7, 0.6], mano: [0.87, 0.5], brazo: [0.08, 0.13, 0.15, 0.6], saludo: 1,
     frases: ['¡Buuu! Soy un fantasma… con sonrisa limpia 👻', '¡A las caries también les gustan los dulces! 😱'] },
   { img: 'colores', w: 498, h: 483, capas: [['sombreroMago', 'left:27%;top:-24%;width:44%']],
-    base: [0.48, 0.98], cuello: 0.55, hombro: [0.76, 0.45], mano: [0.9, 0.27], saludo: 1,
+    base: [0.48, 0.98], cuello: 0.55, hombro: [0.77, 0.48], mano: [0.87, 0.27], brazo: [0.07, 0.12, 0.15, 0.6], saludo: 1,
     frases: ['¡Abracadabra… sonrisa sana! ✨', '¡Nos vemos el 31 en Molar! 🎃'] },
 ];
 const MONSTRUO = Object.fromEntries(MONSTRUOS.map(m => [m.img, m]));
@@ -1473,15 +1554,22 @@ const Titeres = (() => {
       attribute vec2 aP;
       uniform float uT, uAsp, uOla, uSaludo;
       uniform vec2 uBase, uHombro, uMano;
-      uniform vec3 uP;            // x: alcance del brazo · y: altura del cuello · z: fase
+      uniform vec3 uP;            // x: (sin uso) · y: altura del cuello · z: fase
+      uniform vec4 uBrazo;        // ancho del brazo, ancho de la mano, desde, hasta
       varying vec2 vUV;
       vec2 rot(vec2 p, vec2 c, float a) { p -= c; float s = sin(a), k = cos(a); return c + vec2(p.x * k - p.y * s, p.x * s + p.y * k); }
       void main() {
         vec2 A = vec2(uAsp, 1.0);
         vec2 q = aP * A, base = uBase * A, hom = uHombro * A, mano = uMano * A;
         float t = uT + uP.z;
-        float w = pow(clamp(1.0 - distance(q, mano) / uP.x, 0.0, 1.0), 0.75);
-        float ang = (sin(t * 7.0) * 0.5 * uOla + sin(t * 1.6) * 0.07) * uSaludo;
+        // Solo se mueve la franja del brazo (del hombro a la mano): ni la cara ni el cuerpo
+        vec2 d = mano - hom; float L = max(length(d), 0.0001); vec2 dir = d / L;
+        vec2 rel = q - hom;
+        float s = dot(rel, dir) / L;                                        // 0 = hombro · 1 = mano
+        float perp = abs(rel.x * dir.y - rel.y * dir.x);                   // distancia al eje del brazo
+        float ancho = mix(uBrazo.x, uBrazo.y, smoothstep(0.45, 0.85, s));  // la mano es más ancha que el brazo
+        float w = smoothstep(uBrazo.z, uBrazo.w, s) * (1.0 - smoothstep(ancho, ancho * 1.4, perp)) * (1.0 - smoothstep(1.5, 1.8, s));
+        float ang = (sin(t * 7.0) * 0.55 * uOla + sin(t * 1.6) * 0.08) * uSaludo;
         q = rot(q, hom, ang * w);                                          // saluda
         float cab = 1.0 - smoothstep(uP.y - 0.22, uP.y + 0.02, aP.y);
         q = rot(q, vec2(base.x, uP.y), sin(t * 1.3) * 0.06 * cab);         // ladea la cabeza
@@ -1503,7 +1591,7 @@ const Titeres = (() => {
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
-    ['uT', 'uAsp', 'uOla', 'uSaludo', 'uBase', 'uHombro', 'uMano', 'uP', 'uTex'].forEach(n => { loc[n] = gl.getUniformLocation(prog, n); });
+    ['uT', 'uAsp', 'uOla', 'uSaludo', 'uBase', 'uHombro', 'uMano', 'uP', 'uBrazo', 'uTex'].forEach(n => { loc[n] = gl.getUniformLocation(prog, n); });
     // Malla de N × N cuadritos
     const v = [], idx = [];
     for (let j = 0; j <= N; j++) for (let i = 0; i <= N; i++) v.push(i / N, j / N);
@@ -1589,6 +1677,7 @@ const Titeres = (() => {
     gl.uniform1f(loc.uT, t); gl.uniform1f(loc.uAsp, asp); gl.uniform1f(loc.uOla, it.ola); gl.uniform1f(loc.uSaludo, m.saludo);
     gl.uniform2f(loc.uBase, base[0], base[1]); gl.uniform2f(loc.uHombro, hom[0], hom[1]); gl.uniform2f(loc.uMano, mano[0], mano[1]);
     gl.uniform3f(loc.uP, alcance, aCaja([0, m.cuello])[1], it.fase);
+    gl.uniform4f(loc.uBrazo, m.brazo[0] / CAJA.h, m.brazo[1] / CAJA.h, m.brazo[2], m.brazo[3]);
     gl.drawElements(gl.TRIANGLES, nIndices, gl.UNSIGNED_SHORT, 0);
     it.ctx.clearRect(0, 0, w, h);
     it.ctx.drawImage(gl.canvas, 0, LADO - h, w, h, 0, 0, w, h);
@@ -1663,6 +1752,53 @@ document.querySelectorAll('.aparicion[data-monstruo]').forEach((ap, i) => {
   el.style.setProperty('--bd', (-i * 0.9).toFixed(1) + 's');
   ap.appendChild(el);
 });
+
+// ── La invitación: la bruja y el mago la traen, se asoman y te hablan ──
+(function () {
+  const escena = document.getElementById('invEscena'), inv = document.getElementById('invitacion');
+  const lados = { izq: escena.querySelector('.inv-izq'), der: escena.querySelector('.inv-der') };
+  const frases = {
+    izq: ['¡Te esperamos el 31! 🎃', '¡Ven disfrazado! 👻', '¡Habrá inflables y show de mago! 🎩'],
+    der: ['¡Reserva tu cupo aquí! 👇', '¡Hay dulces y premios! 🍬', '¡Cuida tu sonrisa este Halloween! 🦷'],
+  };
+  const cuenta = { izq: 0, der: 0 };
+  setTimeout(() => escena.classList.add('lista'), 250);
+  setTimeout(() => { inv.style.transition = 'transform .3s ease-out, opacity .6s ease'; }, 1400);   // después de entrar, la inclinación responde rápido
+  if (SIN_MOVIMIENTO) return;
+
+  function hablar(lado) {
+    const ap = lados[lado], m = ap && ap.querySelector('.monstruo');
+    if (!m) return;
+    m.querySelector('.m-globo').textContent = frases[lado][cuenta[lado]++ % frases[lado].length];
+    m.classList.add('habla'); ap.classList.add('asomado'); ap.style.zIndex = 3;   // el globo queda sobre la tarjeta
+    if (m._titere) Titeres.saludar(m._titere);
+    setTimeout(() => { m.classList.remove('habla'); ap.classList.remove('asomado'); ap.style.zIndex = ''; }, 3000);
+  }
+  let turno = 0;
+  setTimeout(() => hablar('izq'), 1700);
+  setInterval(() => {
+    const r = inv.getBoundingClientRect();
+    if (document.hidden || r.bottom < 0 || r.top > innerHeight) return;
+    hablar(turno++ % 2 ? 'izq' : 'der');
+  }, 5200);
+
+  // Al pasar por el botón de reservar, los dos saltan de emoción
+  document.getElementById('btnReservar').addEventListener('mouseenter', () => {
+    Object.values(lados).forEach(ap => {
+      const m = ap.querySelector('.monstruo');
+      if (m) { m.classList.remove('salta'); void m.offsetWidth; m.classList.add('salta'); }
+    });
+  });
+
+  // La tarjeta se inclina un poco hacia el mouse
+  addEventListener('pointermove', e => {
+    if (!escena.classList.contains('lista')) return;
+    const r = inv.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    const x = (e.clientX - (r.left + r.width / 2)) / r.width, y = (e.clientY - (r.top + r.height / 2)) / r.height;
+    inv.style.transform = `perspective(1200px) rotateY(${(x * 6).toFixed(2)}deg) rotateX(${(-y * 5).toFixed(2)}deg)`;
+  }, { passive: true });
+})();
 
 (function () {
   const escenario = document.getElementById('escenario');
