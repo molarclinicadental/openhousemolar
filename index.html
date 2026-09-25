@@ -505,7 +505,7 @@
 
 <div class="murcielagos" id="murcielagos" aria-hidden="true"></div>
 
-<button class="musica" id="btnMusica" type="button" aria-label="Activar o pausar música de Halloween" title="Música de Halloween">🎵</button>
+<button class="musica" id="btnMusica" type="button" aria-label="Silenciar la música" title="Silenciar la música">🔇</button>
 
 <header class="hero contenedor">
   <div class="niebla" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -1254,135 +1254,221 @@ async function confirmarReserva() {
 const SIN_MOVIMIENTO = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const azar = (a, b) => a + Math.random() * (b - a);
 
-// ════════════════════════════════════════════════════════════
-//  Música de Halloween: se genera aquí mismo (Web Audio), sin archivos
-//  externos. Marcha misteriosa en re menor con órgano, bajo, campanita,
-//  "fantasma" que canta y eco de cripta. Suena solo al tocar el botón.
-// ════════════════════════════════════════════════════════════
 const Musica = (() => {
+  // ════════════════════════════════════════════════════════════
+  //  Música de Halloween generada aquí mismo (Web Audio, sin archivos):
+  //  zumbido grave de fondo, latido de corazón, bajo dramático, coro oscuro,
+  //  melodía de theremín, tic-tac de reloj, campana de iglesia y efectos
+  //  (viento, truenos lejanos, fantasma). Re menor, 96 pulsos por minuto.
+  // ════════════════════════════════════════════════════════════
   let ctx = null, master, bus, timer = null, sig = 0, paso = 0, sonando = false;
-  const CORCHEA = 60 / 104 / 2;
+  let zumbido = [], theremin = null, thereminVol = null, efectos = null;
+  const CORCHEA = 60 / 96 / 2;
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-  const melA = [74,0,77,81, 82,81,79,77, 76,77,79,76, 74,0,0,0,  74,0,77,81, 82,81,79,77, 76,74,73,76, 74,0,0,0];
-  const melB = [81,0,81,82, 81,79,77,79, 77,76,74,76, 77,0,73,0,  74,77,81,86, 85,0,81,0, 82,81,77,73, 74,0,0,0];
-  const MEL = melA.concat(melB);                          // 8 compases de 8 corcheas
-  const RAIZ = [38, 46, 45, 38, 38, 43, 45, 38];          // Rem, Sib, La, Rem · Rem, Solm, La, Rem
-  const ACORDE = { 38: [0, 3, 7], 46: [0, 4, 7], 45: [0, 4, 7], 43: [0, 3, 7] };
-  const BAJO = [0, null, 12, null, 0, 7, 12, 7];
+  // Progresión de terror: Rem · Do · Sib · La | Rem · Sib · Solm · La
+  const RAIZ = [38, 36, 34, 33, 38, 34, 31, 33];
+  const ACORDE = { 38: [0, 3, 7], 36: [0, 4, 7], 34: [0, 4, 7], 33: [0, 4, 7], 31: [0, 3, 7] };
+  // Melodía del theremín: [nota, corcheas] (null = silencio)
+  const MELODIA = [
+    [69, 4], [70, 2], [69, 2],  [67, 3], [65, 1], [64, 2], [65, 2],  [62, 4], [null, 2], [61, 2],  [62, 6], [null, 2],
+    [74, 4], [72, 2], [70, 2],  [69, 3], [67, 1], [65, 2], [67, 2],  [69, 4], [65, 2], [64, 2],  [62, 6], [null, 2],
+  ];
+  const INICIO_NOTA = {};                                  // corchea → nota que empieza ahí
+  { let p = 0; for (const [n, l] of MELODIA) { INICIO_NOTA[p] = [n, l]; p += l; } }
 
-  function iniciar() {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
-    bus = ctx.createGain(); bus.connect(master);
-    // Eco de cripta (reverberación)
-    const largo = ctx.sampleRate * 2.4, imp = ctx.createBuffer(2, largo, ctx.sampleRate);
-    for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); for (let i = 0; i < largo; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / largo, 3); }
-    const eco = ctx.createConvolver(); eco.buffer = imp;
-    const ecoVol = ctx.createGain(); ecoVol.gain.value = 0.38;
-    bus.connect(eco); eco.connect(ecoVol); ecoVol.connect(master);
+  function ruido(seg) {
+    const b = ctx.createBuffer(1, Math.max(1, Math.round(ctx.sampleRate * seg)), ctx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const s = ctx.createBufferSource(); s.buffer = b; return s;
   }
-
   function env(g, t, ataque, pico, dur, suelta) {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(pico, t + ataque);
     g.gain.setValueAtTime(pico, t + Math.max(ataque, dur - suelta));
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   }
-  function organo(m, t, dur) {
-    const g = ctx.createGain(); g.connect(bus);
-    env(g, t, 0.02, 0.09, dur, 0.12);
-    [[1, 1], [2, .45], [3, .18], [4, .12]].forEach(([k, v]) => {
-      const o = ctx.createOscillator(), gv = ctx.createGain();
-      o.type = 'sine'; o.frequency.value = hz(m) * k; gv.gain.value = v;
-      o.connect(gv); gv.connect(g); o.start(t); o.stop(t + dur + .05);
+
+  function iniciar() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -18; comp.ratio.value = 4;
+    comp.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = 0; master.connect(comp);
+    bus = ctx.createGain(); bus.connect(master);
+    // Eco de cripta, oscuro (reverberación larga con los agudos apagados)
+    const largo = ctx.sampleRate * 3.2, imp = ctx.createBuffer(2, largo, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = imp.getChannelData(c); let prev = 0;
+      for (let i = 0; i < largo; i++) { prev = prev * 0.72 + (Math.random() * 2 - 1) * 0.28; d[i] = prev * Math.pow(1 - i / largo, 2.6); }
+    }
+    const eco = ctx.createConvolver(); eco.buffer = imp;
+    const ecoVol = ctx.createGain(); ecoVol.gain.value = 0.55;
+    bus.connect(eco); eco.connect(ecoVol); ecoVol.connect(master);
+  }
+
+  // ── Voces continuas (se crean al encender y se apagan al silenciar) ──
+  function arrancarContinuas() {
+    const t = ctx.currentTime;
+    // Zumbido grave: dos sierras desafinadas (Re) con un filtro que "respira"
+    const filtro = ctx.createBiquadFilter(); filtro.type = 'lowpass'; filtro.frequency.value = 260; filtro.Q.value = 6;
+    const lfo = ctx.createOscillator(), lfoG = ctx.createGain(); lfo.frequency.value = 0.09; lfoG.gain.value = 140;
+    lfo.connect(lfoG); lfoG.connect(filtro.frequency);
+    const vol = ctx.createGain(); vol.gain.value = 0.0001; vol.gain.exponentialRampToValueAtTime(0.16, t + 3);
+    filtro.connect(vol); vol.connect(bus);
+    zumbido = [lfo];
+    [[hz(38), -7], [hz(38), 6], [hz(45), 3]].forEach(([f, det]) => {
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = det;
+      o.connect(filtro); o.start(t); zumbido.push(o);
     });
+    lfo.start(t);
+    // Theremín: un solo oscilador que se desliza entre notas, con vibrato
+    theremin = ctx.createOscillator(); theremin.type = 'sine'; theremin.frequency.value = hz(62);
+    const vib = ctx.createOscillator(), vibG = ctx.createGain(); vib.frequency.value = 5.8; vibG.gain.value = 7;
+    vib.connect(vibG); vibG.connect(theremin.frequency);
+    const suave = ctx.createBiquadFilter(); suave.type = 'lowpass'; suave.frequency.value = 1800;
+    thereminVol = ctx.createGain(); thereminVol.gain.value = 0.0001;
+    theremin.connect(suave); suave.connect(thereminVol); thereminVol.connect(bus);
+    theremin.start(t); vib.start(t);
+    zumbido.push(theremin, vib);
   }
-  function bajo(m, t) {
-    const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
-    o.type = 'triangle'; o.frequency.value = hz(m); f.type = 'lowpass'; f.frequency.value = 700;
-    o.connect(f); f.connect(g); g.connect(bus);
-    env(g, t, 0.01, 0.22, CORCHEA * 0.9, 0.08);
-    o.start(t); o.stop(t + CORCHEA);
+  function pararContinuas() {
+    const t = ctx.currentTime;
+    zumbido.forEach(o => { try { o.stop(t + 0.5); } catch (_) {} });
+    zumbido = []; theremin = null; thereminVol = null;
   }
-  function colchon(raiz, t) {
-    ACORDE[raiz].forEach(i => {
+
+  // ── Instrumentos ──
+  function latido(t, fuerte) {                             // "bum-bum" grave con un golpecito audible en parlantes chicos
+    [[0, fuerte ? 0.9 : 0.55], [0.2, fuerte ? 0.6 : 0.35]].forEach(([d, v]) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.value = hz(raiz + 24 + i); o.detune.value = azar(-8, 8);
-      o.connect(g); g.connect(bus);
-      env(g, t, 0.25, 0.025, CORCHEA * 8, 0.4);
-      o.start(t); o.stop(t + CORCHEA * 8 + .1);
+      o.frequency.setValueAtTime(95, t + d); o.frequency.exponentialRampToValueAtTime(38, t + d + 0.28);
+      o.connect(g); g.connect(master);
+      env(g, t + d, 0.004, v, 0.34, 0.26);
+      o.start(t + d); o.stop(t + d + 0.36);
+      const n = ruido(0.03), f = ctx.createBiquadFilter(), gn = ctx.createGain();
+      f.type = 'lowpass'; f.frequency.value = 900; n.connect(f); f.connect(gn); gn.connect(master);
+      env(gn, t + d, 0.001, v * 0.18, 0.03, 0.02); n.start(t + d);
     });
   }
-  function bombo(t) {
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(42, t + .25);
-    o.connect(g); g.connect(master);
-    env(g, t, 0.005, 0.35, 0.3, 0.2);
-    o.start(t); o.stop(t + .32);
+  function bajo(m, t, dur) {
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = 'sawtooth'; o2.type = 'square'; o.frequency.value = hz(m); o2.frequency.value = hz(m) / 2;
+    f.type = 'lowpass'; f.frequency.setValueAtTime(700, t); f.frequency.exponentialRampToValueAtTime(180, t + dur);
+    const g2 = ctx.createGain(); g2.gain.value = 0.35;
+    o.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(bus);
+    env(g, t, 0.01, 0.2, dur, 0.1);
+    o.start(t); o2.start(t); o.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
   }
-  function tic(t, fuerte) {
-    const n = ctx.createBufferSource(), b = ctx.createBuffer(1, ctx.sampleRate * .05, ctx.sampleRate), d = b.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    const f = ctx.createBiquadFilter(), g = ctx.createGain();
-    n.buffer = b; f.type = 'highpass'; f.frequency.value = 7000;
+  function coro(raiz, t, dur) {                            // acordes oscuros, como un coro lejano
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 950; f.Q.value = 1.5;
+    const g = ctx.createGain(); f.connect(g); g.connect(bus);
+    env(g, t, 0.6, 0.05, dur, 0.9);
+    ACORDE[raiz].forEach(i => [-9, 9].forEach(det => {
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = hz(raiz + 24 + i); o.detune.value = det;
+      o.connect(f); o.start(t); o.stop(t + dur + 0.1);
+    }));
+  }
+  function tictac(t, tac) {                                // reloj
+    const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = 'square'; o.frequency.value = tac ? 1150 : 1500; f.type = 'bandpass'; f.frequency.value = tac ? 1150 : 1500; f.Q.value = 8;
+    o.connect(f); f.connect(g); g.connect(master);
+    env(g, t, 0.001, 0.05, 0.04, 0.035); o.start(t); o.stop(t + 0.05);
+  }
+  function campana(t) {                                    // campana de iglesia grave (armónicos no enteros)
+    const g = ctx.createGain(); g.connect(bus);
+    env(g, t, 0.005, 0.12, 4.5, 4.2);
+    [[1, 1], [2.01, 0.55], [2.76, 0.4], [4.07, 0.25], [5.4, 0.15]].forEach(([k, v]) => {
+      const o = ctx.createOscillator(), gv = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = hz(50) * k; gv.gain.value = v;
+      o.connect(gv); gv.connect(g); o.start(t); o.stop(t + 4.6);
+    });
+  }
+  function notaTheremin(m, t, dur) {
+    if (!theremin) return;
+    const f = theremin.frequency, v = thereminVol.gain;
+    if (m === null) { v.setTargetAtTime(0.0001, t, 0.12); return; }
+    f.setTargetAtTime(hz(m), t, 0.06);                     // se desliza hasta la nota (portamento)
+    v.setTargetAtTime(0.13, t, 0.05);
+    v.setTargetAtTime(0.08, t + dur * 0.6, 0.2);
+  }
+  function viento(t) {
+    const n = ruido(4), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    f.type = 'bandpass'; f.Q.value = 3;
+    f.frequency.setValueAtTime(280, t); f.frequency.exponentialRampToValueAtTime(900, t + 1.8); f.frequency.exponentialRampToValueAtTime(320, t + 4);
+    n.connect(f); f.connect(g); g.connect(bus);
+    env(g, t, 1.4, 0.09, 4, 2); n.start(t);
+  }
+  function trueno(t) {
+    const n = ruido(3), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    f.type = 'lowpass'; f.frequency.setValueAtTime(420, t); f.frequency.exponentialRampToValueAtTime(90, t + 2.8);
     n.connect(f); f.connect(g); g.connect(master);
-    env(g, t, 0.002, fuerte ? .05 : .025, .05, .04);
-    n.start(t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5, t + 0.06);
+    g.gain.exponentialRampToValueAtTime(0.18, t + 0.5); g.gain.exponentialRampToValueAtTime(0.28, t + 0.8);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 3); n.start(t);
   }
-  function campanita(m, t) {
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'sine'; o.frequency.value = hz(m + 24);
-    o.connect(g); g.connect(bus);
-    env(g, t, 0.005, 0.05, 1.2, 1.1);
-    o.start(t); o.stop(t + 1.25);
-  }
-  function fantasma(t) {                                   // "uuuuh" con vibrato
+  function fantasma(t) {                                   // "uuuuh"
     const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
-    o.type = 'sine'; o.frequency.setValueAtTime(hz(69), t);
-    o.frequency.exponentialRampToValueAtTime(hz(74), t + .8); o.frequency.exponentialRampToValueAtTime(hz(65), t + 2.6);
-    lfo.frequency.value = 5.5; lg.gain.value = 9; lfo.connect(lg); lg.connect(o.frequency);
+    o.type = 'sine'; o.frequency.setValueAtTime(hz(64), t);
+    o.frequency.exponentialRampToValueAtTime(hz(71), t + 0.9); o.frequency.exponentialRampToValueAtTime(hz(59), t + 2.8);
+    lfo.frequency.value = 5; lg.gain.value = 10; lfo.connect(lg); lg.connect(o.frequency);
     o.connect(g); g.connect(bus);
-    env(g, t, 0.5, 0.06, 2.8, 1.2);
-    o.start(t); lfo.start(t); o.stop(t + 2.9); lfo.stop(t + 2.9);
+    env(g, t, 0.6, 0.07, 3, 1.3);
+    o.start(t); lfo.start(t); o.stop(t + 3.1); lfo.stop(t + 3.1);
   }
 
   function programar(p, t) {
     const compas = Math.floor(p / 8), enCompas = p % 8, raiz = RAIZ[compas];
-    const m = MEL[p];
-    if (m) {
-      let largo = 1; while (p + largo < MEL.length && MEL[p + largo] === 0 && largo < 4) largo++;
-      organo(m, t, CORCHEA * largo * 0.92);
-      if (enCompas === 0 && compas % 2 === 0) campanita(m, t);
-    }
-    if (BAJO[enCompas] !== null) bajo(raiz + BAJO[enCompas], t);
-    if (enCompas === 0) { colchon(raiz, t); bombo(t); }
-    if (enCompas === 4) bombo(t);
-    tic(t, enCompas % 2 === 1);
+    if (enCompas === 0) { latido(t, true); coro(raiz, t, CORCHEA * 8); }
+    if (enCompas === 4) latido(t, false);
+    if (enCompas % 2 === 0) { bajo(raiz, t, CORCHEA * 1.8); tictac(t, (enCompas / 2) % 2 === 1); }
+    if (INICIO_NOTA[p]) notaTheremin(INICIO_NOTA[p][0], t, CORCHEA * INICIO_NOTA[p][1]);
+    if (p === 0 || p === 32) campana(t);
     if (p === 48) fantasma(t);
   }
   function reloj() {
-    while (sig < ctx.currentTime + 0.15) { programar(paso, sig); sig += CORCHEA; paso = (paso + 1) % MEL.length; }
+    while (sig < ctx.currentTime + 0.2) { programar(paso, sig); sig += CORCHEA; paso = (paso + 1) % 64; }
+  }
+  function efectosAlAzar() {                               // viento y truenos, de vez en cuando
+    clearTimeout(efectos);
+    efectos = setTimeout(() => {
+      if (sonando && ctx.state === 'running') (Math.random() < 0.6 ? viento : trueno)(ctx.currentTime + 0.05);
+      efectosAlAzar();
+    }, azar(9000, 17000));
+  }
+
+  function empezar() {
+    if (sonando) return;
+    sonando = true;
+    paso = 0; sig = ctx.currentTime + 0.1;
+    arrancarContinuas();
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0.7, ctx.currentTime + 2);
+    clearInterval(timer); timer = setInterval(reloj, 25);
+    efectosAlAzar();
+    setTimeout(() => { if (sonando) trueno(ctx.currentTime + 0.05); }, 600);   // entrada con trueno
   }
 
   return {
     get sonando() { return sonando; },
+    /** Intenta sonar. Devuelve true si el navegador lo permitió (si no, espera el primer toque). */
     async encender() {
       if (!ctx) iniciar();
-      await ctx.resume();
-      sonando = true;
-      sig = ctx.currentTime + 0.08;
-      master.gain.cancelScheduledValues(ctx.currentTime);
-      master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-      master.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1.2);
-      clearInterval(timer); timer = setInterval(reloj, 25);
+      if (ctx.state !== 'running') {
+        try { await Promise.race([ctx.resume(), new Promise(r => setTimeout(r, 300))]); } catch (_) {}
+      }
+      if (ctx.state !== 'running') return false;
+      empezar();
+      return true;
     },
     apagar() {
-      if (!ctx) return;
+      if (!ctx || !sonando) return;
       sonando = false;
+      clearTimeout(efectos);
       master.gain.cancelScheduledValues(ctx.currentTime);
       master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
       master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
-      setTimeout(() => { if (!sonando) { clearInterval(timer); ctx.suspend(); } }, 450);
+      setTimeout(() => { if (!sonando) { clearInterval(timer); pararContinuas(); ctx.suspend(); } }, 450);
     },
     pausarOculta(oculta) {
       if (!ctx || !sonando) return;
@@ -1392,13 +1478,38 @@ const Musica = (() => {
   };
 })();
 
+// ── La música arranca sola: de inmediato si el navegador lo permite, si no con el
+//    primer toque, clic o tecla en cualquier parte. El botón 🔊/🔇 la silencia, y
+//    si la persona la silenció, se recuerda para la próxima visita. ──
 const btnMusica = document.getElementById('btnMusica');
+const prefMusica = { leer() { try { return localStorage.getItem('oh_musica'); } catch (_) { return null; } },
+                     guardar(v) { try { localStorage.setItem('oh_musica', v); } catch (_) {} } };
+function pintarBtnMusica() {
+  const on = Musica.sonando;
+  btnMusica.textContent = on ? '🔊' : '🔇';
+  btnMusica.classList.toggle('sonando', on);
+  btnMusica.setAttribute('aria-label', on ? 'Silenciar la música' : 'Activar la música');
+  btnMusica.title = on ? 'Silenciar la música' : 'Activar la música';
+}
 btnMusica.addEventListener('click', async () => {
   try {
-    if (Musica.sonando) { Musica.apagar(); btnMusica.classList.remove('sonando'); btnMusica.textContent = '🎵'; }
-    else { await Musica.encender(); btnMusica.classList.add('sonando'); btnMusica.textContent = '🔊'; }
+    if (Musica.sonando) { Musica.apagar(); prefMusica.guardar('off'); }
+    else { await Musica.encender(); prefMusica.guardar('on'); }
   } catch (e) { console.warn('[Open House] música:', e); }
+  setTimeout(pintarBtnMusica, 60);
 });
+pintarBtnMusica();
+if (prefMusica.leer() !== 'off' && !SIN_MOVIMIENTO) {
+  const alPrimerToque = e => {
+    if (e.target && e.target.closest && e.target.closest('#btnMusica')) return;   // el botón se maneja solo
+    quitar();
+    if (!Musica.sonando && prefMusica.leer() !== 'off') Musica.encender().then(pintarBtnMusica);
+  };
+  const eventos = ['pointerdown', 'keydown', 'touchend'];
+  const quitar = () => eventos.forEach(ev => removeEventListener(ev, alPrimerToque, true));
+  eventos.forEach(ev => addEventListener(ev, alPrimerToque, true));
+  Musica.encender().then(ok => { if (ok) { quitar(); pintarBtnMusica(); } }).catch(() => {});
+}
 document.addEventListener('visibilitychange', () => Musica.pausarOculta(document.hidden));
 
 // ════════════════════════════════════════════════════════════
