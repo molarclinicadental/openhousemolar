@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bienvenida · Open House Halloween · Molar</title>
+<meta name="description" content="Carta de bienvenida e instrucciones del Open House Halloween de Molar Clínica Dental. Sábado 31 de octubre, Torre Metromed · Consultorio 009.">
+<meta property="og:title" content="¡Bienvenidos al Open House Halloween de Molar! 🎃">
+<meta property="og:description" content="Todo lo que necesitas saber para el sábado 31 de octubre: instrucciones, actividades y cómo llegar.">
+<meta name="theme-color" content="#1A1030">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%83%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --noche: #1A1030; --noche-2: #251742; --noche-3: #33205A;
+    --calabaza: #FF7A1A; --calabaza-2: #FFA24C; --baba: #9BE564; --morado: #8E5CF7;
+    --luna: #FFF4D6; --texto: #F6F0FF; --texto-2: #DCD2F2; --linea: rgba(255, 255, 255, .12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Nunito, system-ui, sans-serif; color: var(--texto); line-height: 1.6; font-size: 17px;
+         background: radial-gradient(1000px 600px at 85% -10%, #4A2A86 0%, transparent 60%), radial-gradient(800px 500px at -10% 40%, #3A1C5F 0%, transparent 55%), var(--noche); }
+  .hoja { width: min(760px, 100% - 32px); margin: 0 auto; padding: 28px 0 60px; }
+  .cabecera { text-align: center; }
+  .cabecera img { height: 50px; filter: drop-shadow(0 0 12px rgba(255, 162, 76, .3)); }
+  .marca { margin-top: 14px; font-family: Fredoka, sans-serif; font-weight: 700; letter-spacing: .2em; color: var(--luna); font-size: clamp(.95rem, 3.4vw, 1.25rem); }
+  h1 { font-family: Creepster, Fredoka, cursive; font-weight: 400; color: var(--calabaza); font-size: clamp(3rem, 13vw, 5.6rem); line-height: 1;
+       text-shadow: 0 4px 0 #B84A00, 0 12px 40px rgba(255, 122, 26, .35); }
+  .sub { color: var(--texto-2); font-weight: 700; margin-top: 6px; }
+  .monstruos { display: flex; justify-content: center; gap: 4px; margin-top: 18px; }
+  .monstruos img { height: clamp(70px, 16vw, 110px); width: auto; animation: bote 3s ease-in-out infinite; }
+  .monstruos img:nth-child(2) { animation-delay: -.8s; } .monstruos img:nth-child(3) { animation-delay: -1.6s; } .monstruos img:nth-child(4) { animation-delay: -2.2s; }
+  @keyframes bote { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  /* Pase personalizado (solo si el enlace trae los datos) */
+  .pase { margin: 26px auto 0; border-radius: 22px; border: 2px dashed rgba(155, 229, 100, .7); padding: 18px 20px;
+          background: linear-gradient(135deg, rgba(155, 229, 100, .12), rgba(142, 92, 247, .16)); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; text-align: center; }
+  .pase[hidden] { display: none; }
+  .pase div small { display: block; font-family: Fredoka, sans-serif; font-weight: 600; letter-spacing: .12em; font-size: .72rem; text-transform: uppercase; color: #D4FF8A; }
+  .pase div b { display: block; font-family: Fredoka, sans-serif; font-size: 1.35rem; line-height: 1.2; }
+  @media (max-width: 560px) { .pase { grid-template-columns: 1fr 1fr; } }
+
+  section { margin-top: 30px; }
+  h2 { font-family: Fredoka, sans-serif; font-size: clamp(1.4rem, 4.5vw, 1.8rem); color: var(--calabaza-2); margin-bottom: 10px; }
+  .carta { background: rgba(255, 255, 255, .05); border: 1px solid var(--linea); border-radius: 22px; padding: 24px 24px 20px; }
+  .carta p + p { margin-top: 12px; }
+  .firma { margin-top: 16px; font-family: Fredoka, sans-serif; font-weight: 600; color: var(--luna); }
+  .datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .dato { padding: 14px 16px; border-radius: 16px; background: var(--noche-2); border: 1px solid var(--linea); }
+  .dato small { display: block; color: var(--texto-2); font-weight: 800; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; }
+  .dato b { font-family: Fredoka, sans-serif; font-size: 1.1rem; }
+  .actividades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 640px) { .actividades { grid-template-columns: repeat(2, 1fr); } }
+  .act { text-align: center; padding: 14px 8px; border-radius: 16px; background: var(--noche-2); border: 1px solid var(--linea); font-weight: 800; font-size: .95rem; }
+  .act span { display: block; font-size: 1.9rem; }
+  .campana { padding: 20px 22px; border-radius: 20px; background: linear-gradient(135deg, rgba(155, 229, 100, .16), rgba(142, 92, 247, .2)); border: 1.5px solid rgba(155, 229, 100, .5); }
+  .campana b { color: var(--baba); }
+  ol.pasos { list-style: none; counter-reset: paso; display: grid; gap: 10px; }
+  ol.pasos li { counter-increment: paso; display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 16px; background: var(--noche-2); border: 1px solid var(--linea); }
+  ol.pasos li::before { content: counter(paso); flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+                        font-family: Fredoka, sans-serif; font-weight: 700; color: #2A1300; background: linear-gradient(180deg, var(--calabaza-2), var(--calabaza)); }
+  ol.pasos b { font-family: Fredoka, sans-serif; font-weight: 600; }
+  .botones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 999px; font-weight: 800; text-decoration: none; color: var(--texto);
+         border: 1px solid var(--linea); background: var(--noche-2); cursor: pointer; font: inherit; font-weight: 800; }
+  .btn.pri { background: linear-gradient(180deg, var(--calabaza-2), var(--calabaza)); color: #2A1300; border: none; }
+  .btn.wa { background: #1FA855; border-color: #1FA855; color: #fff; }
+  .acciones { position: sticky; bottom: 0; margin-top: 30px; padding: 12px 0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+              background: linear-gradient(transparent, var(--noche) 35%); }
+  footer { margin-top: 30px; text-align: center; color: var(--texto-2); font-size: .88rem; }
+  @media (prefers-reduced-motion: reduce) { .monstruos img { animation: none; } }
+
+  /* Impresión / PDF: fondo blanco (ahorra tinta), mismos colores de marca */
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: #fff; color: #1B1030; font-size: 11.5pt; }
+    .hoja { width: 100%; padding: 0; }
+    .cabecera img { content: url(logo-molar.png); height: 42px; filter: none; }
+    .marca { color: #33205A; }
+    h1 { text-shadow: none; color: #E8680F; font-size: 44pt; }
+    h2 { color: #E8680F; }
+    .sub, .dato small, footer { color: #555; }
+    .carta, .dato, .act, ol.pasos li, .campana, .pase { background: #fff !important; border-color: #D9D2EA; color: #1B1030; break-inside: avoid; }
+    .pase div small { color: #3F7F1E; }
+    .campana b { color: #3F7F1E; }
+    .firma { color: #33205A; }
+    .monstruos img { animation: none; height: 70px; }
+    .acciones, .botones { display: none !important; }
+    section { margin-top: 18px; }
+  }
+</style>
+</head>
+<body>
+<main class="hoja">
+  <header class="cabecera">
+    <img src="logo-molar-claro.png" alt="Molar Clínica Dental" width="134" height="50">
+    <div class="marca">OPEN HOUSE MOLAR</div>
+    <h1>Halloween</h1>
+    <p class="sub">Carta de bienvenida · Sábado 31 de octubre</p>
+    <div class="monstruos" aria-hidden="true">
+      <img src="monstruos/verde.png" alt=""><img src="monstruos/naranja.png" alt=""><img src="monstruos/rojo.png" alt=""><img src="monstruos/colores.png" alt="">
+    </div>
+  </header>
+
+  <!-- Datos de la reserva: vienen en el enlace (después del #, no se envían a ningún servidor) -->
+  <div class="pase" id="pase" hidden>
+    <div><small>Niño o niña</small><b id="pNombre">—</b></div>
+    <div><small>Fecha</small><b>Sáb 31 oct</b></div>
+    <div><small>Hora</small><b id="pHora">—</b></div>
+    <div><small>Código</small><b id="pCodigo">—</b></div>
+  </div>
+
+  <section>
+    <div class="carta">
+      <p><b id="saludo">¡Querida familia!</b></p>
+      <p>Gracias por reservar su cupo en el <b>Open House Halloween de Molar Clínica Dental</b>. Estamos felices de recibirlos y ya estamos
+      preparando todo para que sea una mañana inolvidable.</p>
+      <p>En Molar creemos que cuidar la sonrisa de los peques también puede ser divertido. Por eso organizamos este Open House: una mañana
+      llena de disfraces, juegos y sorpresas, en la que cada niño recibe su <b>profilaxis + fluorización</b> en un ambiente alegre,
+      rodeado de amigos… ¡y de nuestros monstruos de la boca, que también vienen disfrazados!</p>
+      <p>En esta carta encontrarán todo lo necesario para ese día. Si tienen cualquier duda, escríbannos por WhatsApp: con gusto les ayudamos.</p>
+      <p class="firma">¡Los esperamos! 🎃<br>Equipo de Molar Clínica Dental</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>📅 El evento</h2>
+    <div class="datos">
+      <div class="dato"><small>Cuándo</small><b>Sábado 31 de octubre</b><br>9:00 a 14:00, en el horario que reservaste</div>
+      <div class="dato"><small>Dónde</small><b>Torre Metromed · Consultorio 009</b><br>Parque Ciudad Blanca · Galo Plaza Lasso, Quito</div>
+      <div class="dato"><small>Qué incluye</small><b>Profilaxis + fluorización</b><br>Limpieza dental y flúor · $15 por niño</div>
+      <div class="dato"><small>Para quién</small><b>Niños y niñas de 0 a 12 años</b><br>¡El disfraz es obligatorio!</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>🎪 Lo que habrá ese día</h2>
+    <div class="actividades">
+      <div class="act"><span>🦷</span>Profilaxis + flúor</div>
+      <div class="act"><span>🎪</span>Inflables</div>
+      <div class="act"><span>🎩</span>Show de magia</div>
+      <div class="act"><span>🖌️</span>Stands de pintura</div>
+      <div class="act"><span>💀</span>Esqueletos</div>
+      <div class="act"><span>🎨</span>Pinta caritas</div>
+      <div class="act"><span>🧁</span>Bocaditos</div>
+      <div class="act"><span>🎁</span>Premios</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>🍬 Campaña «Dulce o premio»</h2>
+    <div class="campana">
+      Este Halloween, ¡los dientes ganan! Traigan los dulces que recolecten y entréguenlos en el consultorio:
+      a cambio les damos <b>descuentos en tratamientos o premios</b>. Menos azúcar, más sonrisas sanas.
+    </div>
+  </section>
+
+  <section>
+    <h2>✅ Instrucciones para ese día</h2>
+    <ol class="pasos">
+      <li><div><b>Lleguen unos minutos antes de su horario.</b> Así el peque disfruta las actividades sin prisa.</div></li>
+      <li><div><b>¡Vengan disfrazados!</b> El disfraz es obligatorio para los niños: brujitas, superhéroes, monstruos… ¡ustedes eligen!</div></li>
+      <li><div><b>Digan su código en recepción</b> (OH + los 4 últimos dígitos de la cédula del niño). También sirve la cédula del niño.</div></li>
+      <li><div><b>El niño viene acompañado de un adulto responsable</b> durante toda la visita.</div></li>
+      <li><div><b>Traigan los dulces de Halloween</b> para cambiarlos por descuentos o premios en la campaña «Dulce o premio».</div></li>
+      <li><div><b>Si no pueden asistir, avísennos por WhatsApp</b> para liberar el cupo para otro peque.</div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>📍 Cómo llegar</h2>
+    <div class="dato"><b>Torre Metromed · Consultorio 009</b><br>Parque Ciudad Blanca · Galo Plaza Lasso, Quito</div>
+    <div class="botones">
+      <a class="btn" href="https://maps.app.goo.gl/kXL7hxQdyqaut85r6" target="_blank" rel="noopener">📍 Ver en Google Maps</a>
+      <a class="btn wa" href="https://wa.me/593986130776?text=Hola!%20Tengo%20una%20consulta%20sobre%20el%20Open%20House%20Halloween%20de%20Molar" target="_blank" rel="noopener">💬 WhatsApp</a>
+    </div>
+  </section>
+
+  <div class="acciones">
+    <button class="btn pri" type="button" onclick="window.print()">📄 Guardar PDF / Imprimir</button>
+    <button class="btn" type="button" id="btnCompartir">📤 Compartir</button>
+  </div>
+
+  <footer>
+    <div><b>Molar Clínica Dental</b> · +593 98 613 0776 · @molar.ecu</div>
+    <div>Torre Metromed · Consultorio 009 · Quito</div>
+  </footer>
+</main>
+
+<script>
+  // Datos de la reserva desde el enlace: #n=Nombre&h=09:40&c=OH-6789 (la parte del # no viaja al servidor)
+  (function () {
+    const p = new URLSearchParams(location.hash.slice(1));
+    const limpio = (s, max) => String(s || '').replace(/[<>"]/g, '').trim().slice(0, max);
+    const nombre = limpio(p.get('n'), 40), hora = limpio(p.get('h'), 5), codigo = limpio(p.get('c'), 12);
+    if (nombre) document.getElementById('saludo').textContent = `¡Querida familia de ${nombre}!`;
+    if (nombre || hora || codigo) {
+      document.getElementById('pNombre').textContent = nombre || '—';
+      document.getElementById('pHora').textContent = hora || '—';
+      document.getElementById('pCodigo').textContent = codigo || '—';
+      document.getElementById('pase').hidden = false;
+      if (nombre) document.title = `Bienvenida de ${nombre} · Open House Halloween · Molar`;
+    }
+    const btn = document.getElementById('btnCompartir');
+    if (!navigator.share) { btn.style.display = 'none'; return; }
+    btn.addEventListener('click', () => navigator.share({
+      title: 'Open House Halloween · Molar', text: '¡Nuestra carta de bienvenida al Open House Halloween de Molar! 🎃', url: location.href,
+    }).catch(() => {}));
+  })();
+</script>
+</body>
+</html>
