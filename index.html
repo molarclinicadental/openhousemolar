@@ -267,7 +267,7 @@
   .asoma.izq .m-globo { left: 95%; } .asoma.der .m-globo { left: 5%; }
   @media (max-width: 640px) { .asoma { width: 92px; bottom: 100px; } }
 
-  /* Confeti de dulces al reservar */
+  /* Confeti al reservar */
   .confeti { position: fixed; top: -40px; z-index: 60; pointer-events: none; font-size: 26px; animation: cae var(--t, 3s) linear forwards; }
   @keyframes cae { to { transform: translate(var(--x, 0), 110vh) rotate(var(--r, 360deg)); } }
 
@@ -556,7 +556,7 @@
     <ol class="pasos-reserva">
       <li class="paso-r"><span class="num">1</span><div><h3>Cédula del niño</h3><p>Si ya es paciente, lo reconocemos.</p></div></li>
       <li class="paso-r"><span class="num">2</span><div><h3>Elige el horario</h3><p>Citas de 20 minutos.</p></div></li>
-      <li class="paso-r"><span class="num">3</span><div><h3>Guarda tu código</h3><p>Preséntalo el día del evento.</p></div></li>
+      <li class="paso-r"><span class="num">3</span><div><h3>Guarda tu código</h3><p>Muéstralo en recepción al llegar.</p></div></li>
     </ol>
     <div class="centrado"><button class="cta cta-sec" type="button" onclick="abrirReserva()">Reservar ahora →</button></div>
   </section>
@@ -769,7 +769,7 @@
     <div class="paso exito" id="paso4">
       <div class="big">🎃</div>
       <h2>¡Cupo reservado!</h2>
-      <p class="sub">Guarda este código y preséntalo el día del evento</p>
+      <p class="sub">Guarda este código: muéstralo en recepción al llegar (también sirve la cédula del niño)</p>
       <div class="codigo" id="exCodigo">OH-XXXXX</div>
       <p>Te esperamos el <b>sábado 31 de octubre</b> a las <b id="exHora"></b> en Torre Metromed · Consultorio 009.</p>
       <p class="ayuda" id="exPago" hidden>Recibimos tu comprobante. Nuestro equipo verificará el pago y te confirmará por WhatsApp.</p>
@@ -1475,7 +1475,7 @@ document.getElementById('arana').addEventListener('click', e => e.currentTarget.
 function pintarAdornos() {
   const cont = document.getElementById('adornos');
   const alto = document.documentElement.scrollHeight, chico = innerWidth < 640;
-  const figuras = ['s-fantasma', 's-calabaza', 's-sombrero', 's-gato', 's-dulce', 's-caldero', 's-diente', 's-escoba', 's-murcielago', 's-fantasma', 's-calabaza'];
+  const figuras = ['s-fantasma', 's-calabaza', 's-sombrero', 's-gato', 's-caldero', 's-diente', 's-escoba', 's-murcielago', 's-fantasma', 's-calabaza'];
   const n = Math.max(12, Math.min(46, Math.round(alto / (chico ? 210 : 160))));
   let html = '';
   // Telarañas fijas en las esquinas de arriba
@@ -1584,10 +1584,10 @@ DISFRACES.sabana = ['0 0 430 479', `
 const MONSTRUOS = [
   { img: 'verde', w: 460, h: 477, capas: [['sombreroBruja', 'left:21%;top:-28%;width:57%']],
     base: [0.42, 0.98], cuello: 0.6, hombro: [0.72, 0.57], mano: [0.88, 0.42], brazo: [0.075, 0.13, 0.12, 0.6], saludo: 1,
-    frases: ['¡Dulce o premio… y después, cepillo! 🦷', '¡Soy una brujita con dientes limpios! ✨'] },
+    frases: ['¡Trae tus dulces y llévate un premio! 🎁', '¡Soy una brujita con dientes limpios! ✨'] },
   { img: 'naranja', w: 436, h: 483, capas: [['cubeta', 'left:73%;top:22%;width:30%']],
     base: [0.45, 0.98], cuello: 0.55, hombro: [0.82, 0.48], mano: [0.87, 0.33], brazo: [0.05, 0.17, 0.08, 0.55], saludo: 0.8,
-    frases: ['¡Traje mi cubeta para los dulces! 🍬', 'Los dulces se cambian por premios en Molar 🎁'] },
+    frases: ['¡Mi cubeta es para entregar los dulces! 🎃', 'Los dulces se cambian por premios en Molar 🎁'] },
   { img: 'rojo', w: 394, h: 475, capas: [['capa', 'left:-9%;top:24%;width:118%;height:74%', 'none'], ['medalla', 'left:42%;top:53%;width:16%']],
     base: [0.5, 0.98], cuello: 0.62, hombro: [0.9, 0.5], mano: [0.95, 0.72], brazo: [0.05, 0.05, 0.2, 0.6], saludo: 0,
     frases: ['Soy vampiro… ¡pero uso hilo dental! 🦇', '¡Buuu! ¿Ya te lavaste los dientes?'] },
@@ -2079,7 +2079,7 @@ const Pocion = (() => {
   const lados = { izq: zona.querySelector('.ap-bruja'), der: zona.querySelector('.ap-mago') };
   const frases = {
     izq: ['¡Mi poción secreta: sonrisas sanas! 🧪', '¡Te esperamos el 31! 🎃', '¡Ven disfrazado! 👻'],
-    der: ['¡Una pizca de dulces… y cepillo! 🦷', '¡Reserva tu cupo aquí! 👇', '¡Hay premios y dulces! 🍬'],
+    der: ['¡Cambia tus dulces por premios! 🎁', '¡Reserva tu cupo aquí! 👇', '¡Hay premios y show de mago! 🎩'],
   };
   const cuenta = { izq: 0, der: 0 };
   const monstruo = lado => lados[lado] && lados[lado].querySelector('.monstruo');
@@ -2128,7 +2128,7 @@ const Pocion = (() => {
   setTimeout(() => setInterval(() => { if (visible && !document.hidden) hablar(turno++ % 2 ? 'izq' : 'der'); }, 5400), 7000);
 
   // El mago lanza ingredientes a la poción y salpican
-  const INGREDIENTES = ['🦷', '🍬', '⭐', '🍭', '🦇', '🍫'];
+  const INGREDIENTES = ['🦷', '⭐', '🦇', '🎃', '🌙', '👻'];
   let n = 0;
   function lanzar() {
     if (!visible || document.hidden) return;
@@ -2214,10 +2214,10 @@ const Pocion = (() => {
   setTimeout(asomar, 12000);
 })();
 
-// ── Lluvia de dulces al confirmar la reserva ──
+// ── Lluvia de confeti de Halloween al confirmar la reserva ──
 function lluviaDeDulces() {
   if (SIN_MOVIMIENTO) return;
-  const cosas = ['🍬', '🍭', '🎃', '👻', '🦷', '🍫', '🦇'];
+  const cosas = ['🎃', '👻', '🦷', '⭐', '🦇', '✨'];
   for (let i = 0; i < 30; i++) {
     const s = document.createElement('span');
     s.className = 'confeti';
