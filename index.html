@@ -477,6 +477,8 @@
   .cta-burbuja .cta { margin-top: calc(var(--vh) * 1.2); padding: clamp(11px, calc(var(--vh) * 1.8), 17px) 34px; }
   .cta-burbuja .cupos-pill { margin-top: calc(var(--vh) * 1.2); }
 
+  /* iPhone: mientras la música espera el primer toque, toda la página cuenta como "tocable" */
+  .toca-audio, .toca-audio body { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -1493,8 +1495,9 @@ const Musica = (() => {
 //    primer toque, clic o tecla en cualquier parte. El botón 🔊/🔇 la silencia, y
 //    si la persona la silenció, se recuerda para la próxima visita. ──
 const btnMusica = document.getElementById('btnMusica');
-const prefMusica = { leer() { try { return localStorage.getItem('oh_musica'); } catch (_) { return null; } },
-                     guardar(v) { try { localStorage.setItem('oh_musica', v); } catch (_) {} } };
+// Preferencia "con/sin sonido" (v2: se ignoran las guardadas con la antigua pantalla de entrada)
+const prefMusica = { leer() { try { return localStorage.getItem('oh_musica_v2'); } catch (_) { return null; } },
+                     guardar(v) { try { localStorage.setItem('oh_musica_v2', v); } catch (_) {} } };
 function pintarBtnMusica() {
   const on = Musica.sonando;
   btnMusica.textContent = on ? '🔊' : '🔇';
@@ -1552,8 +1555,11 @@ if (prefMusica.leer() !== 'off' && !SIN_MOVIMIENTO) {
     sonarAhora().then(ok => { if (ok) quitar(); });
   };
   const eventos = ['touchend', 'click', 'keydown', 'pointerup'];
-  const quitar = () => eventos.forEach(ev => removeEventListener(ev, alTocar, true));
+  const quitar = () => { eventos.forEach(ev => removeEventListener(ev, alTocar, true)); document.documentElement.classList.remove('toca-audio'); };
   eventos.forEach(ev => addEventListener(ev, alTocar, true));
+  // Safari en iPhone solo avisa el toque si cae sobre algo "tocable": mientras la música espera,
+  // toda la página se marca así (no cambia nada visible) y se quita en cuanto suena.
+  if (esIOS) document.documentElement.classList.add('toca-audio');
 }
 document.addEventListener('visibilitychange', () => Musica.pausarOculta(document.hidden));
 
