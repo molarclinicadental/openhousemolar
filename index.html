@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+  // Los datos del evento esperan dentro del caldero hasta que la poción los lanza.
+  // Respaldo: si por algo el caldero no arranca, a los 7 s se muestran igual.
+  document.documentElement.classList.add("js");
+  setTimeout(function () { if (!window.__pocionLista) document.documentElement.classList.add("mostrar-todo"); }, 7000);
+</script>
 <title>Open House Halloween · Molar Clínica Dental</title>
 <meta name="description" content="Open House Molar edición Halloween. Sábado 31 de octubre, 9:00 a 14:00. Profilaxis dental por $15, inflables, show de mago, bocaditos y premios para niños de 0 a 12 años. ¡Ven disfrazado!">
 <meta property="og:title" content="Open House Halloween · Molar">
@@ -138,20 +144,31 @@
   .caldero-escena .titulo-halloween { margin-top: 6px; animation: vapor-titulo 1.3s ease .15s both, titilar 7s ease-in-out 1.5s infinite; }
   @keyframes vapor-titulo { from { opacity: 0; filter: blur(14px); transform: translateY(24px) scale(.94); } to { opacity: 1; filter: none; transform: none; } }
   .inv-lema { color: var(--texto-2); font-size: 1.1rem; max-width: 460px; margin: 8px auto 0; }
-  .pocion-datos { list-style: none; display: grid; gap: 12px; width: min(480px, 100%); margin: 22px auto 0; position: relative; z-index: 4; }
-  .pocion-datos li { position: relative; display: flex; gap: 12px; align-items: center; text-align: left; padding: 10px 22px 10px 10px; border-radius: 999px;
-                     background: radial-gradient(120% 150% at 12% 15%, rgba(212, 255, 138, .22), rgba(46, 158, 42, .16) 42%, rgba(22, 13, 40, .82) 100%);
-                     border: 1.5px solid rgba(155, 229, 100, .6);
-                     box-shadow: inset 0 0 22px rgba(155, 229, 100, .18), 0 10px 24px rgba(0, 0, 0, .35), 0 0 22px rgba(107, 227, 74, .14);
+  /* Datos del evento: burbujas grandes que el caldero lanza una por una (después de hervir un momento) */
+  .pocion-datos { list-style: none; display: grid; gap: 14px; width: min(600px, 100%); margin: 24px auto 0; position: relative; z-index: 4; }
+  .pocion-datos li { position: relative; display: flex; gap: 16px; align-items: center; text-align: left; padding: 14px 28px 14px 14px; border-radius: 999px;
+                     background: radial-gradient(120% 160% at 10% 10%, rgba(212, 255, 138, .26), rgba(46, 158, 42, .2) 38%, rgba(18, 10, 34, .92) 100%);
+                     border: 2px solid #9BE564;
+                     box-shadow: inset 0 0 26px rgba(155, 229, 100, .22), 0 12px 28px rgba(0, 0, 0, .45), 0 0 28px rgba(107, 227, 74, .28);
                      animation: sube-burbuja 1.2s cubic-bezier(.2, 1.25, .4, 1) var(--d, 0s) both, burbuja-flota var(--f, 5s) ease-in-out calc(var(--d, 0s) + 1.2s) infinite; }
-  .pocion-datos li::before { content: ''; position: absolute; top: 6px; left: 20px; width: 26px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, .35); transform: rotate(-10deg); }
-  @keyframes sube-burbuja { 0% { opacity: 0; transform: translateY(var(--dy, 160px)) scale(.12); border-radius: 50%; }
-                            55% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+  .pocion-datos li::before { content: ''; position: absolute; top: 7px; left: 24px; width: 32px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, .4); transform: rotate(-10deg); }
+  @keyframes sube-burbuja { 0% { opacity: 0; transform: translateY(var(--dy, 160px)) scale(.12); } 55% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+  @keyframes sale-burbuja { 0% { opacity: 0; transform: translate(var(--dx, 0), var(--dy, 200px)) scale(.08); }
+                            18% { opacity: 1; } 70% { transform: translate(0, -8px) scale(1.04); } 100% { opacity: 1; transform: none; } }
   @keyframes burbuja-flota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-  .pocion-datos .inv-ico { flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 1.45rem;
-                           background: rgba(255, 255, 255, .08); border: 1px solid rgba(155, 229, 100, .35); }
-  .pocion-datos b { display: block; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 1.12rem; line-height: 1.25; }
-  .pocion-datos small { display: block; color: var(--texto-2); font-size: .95rem; line-height: 1.35; }
+  /* Con JavaScript, los datos esperan dentro del caldero hasta que la poción los lanza */
+  .js .pocion-datos li, .js .cta-burbuja { opacity: 0; animation: none; }
+  .js .pocion-datos li.sale, .js .cta-burbuja.sale { animation: sale-burbuja 1.15s cubic-bezier(.2, 1.1, .4, 1) both, burbuja-flota var(--f, 5s) ease-in-out 1.15s infinite; }
+  .mostrar-todo .pocion-datos li, .mostrar-todo .cta-burbuja { opacity: 1 !important; animation: none !important; transform: none !important; }
+  .pocion-datos .inv-ico { flex-shrink: 0; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-size: 1.85rem;
+                           background: rgba(255, 255, 255, .1); border: 1.5px solid rgba(155, 229, 100, .5); }
+  .pocion-datos b { display: block; font-family: Fredoka, sans-serif; font-weight: 700; font-size: 1.42rem; line-height: 1.2; color: #FFFFFF; }
+  .pocion-datos small { display: block; color: #EAE3FA; font-size: 1.08rem; line-height: 1.35; margin-top: 2px; }
+  @media (max-width: 640px) {
+    .pocion-datos li { padding: 12px 20px 12px 12px; gap: 12px; }
+    .pocion-datos .inv-ico { width: 50px; height: 50px; font-size: 1.55rem; }
+    .pocion-datos b { font-size: 1.2rem; } .pocion-datos small { font-size: 1rem; }
+  }
 
   .caldero-zona { position: relative; width: min(330px, 68vw); margin: 40px auto 0; z-index: 2; }
   .caldero { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; position: relative; z-index: 2; }
@@ -161,13 +178,6 @@
   .caldero.chapoteo .c-brillo { animation: none; opacity: 1; transform: scale(1.25); transition: transform .2s; }
   .caldero .llama { transform-box: fill-box; transform-origin: 50% 100%; animation: llama .45s ease-in-out infinite alternate; }
   @keyframes llama { from { transform: scaleY(.82) skewX(-4deg); } to { transform: scaleY(1.12) skewX(4deg); } }
-  .caldero .c-cucharon { transform-box: view-box; transform-origin: 150px 92px; animation: revolver 3.2s ease-in-out infinite; }
-  @keyframes revolver { 0%, 100% { transform: translate(-34px, 0) rotate(-8deg); } 25% { transform: translate(0, 6px) rotate(0); }
-                        50% { transform: translate(34px, 0) rotate(8deg); } 75% { transform: translate(0, -4px) rotate(0); } }
-  .caldero .c-burb { transform-box: fill-box; transform-origin: center; animation: c-burb 2.2s ease-in infinite; }
-  @keyframes c-burb { 0% { transform: scale(0); opacity: 0; } 55% { transform: scale(1); opacity: 1; } 70% { transform: scale(1.35); opacity: 0; } 100% { transform: scale(0); opacity: 0; } }
-  .burbuja-libre { position: absolute; border-radius: 50%; pointer-events: none; z-index: 3;
-                   background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .8), rgba(155, 229, 100, .55) 45%, rgba(46, 158, 42, .25)); }
   .ingrediente { position: absolute; left: 0; top: 0; font-size: 26px; pointer-events: none; z-index: 3; }
   .ap-bruja { left: -48%; bottom: 4%; width: 60%; z-index: 3; transition: transform .6s cubic-bezier(.3, 1.4, .5, 1); }
   .ap-mago { right: -46%; bottom: 10%; width: 56%; z-index: 1; transition: transform .6s cubic-bezier(.3, 1.4, .5, 1); }
@@ -180,7 +190,9 @@
     .ap-bruja .monstruo.habla .m-globo, .ap-mago .monstruo.habla .m-globo { transform: none; }
     .ap-bruja .m-globo::after { left: 30px; } .ap-mago .m-globo::after { left: auto; right: 22px; }
   }
-  .cta-burbuja { margin-top: 8px; animation: sube-burbuja 1s cubic-bezier(.2, 1.3, .4, 1) 2.6s both; --dy: 60px; position: relative; z-index: 4; }
+  .cta-burbuja { margin-top: 10px; animation: sube-burbuja 1s cubic-bezier(.2, 1.3, .4, 1) 2.6s both; --dy: 60px; position: relative; z-index: 4; }
+  .pocion-lienzo { position: absolute; left: -20%; top: -80%; width: 140%; height: 184%; pointer-events: none; z-index: 1; }
+  .caldero svg { position: relative; z-index: 0; }
   .cuenta-titulo { margin-top: 30px; color: var(--texto-2); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .8rem; }
   .cuenta-titulo + .cuenta { margin-top: 8px; }
 
@@ -235,7 +247,7 @@
     .estrella, .flota, .adorno, .bat .ala-i, .bat .ala-d, .niebla span, .arana, .luna,
     .cementerio .fantasma-tumba, .cementerio .ojo-calabaza, .cementerio .niebla-baja, .titulo-halloween, .cta,
     .m-bote, .m-sombra, .monstruo.salta .m-salto, .ap-tumba, .pocion-datos li, .cta-burbuja, .caldero-escena .titulo-halloween,
-    .caldero .llama, .caldero .c-cucharon, .caldero .c-burb, .caldero .c-brillo { animation: none !important; }
+    .caldero .llama, .caldero .c-brillo { animation: none !important; }
     .monstruo { opacity: 1; transform: none; transition: none; }
     .revelar { opacity: 1; transform: none; transition: none; }
   }
@@ -465,7 +477,8 @@
     </ul>
     <div class="caldero-zona" id="calderoZona">
       <div class="aparicion ap-mago" data-monstruo="colores"></div>
-      <button class="caldero" id="caldero" type="button" aria-label="Caldero de la bruja: ¡tócalo!">
+      <button class="caldero" id="caldero" type="button" aria-label="Caldero de la bruja: ¡tócalo o pasa el dedo por la poción!">
+        <canvas class="pocion-lienzo" id="pocionLienzo" aria-hidden="true"></canvas>
         <svg viewBox="0 0 300 250" aria-hidden="true">
           <defs>
             <radialGradient id="c-luz" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#9BE564" stop-opacity=".55"/><stop offset="1" stop-color="#9BE564" stop-opacity="0"/></radialGradient>
@@ -483,13 +496,7 @@
           <path d="M34 92h232c8 60-20 118-116 124C54 210 26 152 34 92z" fill="url(#c-olla)" stroke="#05030C" stroke-width="4"/>
           <path d="M62 116c-4 38 10 64 38 80" stroke="rgba(255,255,255,.13)" stroke-width="8" fill="none" stroke-linecap="round"/>
           <ellipse cx="150" cy="90" rx="128" ry="24" fill="#2E2548" stroke="#05030C" stroke-width="4"/>
-          <g class="c-cucharon"><path d="M150 96L96 -18" stroke="#7A5530" stroke-width="9" stroke-linecap="round"/><path d="M150 96L96 -18" stroke="#9C7445" stroke-width="3" stroke-linecap="round"/></g>
-          <ellipse class="c-pocion" cx="150" cy="90" rx="112" ry="16" fill="url(#c-pocion)"/>
-          <path d="M66 104q4 18 9 1zM214 108q5 22 11 0zM112 110q3 12 7 0z" fill="#6BE34A" stroke="#2E9E2A" stroke-width="1.5"/>
-          <circle class="c-burb" cx="110" cy="88" r="7" fill="#C6FF7E" stroke="#2E9E2A" stroke-width="2"/>
-          <circle class="c-burb" style="animation-delay:-.7s" cx="172" cy="92" r="9" fill="#C6FF7E" stroke="#2E9E2A" stroke-width="2"/>
-          <circle class="c-burb" style="animation-delay:-1.3s" cx="206" cy="86" r="5" fill="#C6FF7E" stroke="#2E9E2A" stroke-width="2"/>
-          <circle class="c-burb" style="animation-delay:-1.8s" cx="136" cy="84" r="4" fill="#C6FF7E" stroke="#2E9E2A" stroke-width="2"/>
+          <g class="c-cucharon" id="cucharon"><path d="M150 96L96 -18" stroke="#7A5530" stroke-width="9" stroke-linecap="round"/><path d="M150 96L96 -18" stroke="#9C7445" stroke-width="3" stroke-linecap="round"/></g>
         </svg>
       </button>
       <div class="aparicion ap-bruja" data-monstruo="verde"></div>
@@ -1781,9 +1788,257 @@ document.querySelectorAll('.aparicion[data-monstruo]').forEach((ap, i) => {
   ap.appendChild(el);
 });
 
-// ── La poción de la bruja: el caldero burbujea, el mago le echa ingredientes y los dos te hablan ──
+// ════════════════════════════════════════════════════════════
+//  La poción: física sencilla del líquido del caldero.
+//  · La superficie ondula más cuanto más se la agita.
+//  · Las gotas saltan con gravedad: si caen dentro, hacen ondas; si caen
+//    fuera, escurren por la pared de la olla y forman charcos que se secan.
+//  · Burbujas que revientan, vapor, rebalses por el borde.
+//  · Se agita con el dedo o el mouse, hace erupción al tocarla y salpica
+//    cuando el mago le echa ingredientes. Todo en unidades del dibujo (300 × 250).
+// ════════════════════════════════════════════════════════════
+const Pocion = (() => {
+  const lienzo = document.getElementById('pocionLienzo');
+  const caldero = document.getElementById('caldero');
+  const cucharon = document.getElementById('cucharon');
+  const svg = caldero.querySelector('svg');
+  const ctx = lienzo.getContext('2d');
+  const X0 = -60, Y0 = -200, AW = 420;                 // el lienzo cubre x -60…360, y -200…260
+  const S = { cx: 150, cy: 90, rx: 110, ry: 15 };        // superficie de la poción
+  const SUELO = 246, G = 520;
+  let esc = 1, agit = 0.4, destello = 0, visible = true, antes = 0;
+  const gotas = [], ondas = [], escurridos = [], charcos = [], burbujas = [], vapor = [];
+
+  // Pared derecha de la olla (curva del dibujo); la izquierda es su espejo
+  const pared = [];
+  for (let i = 0; i <= 40; i++) {
+    const t = i / 40, u = 1 - t;
+    pared.push({ x: u * u * u * 266 + 3 * u * u * t * 274 + 3 * u * t * t * 246 + t * t * t * 150,
+                 y: u * u * u * 92 + 3 * u * u * t * 152 + 3 * u * t * t * 210 + t * t * t * 216 });
+  }
+  function xDer(y) {
+    if (y <= pared[0].y) return pared[0].x;
+    for (let i = 1; i < pared.length; i++) {
+      if (y <= pared[i].y) { const a = pared[i - 1], b = pared[i]; return a.x + (b.x - a.x) * (y - a.y) / ((b.y - a.y) || 1); }
+    }
+    return 150;
+  }
+  const dentro = (x, y, k = 1) => ((x - S.cx) / (S.rx * k)) ** 2 + ((y - S.cy) / (S.ry * k)) ** 2 <= 1;
+
+  function medir() {
+    const r = lienzo.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    lienzo.width = Math.max(1, Math.round(r.width * dpr)); lienzo.height = Math.max(1, Math.round(r.height * dpr));
+    esc = lienzo.width / AW;
+  }
+
+  function onda(x, y, fuerza = 1) {
+    ondas.push({ x, y, r: 2, max: 22 + 34 * fuerza, a: Math.min(0.7, 0.3 + 0.35 * fuerza) });
+    agit = Math.min(3, agit + 0.12 * fuerza);
+  }
+  function soplo(x) { vapor.push({ x, y: S.cy - 4, r: azar(8, 16), vy: -azar(18, 36), vx: azar(-6, 6), a: azar(0.25, 0.45) }); }
+  function salpicar(x = S.cx, fuerza = 1, n) {
+    const cant = n || Math.round(10 + 14 * fuerza);
+    for (let i = 0; i < cant; i++) {
+      const px = Math.max(S.cx - S.rx * 0.9, Math.min(S.cx + S.rx * 0.9, x + azar(-16, 16) * fuerza));
+      gotas.push({ x: px, y: S.cy - 3, vx: azar(-80, 80) * fuerza + (px - S.cx) * 0.9, vy: -azar(170, 340) * Math.sqrt(fuerza), r: azar(2.2, 5.4) });
+    }
+    onda(x, S.cy, fuerza * 1.5);
+    destello = Math.min(1, destello + 0.45 * fuerza);
+    agit = Math.min(3, agit + 0.7 * fuerza);
+    for (let k = 0; k < 4; k++) soplo(x + azar(-30, 30));
+  }
+  function rebalsar(lado = Math.random() < 0.5 ? -1 : 1) {
+    escurridos.push({ lado, x: 0, y: 100, v: 6, largo: 3, r: azar(3.2, 5) });
+    onda(S.cx + lado * S.rx * 0.85, S.cy, 0.4);
+  }
+  function charco(x, vol) {
+    const c = charcos.find(k => Math.abs(k.x - x) < k.max * 0.8 && k.a > 0.3);
+    if (c) { c.max = Math.min(40, c.max + vol * 0.9); c.a = Math.min(1, c.a + 0.2); }
+    else charcos.push({ x, r: 1, max: 6 + vol * 1.4, a: 1 });
+  }
+
+  let tBurbuja = 0, tVapor = 0, tRebalse = azar(2, 4), tCuchara = 0;
+  function actualizar(dt, t) {
+    agit += (0.4 - agit) * Math.min(1, dt * 0.9);
+    destello *= Math.max(0, 1 - dt * 3);
+
+    // El cucharón revuelve y deja ondas donde toca la poción
+    const fase = t * 2 * Math.PI / 3.2, dx = -34 * Math.cos(fase), dy = 4 * Math.sin(fase * 2);
+    cucharon.setAttribute('transform', `translate(${dx.toFixed(2)} ${dy.toFixed(2)}) rotate(${(dx / 34 * 8).toFixed(2)} 150 92)`);
+    if ((tCuchara -= dt) <= 0) { tCuchara = 0.28; onda(150 + dx, S.cy + 1, 0.25); }
+
+    if ((tBurbuja -= dt) <= 0) {
+      tBurbuja = azar(0.15, 0.4);
+      const a = azar(0, Math.PI * 2), k = Math.sqrt(Math.random()) * 0.8;
+      burbujas.push({ x: S.cx + Math.cos(a) * S.rx * k, y: S.cy + Math.sin(a) * S.ry * k, r: 0.5, max: azar(2.5, 8), v: azar(5, 12) });
+    }
+    if ((tVapor -= dt) <= 0) { tVapor = 0.16; soplo(S.cx + azar(-80, 80)); }
+    if ((tRebalse -= dt) <= 0) { tRebalse = azar(2.5, 5); rebalsar(); }
+
+    for (let i = burbujas.length - 1; i >= 0; i--) {
+      const b = burbujas[i];
+      b.r += b.v * dt;
+      if (b.r >= b.max) {                                 // revienta y suelta gotitas
+        onda(b.x, b.y, b.max / 14);
+        for (let k = 0; k < Math.round(b.max / 2.5); k++)
+          gotas.push({ x: b.x, y: b.y - 1, vx: azar(-45, 45), vy: -azar(80, 190), r: azar(1.3, 2.6) });
+        burbujas.splice(i, 1);
+      }
+    }
+
+    for (let i = gotas.length - 1; i >= 0; i--) {
+      const g = gotas[i];
+      g.vy += G * dt; g.x += g.vx * dt; g.y += g.vy * dt;
+      if (g.vy > 0) {
+        if (g.y >= S.cy - S.ry && dentro(g.x, g.y)) {       // vuelve a la poción
+          onda(g.x, g.y, g.r / 7); gotas.splice(i, 1); continue;
+        }
+        if (g.y > 92 && g.y < 206 && !dentro(g.x, g.y, 1.05)) {
+          const xr = xDer(g.y), xl = 300 - xr;
+          if (g.x >= xl - 1 && g.x <= xr + 1) {             // cae sobre la olla: escurre por la pared
+            escurridos.push({ lado: 0, x: g.x, y: g.y, v: 8, largo: 2, r: g.r * 0.8 }); gotas.splice(i, 1); continue;
+          }
+        }
+        if (g.y >= SUELO) { charco(g.x, g.r); gotas.splice(i, 1); continue; }
+      }
+      if (g.y > 320 || g.x < X0 || g.x > X0 + AW) gotas.splice(i, 1);
+    }
+
+    for (let i = escurridos.length - 1; i >= 0; i--) {
+      const e = escurridos[i];
+      e.v = Math.min(e.v + 50 * dt, 46); e.y += e.v * dt; e.largo = Math.min(e.largo + 26 * dt, 18);
+      const xr = xDer(e.y);
+      if (e.lado) e.x = e.lado > 0 ? xr + 1 : 300 - xr - 1;          // por el borde de la olla
+      else e.x = Math.max(300 - xr + 2, Math.min(xr - 2, e.x));     // por el frente
+      if (e.y >= 206) {                                              // gotea al suelo
+        gotas.push({ x: e.x, y: e.y, vx: 0, vy: 30, r: e.r }); escurridos.splice(i, 1);
+      }
+    }
+    for (let i = charcos.length - 1; i >= 0; i--) {
+      const c = charcos[i];
+      c.r += (c.max - c.r) * Math.min(1, dt * 2.5);
+      c.a -= dt / 8;
+      if (c.a <= 0) charcos.splice(i, 1);
+    }
+    for (let i = ondas.length - 1; i >= 0; i--) {
+      const o = ondas[i];
+      o.r += 44 * dt; o.a -= dt * 0.8 * (1 + o.r / o.max);
+      if (o.a <= 0 || o.r > o.max) ondas.splice(i, 1);
+    }
+    for (let i = vapor.length - 1; i >= 0; i--) {
+      const v = vapor[i];
+      v.y += v.vy * dt; v.x += v.vx * dt; v.r += 9 * dt; v.a -= dt * 0.28;
+      if (v.a <= 0) vapor.splice(i, 1);
+    }
+  }
+
+  function superficie(t) {                                // borde ondulado de la poción
+    ctx.beginPath();
+    for (let i = 0; i <= 72; i++) {
+      const th = i / 72 * Math.PI * 2, x = S.cx + Math.cos(th) * S.rx;
+      const ola = (Math.sin(x * 0.09 + t * 5.2) * 1.1 + Math.sin(x * 0.05 - t * 3.4) * 1.3) * agit;
+      const y = S.cy + Math.sin(th) * S.ry + ola;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.closePath();
+  }
+  function gotaDibujo(x, y, r, vx, vy) {
+    const vel = Math.hypot(vx, vy), alarga = 1 + Math.min(vel / 380, 0.9);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(vy, vx) - Math.PI / 2);
+    ctx.beginPath(); ctx.ellipse(0, 0, r, r * alarga, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#7BEF55'; ctx.fill();
+    ctx.lineWidth = 0.8; ctx.strokeStyle = 'rgba(30,110,30,.8)'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-r * 0.35, -r * 0.3, r * 0.32, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.fill();
+    ctx.restore();
+  }
+
+  function dibujar(t) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, lienzo.width, lienzo.height);
+    ctx.setTransform(esc, 0, 0, esc, -X0 * esc, -Y0 * esc);
+
+    for (const v of vapor) {                              // vapor
+      const g = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, v.r);
+      g.addColorStop(0, `rgba(210,255,190,${(v.a * 0.5).toFixed(3)})`); g.addColorStop(1, 'rgba(210,255,190,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(v.x, v.y, v.r, 0, Math.PI * 2); ctx.fill();
+    }
+    for (const c of charcos) {                            // charcos en el suelo
+      ctx.globalAlpha = Math.max(0, c.a);
+      ctx.beginPath(); ctx.ellipse(c.x, SUELO, c.r, c.r * 0.24, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#5FD63F'; ctx.fill(); ctx.strokeStyle = '#2E9E2A'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(c.x - c.r * 0.3, SUELO - c.r * 0.06, c.r * 0.35, c.r * 0.07, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    ctx.lineCap = 'round';
+    for (const e of escurridos) {                         // chorritos por la pared
+      ctx.strokeStyle = '#6BE34A'; ctx.lineWidth = e.r * 1.5;
+      ctx.beginPath(); ctx.moveTo(e.x, e.y - e.largo); ctx.lineTo(e.x, e.y); ctx.stroke();
+      ctx.beginPath(); ctx.arc(e.x, e.y, e.r * 0.95, 0, Math.PI * 2); ctx.fillStyle = '#7BEF55'; ctx.fill();
+    }
+
+    // La poción: superficie ondulada con brillo
+    superficie(t);
+    const gr = ctx.createRadialGradient(S.cx - 22, S.cy - 6, 4, S.cx, S.cy, S.rx);
+    gr.addColorStop(0, '#E0FF9C'); gr.addColorStop(0.55, '#6BE34A'); gr.addColorStop(1, '#2E9E2A');
+    ctx.fillStyle = gr; ctx.fill();
+    ctx.save();
+    ctx.clip();
+    if (destello > 0.02) { ctx.fillStyle = `rgba(240,255,210,${(destello * 0.45).toFixed(3)})`; ctx.fillRect(S.cx - S.rx, S.cy - 30, S.rx * 2, 60); }
+    ctx.lineWidth = 1.6;
+    for (const o of ondas) {
+      ctx.strokeStyle = `rgba(235,255,200,${Math.max(0, o.a).toFixed(3)})`;
+      ctx.beginPath(); ctx.ellipse(o.x, o.y, o.r, o.r * 0.22, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    for (let k = 0; k < 3; k++) {                          // reflejos que se mueven
+      const hx = S.cx - 60 + ((t * 18 + k * 47) % 120), hy = S.cy - 5 + k * 3;
+      ctx.beginPath(); ctx.ellipse(hx, hy, 14, 1.6, 0, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fill();
+    }
+    for (const b of burbujas) {
+      ctx.beginPath(); ctx.arc(b.x, b.y - b.r * 0.5, b.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(198,255,126,.9)'; ctx.fill(); ctx.strokeStyle = '#2E9E2A'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.arc(b.x - b.r * 0.35, b.y - b.r * 0.85, b.r * 0.28, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fill();
+    }
+    ctx.restore();
+    for (const g of gotas) gotaDibujo(g.x, g.y, g.r, g.vx, g.vy);
+  }
+
+  function cuadro(ahora) {
+    const dt = Math.min(0.05, (ahora - antes) / 1000 || 0.016); antes = ahora;
+    actualizar(dt, ahora / 1000);
+    dibujar(ahora / 1000);
+    if (visible && !document.hidden) requestAnimationFrame(cuadro); else corriendo = false;
+  }
+  let corriendo = false;
+  const arrancar = () => { if (!corriendo && !SIN_MOVIMIENTO) { corriendo = true; antes = performance.now(); requestAnimationFrame(cuadro); } };
+
+  medir();
+  addEventListener('resize', medir, { passive: true });
+  new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) { medir(); arrancar(); } }).observe(caldero);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) arrancar(); });
+  if (SIN_MOVIMIENTO) { dibujar(0); }
+
+  // Dedo o mouse sobre la poción: la agita y salpica
+  const aDibujo = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * 300, (e.clientY - r.top) / r.height * 250]; };
+  let ultimo = 0;
+  caldero.addEventListener('pointermove', e => {
+    const [x, y] = aDibujo(e), ahora = performance.now();
+    if (ahora - ultimo < 70 || !dentro(x, y, 1.8)) return;
+    ultimo = ahora;
+    const px = Math.max(S.cx - S.rx * 0.9, Math.min(S.cx + S.rx * 0.9, x));
+    onda(px, S.cy, 0.7); salpicar(px, 0.35, 3);
+  }, { passive: true });
+
+  return {
+    salpicar, rebalsar,
+    xDesdeZona(px, ancho) { return px / ancho * 300; },
+    erupcion(x) { salpicar(x ?? S.cx, 1.9); rebalsar(-1); rebalsar(1); },
+    aDibujo,
+  };
+})();
+
+// ── La poción de la bruja: primero hierve, luego lanza los datos uno por uno; el mago echa ingredientes ──
 (function () {
-  const escena = document.getElementById('calderoEscena');
   const zona = document.getElementById('calderoZona');
   const caldero = document.getElementById('caldero');
   const lados = { izq: zona.querySelector('.ap-bruja'), der: zona.querySelector('.ap-mago') };
@@ -1795,14 +2050,32 @@ document.querySelectorAll('.aparicion[data-monstruo]').forEach((ap, i) => {
   const monstruo = lado => lados[lado] && lados[lado].querySelector('.monstruo');
   const saltar = m => { if (m) { m.classList.remove('salta'); void m.offsetWidth; m.classList.add('salta'); } };
 
-  // Al tocar el caldero: murciélagos, explosión de burbujas y los dos saltan
-  caldero.addEventListener('click', () => {
+  // Al tocar la poción: erupción, murciélagos y los dos saltan
+  caldero.addEventListener('click', e => {
+    const [x] = Pocion.aDibujo(e);
+    Pocion.erupcion(Math.max(50, Math.min(250, x)));
     const r = caldero.getBoundingClientRect();
     Murcielagos.bandada(r.left + r.width / 2, r.top + r.height * 0.35);
-    for (let i = 0; i < 18; i++) burbuja(true);
     saltar(monstruo('izq')); saltar(monstruo('der'));
   });
-  if (SIN_MOVIMIENTO) return;
+
+  // Los datos salen del caldero, uno por uno, después de que la poción hierve un momento
+  const datos = [...document.querySelectorAll('#pocionDatos li'), document.querySelector('.cta-burbuja')];
+  function lanzarDato(el, ultimo) {
+    const rc = caldero.getBoundingClientRect(), re = el.getBoundingClientRect();
+    el.style.setProperty('--dx', (rc.left + rc.width / 2 - (re.left + re.width / 2)).toFixed(0) + 'px');
+    el.style.setProperty('--dy', (rc.top + rc.height * 0.36 - (re.top + re.height / 2)).toFixed(0) + 'px');
+    el.classList.add('sale');
+    Pocion.salpicar(150 + azar(-35, 35), ultimo ? 1.1 : 1.5);
+  }
+  if (SIN_MOVIMIENTO) { document.documentElement.classList.add('mostrar-todo'); return; }
+  let empezo = false;
+  new IntersectionObserver(([en], obs) => {
+    if (!en.isIntersecting || empezo) return;
+    empezo = true; obs.disconnect();
+    window.__pocionLista = true;                  // ya salen: el respaldo del head no hace falta
+    datos.forEach((el, i) => setTimeout(() => lanzarDato(el, i === datos.length - 1), 1700 + i * 1000));
+  }, { threshold: 0.2 }).observe(zona);
 
   let visible = true;
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(zona);
@@ -1816,30 +2089,10 @@ document.querySelectorAll('.aparicion[data-monstruo]').forEach((ap, i) => {
     setTimeout(() => { m.classList.remove('habla'); ap.classList.remove('asomado'); ap.style.zIndex = ''; }, 3000);
   }
   let turno = 0;
-  setTimeout(() => hablar('izq'), 3200);
-  setInterval(() => { if (visible && !document.hidden) hablar(turno++ % 2 ? 'izq' : 'der'); }, 5400);
+  setTimeout(() => hablar('izq'), 6800);
+  setTimeout(() => setInterval(() => { if (visible && !document.hidden) hablar(turno++ % 2 ? 'izq' : 'der'); }, 5400), 7000);
 
-  // Burbujas y vapor que suben de la boca del caldero (la boca está al 36 % de alto)
-  function burbuja(fuerte) {
-    const W = zona.clientWidth, H = caldero.clientHeight;
-    const b = document.createElement('span');
-    const tam = fuerte ? azar(8, 22) : azar(5, 14);
-    b.className = 'burbuja-libre';
-    b.style.width = b.style.height = tam + 'px';
-    b.style.left = (W * azar(0.25, 0.72)) + 'px';
-    b.style.top = (H * 0.33) + 'px';
-    zona.appendChild(b);
-    const sube = fuerte ? azar(140, 260) : azar(80, 170), deriva = azar(-40, 40);
-    const anim = b.animate([
-      { transform: 'translate(0, 0) scale(.4)', opacity: 0 },
-      { transform: `translate(${deriva * 0.4}px, ${-sube * 0.3}px) scale(1)`, opacity: 0.95, offset: 0.25 },
-      { transform: `translate(${deriva}px, ${-sube}px) scale(1.15)`, opacity: 0 },
-    ], { duration: azar(1400, 2400), easing: 'ease-out' });
-    anim.onfinish = () => b.remove();
-  }
-  setInterval(() => { if (visible && !document.hidden) burbuja(false); }, 320);
-
-  // El mago lanza ingredientes al caldero y salpican
+  // El mago lanza ingredientes a la poción y salpican
   const INGREDIENTES = ['🦷', '🍬', '⭐', '🍭', '🦇', '🍫'];
   let n = 0;
   function lanzar() {
@@ -1849,20 +2102,15 @@ document.querySelectorAll('.aparicion[data-monstruo]').forEach((ap, i) => {
     ing.className = 'ingrediente';
     ing.textContent = INGREDIENTES[n++ % INGREDIENTES.length];
     zona.appendChild(ing);
-    const x0 = W * 1.05, y0 = -H * 0.25, x1 = W * azar(0.4, 0.6), y1 = H * 0.3;
+    const x0 = W * 1.05, y0 = -H * 0.25, x1 = W * azar(0.35, 0.65), y1 = H * 0.3;
     const anim = ing.animate([
       { transform: `translate(${x0}px, ${y0}px) rotate(0deg) scale(1)`, opacity: 0 },
       { transform: `translate(${(x0 + x1) / 2}px, ${y0 - H * 0.45}px) rotate(200deg) scale(1.1)`, opacity: 1, offset: 0.45 },
       { transform: `translate(${x1}px, ${y1}px) rotate(420deg) scale(.5)`, opacity: 1 },
     ], { duration: 1100, easing: 'cubic-bezier(.3, .1, .6, 1)' });
-    anim.onfinish = () => {
-      ing.remove();
-      caldero.classList.add('chapoteo');
-      setTimeout(() => caldero.classList.remove('chapoteo'), 260);
-      for (let i = 0; i < 6; i++) burbuja(true);
-    };
+    anim.onfinish = () => { ing.remove(); Pocion.salpicar(Pocion.xDesdeZona(x1 + 13, W), 1); };
   }
-  setTimeout(() => { lanzar(); setInterval(lanzar, 4200); }, 2800);
+  setTimeout(() => { lanzar(); setInterval(lanzar, 4200); }, 7600);
 
   // Al pasar por el botón de reservar, los dos saltan de emoción
   document.getElementById('btnReservar').addEventListener('mouseenter', () => { saltar(monstruo('izq')); saltar(monstruo('der')); });
