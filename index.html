@@ -7,9 +7,6 @@
   // Los datos del evento esperan dentro del caldero hasta que la poción los lanza.
   // Respaldo: si por algo el caldero no arranca, a los 7 s se muestran igual.
   document.documentElement.classList.add("js");
-  // Pantalla de entrada (su toque arranca la música), salvo que la persona haya elegido sin sonido
-  try { if (localStorage.getItem("oh_musica") !== "off" && !matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("con-entrada"); } catch (e) {}
-  setTimeout(function () { if (!window.__entradaLista) document.documentElement.classList.remove("con-entrada"); }, 4000);
   setTimeout(function () { if (!window.__pocionLista) document.documentElement.classList.add("mostrar-todo"); }, 7000);
 </script>
 <title>Open House Halloween · Molar Clínica Dental</title>
@@ -480,19 +477,6 @@
   .cta-burbuja .cta { margin-top: calc(var(--vh) * 1.2); padding: clamp(11px, calc(var(--vh) * 1.8), 17px) 34px; }
   .cta-burbuja .cupos-pill { margin-top: calc(var(--vh) * 1.2); }
 
-  /* Pantalla de entrada: el toque para entrar arranca la música (los navegadores exigen un toque) */
-  .entrada { position: fixed; inset: 0; z-index: 80; display: none; place-items: center; padding: 24px; text-align: center;
-             background: radial-gradient(ellipse at center, rgba(51, 32, 90, .92), rgba(10, 5, 22, .97)); transition: opacity .6s ease, visibility .6s; }
-  .entrada.fuera { opacity: 0; visibility: hidden; pointer-events: none; }
-  .con-entrada .entrada { display: grid; }
-  .con-entrada body { overflow: hidden; }
-  .entrada-cal { font-size: clamp(72px, 16vh, 120px); line-height: 1; animation: entrada-bote 1.6s ease-in-out infinite; }
-  @keyframes entrada-bote { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-14px) rotate(6deg); } }
-  .entrada-marca { margin-top: 14px; font-family: Fredoka, sans-serif; font-weight: 700; letter-spacing: .2em; color: var(--luna); font-size: clamp(.9rem, 3.8vw, 1.3rem); }
-  .entrada-titulo { font-family: Creepster, Fredoka, cursive; color: var(--calabaza); font-size: clamp(3rem, 14vw, 5.5rem); line-height: 1;
-                    text-shadow: 0 4px 0 #B84A00, 0 12px 40px rgba(255, 122, 26, .35); }
-  .entrada .cta { margin-top: 22px; font-size: 1.3rem; }
-  .entrada-sin { display: block; margin: 16px auto 0; background: none; border: 0; color: var(--texto-2); text-decoration: underline; font: inherit; font-size: .92rem; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -521,17 +505,6 @@
 </div>
 
 <div class="murcielagos" id="murcielagos" aria-hidden="true"></div>
-
-<!-- Pantalla de entrada: el toque arranca la música y la animación -->
-<div class="entrada" id="entrada" role="dialog" aria-label="Entrar al Open House">
-  <div>
-    <div class="entrada-cal" aria-hidden="true">🎃</div>
-    <div class="entrada-marca">OPEN HOUSE MOLAR</div>
-    <div class="entrada-titulo">Halloween</div>
-    <button class="cta" id="btnEntrar" type="button">🔊 Toca para entrar</button>
-    <button class="entrada-sin" id="btnEntrarSin" type="button">Entrar sin sonido</button>
-  </div>
-</div>
 
 <button class="musica" id="btnMusica" type="button" aria-label="Silenciar la música" title="Silenciar la música">🔇</button>
 
@@ -1555,29 +1528,13 @@ btnMusica.addEventListener('click', async () => {
 });
 pintarBtnMusica();
 
-// ── Pantalla de entrada: su toque arranca la música y la animación del caldero ──
-const entrada = document.getElementById('entrada');
-const conEntrada = () => document.documentElement.classList.contains('con-entrada');
-function cerrarEntrada() {
-  entrada.classList.add('fuera');
-  setTimeout(() => { document.documentElement.classList.remove('con-entrada'); entrada.classList.remove('fuera'); }, 650);
-  window.dispatchEvent(new Event('oh-entro'));
-}
-function entrar(conSonido) {
-  if (conSonido) { sonarAhora(); prefMusica.guardar('on'); } else prefMusica.guardar('off');
-  cerrarEntrada();
-}
-document.getElementById('btnEntrar').addEventListener('click', () => entrar(true));
-document.getElementById('btnEntrarSin').addEventListener('click', () => entrar(false));
-window.__entradaLista = true;                     // el respaldo del head ya no hace falta
-
 if (prefMusica.leer() !== 'off' && !SIN_MOVIMIENTO) {
-  // Si el navegador deja sonar sin toque (p. ej. visitas repetidas en computadora), no hace falta la entrada
-  Musica.encender().then(ok => { if (ok) { pintarBtnMusica(); if (conEntrada()) cerrarEntrada(); } }).catch(() => {});
+  // Si el navegador deja sonar sin toque (p. ej. visitas repetidas en computadora), suena de una vez
+  Musica.encender().then(ok => { if (ok) pintarBtnMusica(); }).catch(() => {});
   // Si no, cada toque, clic o tecla lo vuelve a intentar hasta que suene (en iPhone el primer toque a veces no alcanza)
   const alTocar = e => {
     if (Musica.sonando || prefMusica.leer() === 'off') return quitar();
-    if (e.target && e.target.closest && e.target.closest('#btnMusica, #btnEntrar, #btnEntrarSin')) return;   // se manejan solos
+    if (e.target && e.target.closest && e.target.closest('#btnMusica')) return;   // el botón se maneja solo
     sonarAhora().then(ok => { if (ok) quitar(); });
   };
   const eventos = ['touchend', 'click', 'keydown', 'pointerup'];
@@ -2355,10 +2312,7 @@ const Pocion = (() => {
     if (!en.isIntersecting || empezo) return;
     empezo = true; obs.disconnect();
     window.__pocionLista = true;                  // ya salen: el respaldo del head no hace falta
-    const lanzarTodos = () => datos.forEach((el, i) => setTimeout(() => lanzarDato(el, i === datos.length - 1), 1700 + i * 1000));
-    // Con pantalla de entrada, la poción empieza cuando la persona entra (para que vea la animación)
-    if (document.documentElement.classList.contains('con-entrada')) addEventListener('oh-entro', () => setTimeout(lanzarTodos, 200), { once: true });
-    else lanzarTodos();
+    datos.forEach((el, i) => setTimeout(() => lanzarDato(el, i === datos.length - 1), 1700 + i * 1000));
   }, { threshold: 0.2 }).observe(zona);
 
   let visible = true;
