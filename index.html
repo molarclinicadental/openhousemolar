@@ -167,6 +167,13 @@
   .saludo-titulo { font-family: Fredoka, sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--calabaza-2); }
   .saludo-texto { color: var(--texto); margin-top: 2px; }
   [hidden] { display: none !important; }
+  .nota-nino { margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: rgba(155, 229, 100, .10);
+               border: 1.5px solid rgba(155, 229, 100, .45); font-size: .9rem; line-height: 1.45; }
+  .nota-nino b { color: var(--baba); }
+  .confirma { display: flex; gap: 10px; align-items: flex-start; font-size: .88rem; cursor: pointer; }
+  .confirma input { width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; accent-color: var(--calabaza); }
+  .pago-previo { margin: 0 0 12px; padding: 12px 14px; border-radius: 14px; background: rgba(155, 229, 100, .12);
+                 border: 1.5px solid rgba(155, 229, 100, .5); font-size: .9rem; }
   .turnos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   @media (min-width: 420px) { .turnos { grid-template-columns: repeat(4, 1fr); } }
   .turno { padding: 12px 6px; border-radius: 14px; border: 1.5px solid var(--linea); background: var(--noche); color: var(--texto);
@@ -318,7 +325,9 @@
     <div class="pasos" id="pasos"><span></span><span></span><span></span></div>
 
     <div class="paso" id="paso1">
-      <div class="campo"><label for="rCedula">Cédula del niño o niña</label>
+      <div class="nota-nino">👧🧒 Todos los datos son <b>del niño o niña que se va a atender</b>, no del papá o la mamá.
+        Con esta cédula creamos su <b>historia clínica</b>. Solo el celular y el correo son del representante.</div>
+      <div class="campo"><label for="rCedula">Cédula del niño o niña <span style="font-weight:600;color:var(--texto-2)">(no la del representante)</span></label>
         <input id="rCedula" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 dígitos" oninput="alEscribirCedula()"><div class="err" id="rCedulaErr"></div></div>
       <div class="ayuda" id="cedulaEstado">Escribe la cédula para empezar.</div>
 
@@ -338,6 +347,10 @@
           <input id="rTel" inputmode="tel" maxlength="10" autocomplete="tel" placeholder="09XXXXXXXX"><div class="err" id="rTelErr"></div></div>
         <div class="campo" data-grupo="nuevo"><label for="rEmail">Correo del representante</label>
           <input id="rEmail" type="email" maxlength="120" autocomplete="email" placeholder="correo@ejemplo.com"><div class="err" id="rEmailErr"></div></div>
+        <div class="campo" data-grupo="nuevo"><label class="confirma" for="rConfirmaNino">
+          <input type="checkbox" id="rConfirmaNino">
+          <span>Confirmo que la <b>cédula</b> y el <b>nombre</b> son del niño o niña que se atenderá (no del representante).</span></label>
+          <div class="err" id="rConfirmaNinoErr"></div></div>
       </div>
       <div class="aviso" id="avisoCedula"></div>
       <div class="acciones" id="accionesPaso1" hidden><button class="b-pri" type="button" id="btnPaso1" onclick="paso1Siguiente()">Continuar →</button></div>
@@ -353,7 +366,7 @@
     <div class="paso" id="paso3">
       <div class="resumen">
         <div><span>Niño o niña</span><b id="resNombre"></b></div>
-        <div><span>Cédula</span><b id="resCedula"></b></div>
+        <div><span>Cédula del niño o niña</span><b id="resCedula"></b></div>
         <div><span>Celular</span><b id="resTel"></b></div>
         <div><span>Fecha</span><b>Sábado 31 de octubre</b></div>
         <div><span>Hora</span><b id="resHora"></b></div>
@@ -363,7 +376,8 @@
 
       <!-- Primero el pago: sin comprobante no se crea la cita -->
       <div id="pagoBloque" hidden>
-        <div class="pago-caja">
+        <div class="pago-previo" id="pagoPrevio" hidden></div>
+        <div class="pago-caja" id="pagoCaja">
           <div class="pago-titulo">💳 Paga ahora para asegurar tu cupo</div>
           <div id="pagoDatos"></div>
           <img class="pago-qr" id="pagoQr" alt="Código QR para pagar" hidden>
@@ -492,7 +506,7 @@ function marcarError(id, msg) {
   const e = document.getElementById(id + 'Err'); e.textContent = msg; e.classList.add('ver');
 }
 function limpiarErrores() {
-  ['rCedula', 'rNombre', 'rEdad', 'rTel', 'rEmail'].forEach(id => {
+  ['rCedula', 'rNombre', 'rEdad', 'rTel', 'rEmail', 'rConfirmaNino'].forEach(id => {
     document.getElementById(id).classList.remove('error');
     document.getElementById(id + 'Err').classList.remove('ver');
   });
@@ -503,13 +517,32 @@ function limpiarErrores() {
 // el horario (la base usa los datos de su ficha). Si es nuevo, formulario.
 let registrado = null;       // respuesta de publico_oh_paciente
 let _cedulaTimer = null, _cedulaConsulta = 0;
+/** Cédula ecuatoriana: provincia, tercer dígito y dígito verificador (módulo 10). */
+function cedulaValida(c) {
+  if (!/^\d{10}$/.test(c)) return false;
+  const prov = Number(c.slice(0, 2));
+  if (!((prov >= 1 && prov <= 24) || prov === 30) || Number(c[2]) > 5) return false;
+  let suma = 0;
+  for (let i = 0; i < 9; i++) {
+    let d = Number(c[i]) * (i % 2 === 0 ? 2 : 1);
+    if (d > 9) d -= 9;
+    suma += d;
+  }
+  return (10 - (suma % 10)) % 10 === Number(c[9]);
+}
+
 function alEscribirCedula() {
   const inp = document.getElementById('rCedula');
   inp.value = inp.value.replace(/\D/g, '').slice(0, 10);
   clearTimeout(_cedulaTimer);
   registrado = null;
   mostrarPaso1('esperando');
-  if (inp.value.length === 10) _cedulaTimer = setTimeout(() => consultarCedula(inp.value), 300);
+  if (inp.value.length !== 10) return;
+  if (!cedulaValida(inp.value)) {
+    document.getElementById('cedulaEstado').textContent = '⚠️ Esta cédula no es válida. Revisa los números (debe ser la cédula del niño o niña).';
+    return;
+  }
+  _cedulaTimer = setTimeout(() => consultarCedula(inp.value), 300);
 }
 
 async function consultarCedula(cedula) {
@@ -553,7 +586,7 @@ function mostrarPaso1(estado) {
       '" target="_blank" rel="noopener" style="color:#fff;font-weight:800">💬 Escribir por WhatsApp</a>';
     aviso.classList.add('ver');
   } else if (registrado.fuera_de_edad) {
-    $('saludoTexto').textContent = `El Open House es para niños de 0 a ${registrado.edad_max} años.`;
+    $('saludoTexto').textContent = `Esta cédula es de una persona mayor de ${registrado.edad_max} años. El Open House es para niños de 0 a ${registrado.edad_max} años: si escribiste la cédula del papá o la mamá, escribe la del niño o niña.`;
     $('btnPaso1').disabled = true;
   } else {
     $('saludoTexto').textContent = registrado.falta_telefono || registrado.falta_edad
@@ -568,6 +601,7 @@ async function paso1Siguiente() {
   const d = { cedula: v('rCedula'), nombre: v('rNombre').replace(/[<>"]/g, ''), edad: v('rEdad'), tel: v('rTel'), email: v('rEmail') };
   let ok = true;
   if (!/^\d{10}$/.test(d.cedula)) { marcarError('rCedula', 'Debe tener 10 dígitos'); ok = false; }
+  else if (!cedulaValida(d.cedula)) { marcarError('rCedula', 'Esta cédula no es válida. Revisa los números.'); ok = false; }
   if (registrado) {
     // Paciente registrado: solo lo que falte en su ficha
     d.registrado = true;
@@ -582,6 +616,7 @@ async function paso1Siguiente() {
     if (!d.edad) { marcarError('rEdad', 'Selecciona la edad'); ok = false; }
     if (!/^09\d{8}$/.test(d.tel)) { marcarError('rTel', 'Celular ecuatoriano: 09XXXXXXXX'); ok = false; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) { marcarError('rEmail', 'Correo no válido'); ok = false; }
+    if (!document.getElementById('rConfirmaNino').checked) { marcarError('rConfirmaNino', 'Marca la casilla para confirmar que los datos son del niño o niña'); ok = false; }
   }
   if (!ok) return;
   datos = d;
@@ -628,7 +663,22 @@ function paso2Siguiente() {
 
 // ── Pago: datos para transferir y comprobante (sin comprobante no hay cita) ──
 const pagoRequerido = () => !!(evento && evento.pago && evento.pago.requerido);
-let comprobanteSubido = null;   // { archivo, ruta }: si la reserva falla, no se vuelve a subir
+let comprobanteSubido = null;   // { archivo, ruta, referencia }: si la reserva falla, no se vuelve a subir
+
+// El comprobante ya subido se recuerda en este celular (por cédula): si el
+// horario se llenó o se cerró la página, NO se vuelve a pagar, sirve el mismo.
+const clavePago = ced => 'oh_pago_' + EVENTO_SLUG + '_' + ced;
+function pagoGuardado(ced) {
+  try { const v = JSON.parse(localStorage.getItem(clavePago(ced)) || 'null'); return v && v.ruta && v.referencia ? v : null; }
+  catch (_) { return null; }
+}
+function guardarPago(ced, v) {
+  try { if (v) localStorage.setItem(clavePago(ced), JSON.stringify(v)); else localStorage.removeItem(clavePago(ced)); } catch (_) {}
+}
+function pagoPrevio() {
+  if (comprobanteSubido && comprobanteSubido.cedula === datos.cedula) return comprobanteSubido;
+  return pagoGuardado(datos.cedula);
+}
 
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -639,6 +689,17 @@ function pintarPago() {
   document.getElementById('pagoBloque').hidden = !req;
   document.getElementById('resPrecioTexto').textContent = req ? 'Total a pagar ahora:' : 'Valor a pagar el día del evento:';
   if (!req) return;
+  const previo = pagoPrevio();
+  const aviso = document.getElementById('pagoPrevio');
+  aviso.hidden = !previo;
+  document.getElementById('pagoCaja').hidden = !!previo;
+  document.querySelectorAll('#rFoto, #rComprobante').forEach(el => { el.closest('.campo').hidden = !!previo; });
+  if (previo) {
+    aviso.innerHTML = `✅ <b>Tu pago ya está registrado</b> (comprobante ${esc(previo.referencia)}).<br>
+      <b>No hagas otro pago:</b> el mismo comprobante sirve para el horario que elegiste.
+      <div style="margin-top:6px"><button type="button" class="copiar" onclick="cambiarComprobante()">Subí un comprobante equivocado</button></div>`;
+    return;
+  }
   const p = evento.pago;
   const filas = [
     ['Banco', p.banco], ['Tipo de cuenta', p.tipo_cuenta], ['Número de cuenta', p.numero_cuenta, true],
@@ -653,6 +714,12 @@ function pintarPago() {
     `Transfiere $${Number(evento.precio)} y luego escribe el número del comprobante y sube la foto. Sin comprobante no se puede reservar.`;
 }
 
+function cambiarComprobante() {
+  comprobanteSubido = null;
+  guardarPago(datos.cedula, null);
+  pintarPago();
+}
+
 function copiarDato(btn) {
   const texto = btn.dataset.v;
   const listo = () => { btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = 'Copiar'; }, 1500); };
@@ -663,6 +730,8 @@ const TIPOS_COMPROBANTE = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp
 
 /** Valida número y foto del comprobante y sube la foto al espacio privado. Devuelve { referencia, ruta } o null. */
 async function prepararPago(cli) {
+  const previo = pagoPrevio();
+  if (previo) return { referencia: previo.referencia, ruta: previo.ruta };
   const refInp = document.getElementById('rComprobante');
   const fotoInp = document.getElementById('rFoto');
   ['rComprobante', 'rFoto'].forEach(id => {
@@ -679,13 +748,13 @@ async function prepararPago(cli) {
   else if (!TIPOS_COMPROBANTE[tipo]) { marcarError('rFoto', 'Debe ser una foto (JPG, PNG) o un PDF'); ok = false; }
   else if (archivo.size > 5 * 1024 * 1024) { marcarError('rFoto', 'La foto pesa más de 5 MB. Envía una captura de pantalla.'); ok = false; }
   if (!ok) return null;
-  if (comprobanteSubido && comprobanteSubido.archivo === archivo) return { referencia, ruta: comprobanteSubido.ruta };
-  const id = (crypto.randomUUID ? crypto.randomUUID()
+  const id =(crypto.randomUUID ? crypto.randomUUID()
     : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
   const ruta = `${EVENTO_SLUG}/${id}.${TIPOS_COMPROBANTE[tipo]}`;
   const { error } = await cli.storage.from('oh-comprobantes').upload(ruta, archivo, { contentType: tipo, upsert: false });
   if (error) throw error;
-  comprobanteSubido = { archivo, ruta };
+  comprobanteSubido = { cedula: datos.cedula, referencia, ruta };
+  guardarPago(datos.cedula, { referencia, ruta });
   return { referencia, ruta };
 }
 
@@ -719,10 +788,23 @@ async function confirmarReserva() {
         irPaso(2);
         pintarTurnos();
         const a = document.getElementById('avisoTurnos');
-        a.textContent = 'Ese horario se acaba de llenar. Elige otro, por favor.';
+        const quedan = evento ? evento.turnos.some(t => t.libres > 0) : true;
+        if (!pago) {
+          a.textContent = 'Ese horario se acaba de llenar. Elige otro, por favor.';
+        } else if (quedan) {
+          a.innerHTML = `Ese horario se acaba de llenar. <b>Tu pago ya quedó guardado: NO hagas otro pago.</b>
+            El mismo comprobante (${esc(pago.referencia)}) sirve para el horario que elijas ahora.`;
+        } else {
+          const msgWa = 'Hola! Pagué el Open House Halloween pero se llenaron los cupos antes de terminar mi reserva.\n\n' +
+            '*Cédula del niño/a:* ' + datos.cedula + '\n*Comprobante:* ' + pago.referencia + '\n\n¿Me ayudan?';
+          a.innerHTML = `Se llenaron todos los cupos mientras reservabas. <b>Tu pago quedó registrado (comprobante ${esc(pago.referencia)}).</b>
+            No hagas otro pago: <a href="https://wa.me/${TEL_CLINICA}?text=${encodeURIComponent(msgWa)}" target="_blank" rel="noopener" style="color:#fff;font-weight:800">escríbenos por WhatsApp</a> y te ayudamos.`;
+        }
         a.classList.add('ver');
         return;
       }
+      // Comprobante rechazado por la base (ya usado o no encontrado): se puede subir otro
+      if (pago && data && /comprobante/i.test(data.error || '')) { comprobanteSubido = null; guardarPago(datos.cedula, null); pintarPago(); }
       aviso.textContent = (data && data.error) || 'No se pudo reservar.';
       aviso.classList.add('ver');
       return;
@@ -736,6 +818,7 @@ async function confirmarReserva() {
       '*Lugar:* Torre Metromed · Consultorio 009\n\n¡Gracias!';
     // Nueva reserva desde cero: se limpia el comprobante
     comprobanteSubido = null;
+    guardarPago(datos.cedula, null);
     document.getElementById('rComprobante').value = '';
     document.getElementById('rFoto').value = '';
     document.getElementById('exWa').href = 'https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent(msg);
