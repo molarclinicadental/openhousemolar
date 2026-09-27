@@ -851,8 +851,10 @@
   </div>
 </div>
 
-<!-- La librería de la base se carga sin frenar la página; al llegar, se leen los cupos -->
-<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js" onload="window.__sbListo && window.__sbListo()"></script>
+<!-- La librería de la base se carga sin frenar la página; al llegar, se leen los cupos.
+     integrity: si el archivo del CDN cambia, el navegador no lo ejecuta. -->
+<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js"
+        integrity="sha384-D3HBLJnDxXL59BXo26GFWjGTcyxip2IVM0I+EqfCMwOhTc5jUTZxISDtfdXFaUOm" crossorigin="anonymous" onload="window.__sbListo && window.__sbListo()"></script>
 <script>
 // ════════════════════════════════════════════════════════════
 //  El evento se configura en la base (tabla "eventos", SQL 27 de Molar):
