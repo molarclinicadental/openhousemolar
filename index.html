@@ -638,7 +638,7 @@
   <!-- 6. Cómo llegar -->
   <section class="contenedor cierre">
     <h2 class="sec-titulo">¿Cómo llegar?</h2>
-    <p>Torre Metromed · Consultorio 009 · Parque Ciudad Blanca · Galo Plaza Lasso, Quito</p>
+    <p>Hospital UTN · Torre 2 Metromed · Consultorio 009 · Parque Ciudad Blanca · Galo Plaza Lasso, Ibarra</p>
     <div class="botones">
       <a class="btn" href="https://maps.app.goo.gl/kXL7hxQdyqaut85r6" target="_blank" rel="noopener">📍 Ver en Google Maps</a>
       <a class="btn wa" href="https://wa.me/593986130776?text=Hola!%20Necesito%20indicaciones%20para%20llegar%20al%20Open%20House%20Halloween%20de%20Molar" target="_blank" rel="noopener">💬 Pedir indicaciones</a>
@@ -651,7 +651,7 @@
     <h2 class="sec-titulo">Detalles del evento</h2>
     <div class="rejilla">
       <div class="tarjeta"><div class="ico">📅</div><div class="lbl">Fecha y hora</div><div class="val">Sábado 31 de octubre</div><div class="det" id="infoHorario">9:00 a 14:00</div></div>
-      <div class="tarjeta"><div class="ico">📍</div><div class="lbl">Ubicación</div><div class="val">Torre Metromed</div><div class="det">Consultorio 009 · Galo Plaza Lasso</div></div>
+      <div class="tarjeta"><div class="ico">📍</div><div class="lbl">Ubicación</div><div class="val">Hospital UTN</div><div class="det">Torre 2 Metromed · Consultorio 009 · Ibarra</div></div>
       <div class="tarjeta"><div class="ico">🧒</div><div class="lbl">Para quién</div><div class="val">Niños y niñas</div><div class="det">De 0 a 12 años</div></div>
       <div class="tarjeta"><div class="ico">🦷</div><div class="lbl">Precio</div><div class="val" id="infoPrecio">$15</div><div class="det">Profilaxis + fluorización · cupos limitados</div></div>
     </div>
@@ -719,7 +719,7 @@
 
 <footer class="contenedor">
   <div><b>Molar Clínica Dental</b> · +593 98 613 0776 · @molar.ecu</div>
-  <div>Torre Metromed · Consultorio 009</div>
+  <div>Hospital UTN · Torre 2 Metromed · Consultorio 009</div>
   <div><a href="https://molarec.com/privacidad" target="_blank" rel="noopener">Política de privacidad</a></div>
 </footer>
 
@@ -838,7 +838,7 @@
       <h2>¡Cupo reservado!</h2>
       <p class="sub">Tu código de reserva. Dilo en recepción al llegar.</p>
       <div class="codigo" id="exCodigo">OH-0000</div>
-      <p>Te esperamos el <b>sábado 31 de octubre</b> a las <b id="exHora"></b> en Torre Metromed · Consultorio 009.</p>
+      <p>Te esperamos el <b>sábado 31 de octubre</b> a las <b id="exHora"></b> en Hospital UTN · Torre 2 Metromed · Consultorio 009.</p>
       <p class="ayuda" id="exPago" hidden>Recibimos tu comprobante. Nuestro equipo verificará el pago y te confirmará por WhatsApp.</p>
       <!-- Carta de bienvenida y pase para guardar o compartir -->
       <div class="acciones">
@@ -1330,7 +1330,7 @@ async function confirmarReserva() {
     const msg = 'Hola! Acabo de reservar un cupo para el Open House Halloween de Molar 🎃\n\n' +
       '*Código:* ' + numero + '\n*Nombre:* ' + (data.nombre || datos.nombre) + '\n*Hora:* ' + data.hora + ' del sábado 31 de octubre\n' +
       (data.pago ? '*Pago:* transferencia, comprobante ' + (pago ? pago.referencia : '') + '\n' : '') +
-      '*Lugar:* Torre Metromed · Consultorio 009\n\n¡Gracias!';
+      '*Lugar:* Hospital UTN · Torre 2 Metromed · Consultorio 009\n\n¡Gracias!';
     // Nueva reserva desde cero: se limpia el comprobante
     comprobanteSubido = null;
     guardarPago(datos.cedula, null);
@@ -2611,7 +2611,7 @@ async function dibujarPase({ nombre, hora, codigo }) {
   caja(x0 + (w + sep) * 2, y, w, 150, 'CÓDIGO', codigo || '—', true);
 
   g.fillStyle = '#FFF4D6'; g.font = '700 36px Fredoka, sans-serif';
-  g.fillText('📍 Torre Metromed · Consultorio 009', W / 2, 1200);
+  g.fillText('📍 Hospital UTN · Torre 2 Metromed · Consultorio 009', W / 2, 1200);
   g.fillStyle = '#DCD2F2'; g.font = '800 30px Nunito, sans-serif';
   g.fillText('👻 ¡Ven disfrazado!   ·   🍬 Trae tus dulces y cámbialos por premios', W / 2, 1255);
   return new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.9));   // JPG: pesa poco para WhatsApp
