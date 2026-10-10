@@ -937,6 +937,26 @@ async function cargarEvento() {
   document.getElementById('resServicio').textContent = evento.servicio;
 }
 if (window.supabase) cargarEvento(); else window.__sbListo = cargarEvento;
+
+// ── Reserva hecha en la clínica: la app de Molar abre esta página con
+//    #reserva=1&n=…&h=…&c=… para entregar el pase y la carta. Los datos van
+//    después del # (no se envían a ningún servidor) y no se consulta la base.
+(function () {
+  const p = new URLSearchParams(location.hash.slice(1));
+  if (p.get('reserva') !== '1' || !/^OH-[A-Z0-9]{4}$/.test(p.get('c') || '')) return;
+  const n = (p.get('n') || '').slice(0, 40), h = (p.get('h') || '').slice(0, 5), c = p.get('c');
+  history.replaceState(null, '', location.pathname);
+  document.getElementById('reserva').classList.add('abierto');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('exCodigo').textContent = c;
+  document.getElementById('exHora').textContent = h;
+  document.getElementById('exPago').hidden = true;
+  window.__pase = { nombre: n, hora: h, codigo: c };
+  document.getElementById('exCarta').href = 'bienvenida.html#' + new URLSearchParams({ n: n, h: h, c: c }).toString();
+  const msg = 'Hola! Tengo mi reserva del Open House Halloween de Molar 🎃\n\n*Código:* ' + c + '\n*Nombre:* ' + n + '\n*Hora:* ' + h + ' del sábado 31 de octubre\n\n¡Gracias!';
+  document.getElementById('exWa').href = 'https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent(msg);
+  irPaso(4);
+})();
 setInterval(cargarEvento, 60000);
 
 // ── Ventana de reserva ──
