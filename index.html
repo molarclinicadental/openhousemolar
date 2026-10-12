@@ -35,7 +35,7 @@
     --radio: 22px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; overflow-x: clip; }   /* los adornos que se salen no deben ensanchar la página en el celular */
   body {
     font-family: Nunito, system-ui, sans-serif;
     background: radial-gradient(1200px 700px at 80% -10%, #4A2A86 0%, transparent 60%),
@@ -228,6 +228,19 @@
   .video-grande .play { width: 72px; height: 72px; font-size: 28px; box-shadow: 0 0 0 8px rgba(255, 122, 26, .18); }
   .video-grande b { font-family: Fredoka, sans-serif; font-size: 1.35rem; }
   .video .det { color: var(--texto-2); }
+  .video-propio { max-width: 290px; margin: 22px auto 18px; border-radius: var(--radio); overflow: hidden;
+                  border: 1px solid rgba(255, 122, 26, .45); box-shadow: 0 0 0 8px rgba(255, 122, 26, .12); background: #000; }
+  .video-propio video { display: block; width: 100%; aspect-ratio: 9 / 16; object-fit: cover; }
+
+  /* Aviso de cookies de Meta (solo si hay Pixel configurado) */
+  .aviso-cookies { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60; max-width: 560px; margin: 0 auto;
+                   display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 14px; border-radius: 14px;
+                   background: var(--noche-2); border: 1px solid var(--linea); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); font-size: .86rem; }
+  .aviso-cookies p { flex: 1 1 240px; color: var(--texto-2); }
+  .aviso-cookies a { color: var(--calabaza); text-decoration: underline; }
+  .aviso-cookies div { display: flex; gap: 8px; margin-left: auto; }
+  .aviso-cookies button { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--linea); background: transparent; color: var(--texto); font-weight: 800; cursor: pointer; }
+  .aviso-cookies button.si { background: var(--calabaza); border-color: var(--calabaza); color: #2A1300; }
 
   /* Campaña «Dulce o premio», más visible */
   .dulce.dulce-grande { padding: 28px clamp(130px, 14vw, 170px) 28px 30px; border-width: 2px; }
@@ -577,13 +590,14 @@
 </header>
 
 <main>
-  <!-- 1. Video del año pasado -->
+  <!-- 1. Video del Open House 2025: se ve aquí mismo (antes abría Instagram y la persona ya no volvía a reservar) -->
   <section class="contenedor" id="video">
     <h2 class="sec-titulo">Así fue el año pasado</h2>
-    <a class="video video-grande" href="https://www.instagram.com/p/DQwjSklDSNx/" target="_blank" rel="noopener">
-      <span class="play">▶</span>
-      <span><b>Mira el video del Open House</b><br><span class="det">Se abre en Instagram</span></span>
-    </a>
+    <div class="video-propio">
+      <video id="videoOH" src="video/open-house.mp4" poster="video/open-house.jpg" controls playsinline preload="none"
+             aria-label="Video del Open House Halloween 2025 de Molar"></video>
+    </div>
+    <div class="centrado"><button class="cta cta-sec" type="button" onclick="abrirReserva()">🎃 Reservar mi cupo</button></div>
   </section>
 
   <!-- 2. Cómo reservar (3 pasos cortos) -->
@@ -878,6 +892,54 @@ function cliente() {
   return sb;
 }
 
+// ════════════════════════════════════════════════════════════
+//  Pixel de Meta: mide qué personas del anuncio llegan a reservar.
+//  · Vacío = apagado (no aparece el aviso ni se carga nada).
+//  · Solo se carga si la persona toca "Aceptar" en el aviso (LOPDP).
+//  · Nunca se envían cédula, nombre, teléfono ni datos de salud:
+//    solo "vio la página", "abrió la reserva", "reservó".
+// ════════════════════════════════════════════════════════════
+const META_PIXEL_ID = '';
+const Pixel = (() => {
+  const CLAVE = 'oh_cookies_meta';
+  const leer = () => { try { return localStorage.getItem(CLAVE); } catch (_) { return null; } };
+  const guardar = v => { try { localStorage.setItem(CLAVE, v); } catch (_) {} };
+  let activo = false;
+  function cargar() {
+    if (activo || !META_PIXEL_ID) return;
+    activo = true;
+    /* Código oficial de Meta (fbevents.js) */
+    !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v;
+      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s); }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }
+  function aviso() {
+    const d = document.createElement('div');
+    d.className = 'aviso-cookies';
+    d.setAttribute('role', 'dialog');
+    d.setAttribute('aria-label', 'Aviso de cookies');
+    d.innerHTML = '<p>Usamos cookies de Meta para saber si nuestros anuncios te ayudaron a llegar aquí. No compartimos tu cédula, nombre ni teléfono. ' +
+      '<a href="https://molarec.com/privacidad" target="_blank" rel="noopener">Más información</a></p>' +
+      '<div><button type="button" data-v="no">No, gracias</button><button type="button" data-v="si" class="si">Aceptar</button></div>';
+    d.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      guardar(b.dataset.v); d.remove();
+      if (b.dataset.v === 'si') cargar();
+    });
+    document.body.appendChild(d);
+  }
+  if (META_PIXEL_ID) {
+    const v = leer();
+    if (v === 'si') cargar();
+    else if (v !== 'no') { if (document.readyState === 'loading') addEventListener('DOMContentLoaded', aviso); else aviso(); }
+  }
+  return {
+    evento(nombre, datos) { if (activo && window.fbq) try { fbq('track', nombre, datos || {}); } catch (_) {} },
+  };
+})();
+
 // ── Estrellas del cielo ──
 (function () {
   const cont = document.getElementById('estrellas');
@@ -963,6 +1025,7 @@ setInterval(cargarEvento, 60000);
 function abrirReserva() {
   document.getElementById('reserva').classList.add('abierto');
   document.body.style.overflow = 'hidden';
+  Pixel.evento('InitiateCheckout', { content_name: 'reserva_open_house' });
   irPaso(1);
   const ced = document.getElementById('rCedula').value;
   const tel = document.getElementById('rTel').value;
@@ -1365,6 +1428,7 @@ async function confirmarReserva() {
     window.__pase = { nombre: (data.nombre || datos.nombre || '').split(' ')[0], hora: data.hora, codigo: numero };
     document.getElementById('exCarta').href = 'bienvenida.html#' + new URLSearchParams({ n: window.__pase.nombre, h: data.hora, c: numero }).toString();
     irPaso(4);
+    Pixel.evento('Schedule', { content_name: 'open_house_halloween_2026', value: 15, currency: 'USD' });
     lluviaDeDulces();
     cargarEvento();
   } catch (e) {
@@ -1667,6 +1731,17 @@ btnMusica.addEventListener('click', async () => {
 });
 pintarBtnMusica();
 addEventListener('oh-musica', pintarBtnMusica);   // si la música arranca más tarde (iPhone), el botón se actualiza
+
+// Mientras se ve el video del Open House, la música de fondo se calla; al terminar vuelve
+(function () {
+  const v = document.getElementById('videoOH');
+  if (!v) return;
+  let volver = false;
+  v.addEventListener('play', () => { if (Musica.sonando) { volver = true; Musica.apagar(); pintarBtnMusica(); } Pixel.evento('ViewContent', { content_name: 'video_open_house' }); });
+  const reanudar = () => { if (volver && prefMusica.leer() !== 'off') { volver = false; sonarAhora().catch(() => {}); } };
+  v.addEventListener('pause', reanudar);
+  v.addEventListener('ended', reanudar);
+})();
 
 if (prefMusica.leer() !== 'off' && !SIN_MOVIMIENTO) {
   // Si el navegador deja sonar sin toque (p. ej. visitas repetidas en computadora), suena de una vez
