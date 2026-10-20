@@ -1196,7 +1196,7 @@ async function paso1Siguiente() {
   d.notaSalud = v('rNotaSalud').replace(/[<>"]/g, '').slice(0, 300);
   if (d.tieneAlergia === null) { marcarError('rAlergia', 'Responde si el niño o niña tiene alguna alergia'); ok = false; }
   else if (d.tieneAlergia && d.alergiaCual.length < 3) { marcarError('rAlergiaCual', 'Escribe cuál es la alergia'); ok = false; }
-  if (!ok) return;
+  if (!ok) { verPrimerError('#paso1'); return; }
   datos = d;
   irPaso(2);
   document.getElementById('turnos').innerHTML = '<p class="ayuda">Cargando horarios…</p>';
@@ -1321,6 +1321,35 @@ function copiarDato(btn) {
 
 const TIPOS_COMPROBANTE = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/heic': 'heic', 'image/heif': 'heif', 'application/pdf': 'pdf' };
 
+/** Tipo del archivo; algunos celulares (Drive, gestor de archivos) lo mandan vacío: se deduce de la extensión */
+function tipoComprobante(archivo) {
+  if (archivo.type) return archivo.type === 'image/jpg' ? 'image/jpeg' : archivo.type;
+  const ext = (archivo.name.match(/\.([a-z0-9]+)$/i) || [])[1] || '';
+  return ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif', pdf: 'application/pdf' })[ext.toLowerCase()] || '';
+}
+
+/** Achica una foto a 1600 px como JPEG. Devuelve el archivo nuevo, o null si no hace falta o el navegador no puede (PDF, HEIC en Android). */
+async function achicarFoto(archivo, tipo) {
+  if (!/^image\/(jpeg|png|webp|heic|heif)$/.test(tipo) || archivo.size < 900 * 1024) return null;
+  try {
+    const url = URL.createObjectURL(archivo);
+    const img = await new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mal; i.src = url; });
+    const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    const blob = await new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.82));
+    return blob && blob.size < archivo.size ? new File([blob], 'comprobante.jpg', { type: 'image/jpeg' }) : null;
+  } catch (_) { return null; }
+}
+
+/** En el celular el aviso de error queda fuera de la vista: se lleva la pantalla hasta él */
+function verPrimerError(paso = '#paso3') {
+  const e = document.querySelector(paso + ' .error, ' + paso + ' .err.ver, ' + paso + ' .aviso.ver');
+  if (e) e.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 /** Valida número y foto del comprobante y sube la foto al espacio privado. Devuelve { referencia, ruta } o null. */
 async function prepararPago(cli) {
   const previo = pagoPrevio();
@@ -1332,19 +1361,24 @@ async function prepararPago(cli) {
     document.getElementById(id + 'Err').classList.remove('ver');
   });
   const referencia = refInp.value.trim().replace(/\s+/g, '');
-  const archivo = fotoInp.files && fotoInp.files[0];
+  let archivo = fotoInp.files && fotoInp.files[0];
   let ok = true;
   if (referencia.length < 4) { marcarError('rComprobante', 'Escribe el número del comprobante'); ok = false; }
-  let tipo = archivo ? (archivo.type || '') : '';
-  if (archivo && !tipo && /\.hei[cf]$/i.test(archivo.name)) tipo = 'image/heic';
+  let tipo = archivo ? tipoComprobante(archivo) : '';
   if (!archivo) { marcarError('rFoto', 'Sube la foto o captura del comprobante'); ok = false; }
   else if (!TIPOS_COMPROBANTE[tipo]) { marcarError('rFoto', 'Debe ser una foto (JPG, PNG) o un PDF'); ok = false; }
-  else if (archivo.size > 5 * 1024 * 1024) { marcarError('rFoto', 'La foto pesa más de 5 MB. Envía una captura de pantalla.'); ok = false; }
-  if (!ok) return null;
+  if (!ok) { verPrimerError(); return null; }
+  // Las fotos de la cámara pesan varios MB: se achican aquí antes de subir (más rápido con datos móviles)
+  const chica = await achicarFoto(archivo, tipo);
+  if (chica) { archivo = chica; tipo = 'image/jpeg'; }
+  if (archivo.size > 5 * 1024 * 1024) { marcarError('rFoto', 'La foto pesa demasiado. Envía mejor una captura de pantalla del comprobante.'); verPrimerError(); return null; }
   const id =(crypto.randomUUID ? crypto.randomUUID()
     : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
   const ruta = `${EVENTO_SLUG}/${id}.${TIPOS_COMPROBANTE[tipo]}`;
-  const { error } = await cli.storage.from('oh-comprobantes').upload(ruta, archivo, { contentType: tipo, upsert: false });
+  // Con señal débil la subida puede quedarse colgada: a los 60 s se avisa en vez de girar para siempre
+  const subida = cli.storage.from('oh-comprobantes').upload(ruta, archivo, { contentType: tipo, upsert: false });
+  const limite = new Promise((_, mal) => setTimeout(() => mal(new Error('tiempo')), 60000));
+  const { error } = await Promise.race([subida, limite]);
   if (error) throw error;
   comprobanteSubido = { cedula: datos.cedula, referencia, ruta };
   guardarPago(datos.cedula, { referencia, ruta });
@@ -1405,6 +1439,7 @@ async function confirmarReserva() {
       if (pago && data && /comprobante/i.test(data.error || '')) { comprobanteSubido = null; guardarPago(datos.cedula, null); pintarPago(); }
       aviso.textContent = (data && data.error) || 'No se pudo reservar.';
       aviso.classList.add('ver');
+      verPrimerError();
       return;
     }
     const numero = data.codigo;   // código de reserva al azar (no revela la cédula)
@@ -1436,9 +1471,12 @@ async function confirmarReserva() {
     console.error('[Open House] reservar:', e);
     const msg = 'Hola! Intenté reservar para el Open House Halloween de Molar pero la página dio error.\n\n' +
       '*Nombre:* ' + (datos.nombre || '') + '\n*Hora que quería:* ' + (horaElegida || '') + '\n\n¿Me ayudan a reservar?';
-    aviso.innerHTML = 'Hubo un problema al reservar. <a href="https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent(msg) +
-      '" target="_blank" rel="noopener" style="color:#fff;font-weight:800">Resérvalo por WhatsApp aquí</a>.';
+    const lento = e && (e.message === 'tiempo' || /fetch|network|red/i.test(e.message || ''));
+    aviso.innerHTML = (lento ? 'La conexión está lenta y el comprobante no terminó de subir. Intenta de nuevo con buena señal o Wi‑Fi, o ' : 'Hubo un problema al reservar. ') +
+      '<a href="https://wa.me/' + TEL_CLINICA + '?text=' + encodeURIComponent(msg) +
+      '" target="_blank" rel="noopener" style="color:#fff;font-weight:800">' + (lento ? 'resérvalo por WhatsApp aquí' : 'Resérvalo por WhatsApp aquí') + '</a>.';
     aviso.classList.add('ver');
+    verPrimerError();
   } finally {
     btn.disabled = false;
     btn.innerHTML = '✓ Confirmar reserva';
